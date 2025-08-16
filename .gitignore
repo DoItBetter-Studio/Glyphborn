@@ -1,3 +1,40 @@
+# Visual Studio files
+*.sln
+*.vcxproj
+*.vcxproj.filters
+*.vcxproj.user
+*.ncb
+*.suo
+*.opensdf
+*.sdf
+*.cache
+*.log
+*.tlog
+*.vspscc
+*.vssscc
+*.dbmdl
+*.pdb
+*.ipch
+*.obj
+*.idb
+*.class
+*.psess
+*.vsp
+*.vsix
+*.user
+*.rsuser
+*.scc
+
+# Visual Studio folders
+.vs/
+Debug/
+Release/
+x64/
+x86/
+ipch/
+bin/
+obj/
+
 # Prerequisites
 *.d
 
