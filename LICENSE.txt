@@ -1,0 +1,55 @@
+Glyphborn — Private Development License
+Copyright (c) 2025 Anthony T. Lawrence
+
+This software and all associated source code, assets, documentation, and binaries (collectively referred to as "Glyphborn") are the intellectual property of Anthony T. Lawrence.
+
+Glyphborn is currently in active development and is shared privately for the sole purpose of collaborative testing, feedback, and platform validation. This license governs the use of Glyphborn by authorized collaborators only.
+
+---
+
+1. Authorized Use
+
+Permission is granted to the following parties:
+- Null/Simi
+- Any other individuals explicitly authorized by Anthony T. Lawrence
+
+Authorized parties may:
+- Download, compile, and run Glyphborn on their local machines
+- Modify the source code for the purpose of testing, debugging, or contributing feedback
+- Share technical observations and suggestions directly with Anthony T. Lawrence
+
+---
+
+2. Restrictions
+
+Unless explicitly granted written permission, the following actions are prohibited:
+- Redistribution of Glyphborn in any form, including public repositories, forums, or file-sharing platforms
+- Commercial use, including selling, licensing, or monetizing any part of Glyphborn
+- Publication of Glyphborn’s source code, binaries, or documentation
+- Use of Glyphborn in any project intended for public release or commercial deployment
+
+---
+
+3. Ownership
+
+Glyphborn remains the sole intellectual property of Anthony T. Lawrence. All modifications, forks, or derivative works created under this license are considered collaborative contributions and do not transfer ownership.
+
+---
+
+4. Warranty Disclaimer
+
+Glyphborn is provided "as is" for development and testing purposes. No warranties are expressed or implied, including but not limited to fitness for a particular purpose, merchantability, or compatibility with any system.
+
+Anthony T. Lawrence shall not be held liable for any damages, data loss, or system failures resulting from the use or misuse of Glyphborn.
+
+---
+
+5. Termination
+
+This license may be revoked at any time by Anthony T. Lawrence, with or without cause. Upon termination, all copies of Glyphborn must be deleted and no further use is permitted.
+
+---
+
+6. Contact
+
+For questions, permissions, or collaboration requests, contact Anthony T. Lawrence directly.

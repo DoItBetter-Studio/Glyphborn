@@ -1,6 +1,8 @@
 #ifndef VEC2_H
 #define VEC2_H
 
+#include <math.h>
+
 typedef struct
 {
 	float x;

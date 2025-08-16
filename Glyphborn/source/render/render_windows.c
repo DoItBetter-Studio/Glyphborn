@@ -1,6 +1,6 @@
 #ifdef _WIN32
 
-#include "ascii_tileset.h"
+#include "font/ascii_tileset.h"
 #include "render.h"
 #include <Windows.h>
 
@@ -290,6 +290,25 @@ void render_draw_text_colored(int x, int y, const char* text, uint32_t color)
 		}
 
 		cursor_x += draw_width + ASCII_TILESET_SPACING;
+	}
+}
+
+void render_draw_rect(int x, int y, int width, int height, uint32_t color)
+{
+	if (x < 0) { width += x; x = 0; }
+	if (y < 0) { height += y; y = 0; }
+	if (x + width > FB_WIDTH) width = FB_WIDTH - x;
+	if (y + height > FB_HEIGHT) height = FB_HEIGHT - y;
+	if (width <= 0 || height <= 0) return;
+
+	for (int j = 0; j < height; ++j)
+	{
+		uint32_t* row = &framebuffer_ui[(y + j) * FB_WIDTH + x];
+
+		for (int i = 0; i < width; ++i)
+		{
+			row[i] = color;
+		}
 	}
 }
 

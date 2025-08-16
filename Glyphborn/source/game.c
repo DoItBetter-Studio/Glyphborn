@@ -4,10 +4,15 @@
 #include "camera.h"
 #include "test_cube.h"
 #include "windowskin_0.h"
+#include "audio.h"
+#include "audio/player_jump.h"
+#include "ui.h"
 
 Camera main_camera = { 0 };
 Mat4 view;
 Mat4 projection;
+
+UISystem ui;
 
 static void draw_test_pattern_ui(void)
 {
@@ -22,9 +27,15 @@ static void draw_test_pattern_ui(void)
 	}
 }
 
+static void on_click_jump(void* data)
+{
+	audio_play_sound(player_jump, PLAYER_JUMP_LEN);
+}
+
 void game_init(void)
 {
 	input_init();
+	ui_init(&ui);
 
 	main_camera.position = (Vec3){ 0.0f, 0.0f, -5.0f };
 	main_camera.target = (Vec3){ 0.0f, 0.0f, 0.0f };
@@ -32,25 +43,55 @@ void game_init(void)
 
 	view = camera_get_view_matrix(&main_camera);
 	projection = mat4_perspective(3.14159f / 4.0f, (float)FB_WIDTH / (float)FB_HEIGHT, 0.1f, 100.0f);
+
+	ui_add_element(&ui, ui_create_button(50, 50, 120, 32, "Click Me", 0xFF333333, 0xFF000000, on_click_jump));
+	ui_add_element(&ui, ui_create_button(50, 100, 120, 32, "Button 2", 0xFF333333, 0xFF000000, on_click_jump));
+
+	ui_add_element(&ui, ui_create_label(50, 200, "Hello, UI!", 0xFF0000FF)); // Blue text
 }
 
-static bool showUI = false;
+static bool activate = false;
 
 void game_update(float delta_time)
 {
 	input_update();
 
-	if (input_button_down(BUTTON_A))
-		showUI = !showUI;
+	int nav_dx = 0, nav_dy = 0;
 
-	if (input_get_button(BUTTON_UP))
-		main_camera.position.z += 1.0f * delta_time;
-	if (input_get_button(BUTTON_DOWN))
-		main_camera.position.z -= 1.0f * delta_time;
-	if (input_get_button(BUTTON_LEFT))
-		main_camera.position.x -= 1.0f * delta_time;
-	if (input_get_button(BUTTON_RIGHT))
-		main_camera.position.x += 1.0f * delta_time;
+	if (input_button_down(BUTTON_START))
+	{
+		ui.input_locked = !ui.input_locked; // Toggle input lock
+	}
+
+	if (ui.input_locked)
+	{
+		if (input_button_down(BUTTON_UP)) nav_dy += 1;
+		if (input_button_down(BUTTON_DOWN)) nav_dy += -1;
+		if (input_button_down(BUTTON_LEFT)) nav_dx += -1;
+		if (input_button_down(BUTTON_RIGHT)) nav_dx += 1;
+		if (input_button_down(BUTTON_A)) activate = true;
+	}
+
+	// TODO: Implement mouse input
+	ui_update(&ui, delta_time, 0, 0, false, nav_dx, nav_dy, activate);
+	activate = false; // Reset activation state after processing
+
+	if (input_button_down(BUTTON_B))
+	{
+		audio_play_sound(player_jump, PLAYER_JUMP_LEN);
+	}
+
+	if (!ui.input_locked)
+	{
+		if (input_get_button(BUTTON_UP))
+			main_camera.position.z += 1.0f * delta_time;
+		if (input_get_button(BUTTON_DOWN))
+			main_camera.position.z -= 1.0f * delta_time;
+		if (input_get_button(BUTTON_LEFT))
+			main_camera.position.x -= 1.0f * delta_time;
+		if (input_get_button(BUTTON_RIGHT))
+			main_camera.position.x += 1.0f * delta_time;
+	}
 
 	view = camera_get_view_matrix(&main_camera);
 }
@@ -71,21 +112,10 @@ void game_render(void)
 
 void game_render_ui(void)
 {
-	if (showUI)
-	{
-		render_draw_image(10, 210, WINDOWSKIN_0_WIDTH, WINDOWSKIN_0_HEIGHT, WINDOWSKIN_0_BITDEPTH, windowskin_0, windowskin_0_palette);
-		render_draw_text_colored(20, 220, "Hello, Glyphborn!", 0xFFFF0000); // Red text
-	}
-	// Draw a simple UI element
-	for (int y = 10; y < 20; ++y)
-	{
-		for (int x = 50; x < FB_WIDTH - 50; ++x)
-		{
-			framebuffer_ui[y * FB_WIDTH + x] = 0xFF00FF00; // Green bar at the top
-		}
-	}
+	ui_render(&ui);
 }
 
 void game_shutdown(void)
 {
+	ui_clear(&ui);
 }

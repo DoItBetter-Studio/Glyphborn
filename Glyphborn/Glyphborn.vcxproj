@@ -19,6 +19,8 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="source\audio\audio_linux.c" />
+    <ClCompile Include="source\audio\audio_windows.c" />
     <ClCompile Include="source\camera.c" />
     <ClCompile Include="source\game.c" />
     <ClCompile Include="source\input\input_linux.c" />
@@ -34,10 +36,13 @@
     <ClCompile Include="source\render\render_linux.c" />
     <ClCompile Include="source\render\render_windows.c" />
     <ClCompile Include="source\test_cube.c" />
+    <ClCompile Include="source\ui.c" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="assets\ascii_tileset.h" />
-    <ClInclude Include="assets\windowskin_0.h" />
+    <ClInclude Include="includes\ui.h" />
+    <ClInclude Include="resources\audio\player_jump.h" />
+    <ClInclude Include="resources\font\ascii_tileset.h" />
+    <ClInclude Include="resources\windowskin_0.h" />
     <ClInclude Include="includes\audio.h" />
     <ClInclude Include="includes\camera.h" />
     <ClInclude Include="includes\game.h" />
@@ -51,6 +56,14 @@
     <ClInclude Include="includes\platform.h" />
     <ClInclude Include="includes\render.h" />
     <ClInclude Include="includes\test_cube.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <Media Include="assets\audio\player_jump.wav" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="tools\build_assets.py" />
+    <None Include="tools\convert_audio.py" />
+    <None Include="tools\convert_image.py" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>
@@ -105,16 +118,16 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IncludePath>$(ProjectDir)assets;$(ProjectDir)includes;$(IncludePath)</IncludePath>
+    <IncludePath>$(ProjectDir)resources;$(ProjectDir)includes;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <IncludePath>$(ProjectDir)assets;$(ProjectDir)includes;$(IncludePath)</IncludePath>
+    <IncludePath>$(ProjectDir)resources;$(ProjectDir)includes;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>$(ProjectDir)assets;$(ProjectDir)includes;$(IncludePath)</IncludePath>
+    <IncludePath>$(ProjectDir)resources;$(ProjectDir)includes;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <IncludePath>$(ProjectDir)assets;$(ProjectDir)includes;$(IncludePath)</IncludePath>
+    <IncludePath>$(ProjectDir)resources;$(ProjectDir)includes;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -130,6 +143,11 @@
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
+    <PreBuildEvent>
+      <Command>"$(ProjectDir)tools\.GlyphVenv\Scripts\activate"
+
+py "$(ProjectDir)tools\build_assets.py"</Command>
+    </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -147,6 +165,11 @@
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
+    <PreBuildEvent>
+      <Command>"$(ProjectDir)tools\.GlyphVenv\Scripts\activate"
+
+py "$(ProjectDir)tools\build_assets.py"</Command>
+    </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
@@ -162,6 +185,11 @@
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
+    <PreBuildEvent>
+      <Command>"$(ProjectDir)tools\.GlyphVenv\Scripts\activate"
+
+py "$(ProjectDir)tools\build_assets.py"</Command>
+    </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -179,6 +207,11 @@
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
+    <PreBuildEvent>
+      <Command>"$(ProjectDir)tools\.GlyphVenv\Scripts\activate"
+
+py "$(ProjectDir)tools\build_assets.py"</Command>
+    </PreBuildEvent>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

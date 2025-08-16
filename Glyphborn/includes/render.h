@@ -29,5 +29,6 @@ void render_draw_wireframe(RenderMesh *mesh, Mat4 model, Mat4 view, Mat4 project
 void render_draw_image(int x, int y, int width, int height, int depth, const unsigned char* image_data, const unsigned char* palette);
 void render_draw_text(int x, int y, const char* text);
 void render_draw_text_colored(int x, int y, const char* text, uint32_t color);
+void render_draw_rect(int x, int y, int width, int height, uint32_t color);
 
 #endif // !RENDER_H

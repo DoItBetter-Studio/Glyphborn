@@ -3,6 +3,7 @@
 #include "platform.h"
 #include "render.h"
 #include "game.h"
+#include "audio.h"
 
 #ifdef _WIN32
 #include <Windows.h>
@@ -19,6 +20,7 @@ int main()
 	platform_init(&window);
 	render_init(platform_get_native_window());
 	game_init();
+	audio_init();
 
 	while (platform_running())
 	{
@@ -29,6 +31,7 @@ int main()
 		render_clear(framebuffer_ui, 0x00000000);
 
 		game_update(platform_frame_timing());
+		audio_update();
 
 		game_render();
 		game_render_ui();
@@ -37,6 +40,7 @@ int main()
 		render_present();
 	}
 
+	audio_shutdown();
 	game_shutdown();
 	render_shutdown();
 	platform_shutdown();
