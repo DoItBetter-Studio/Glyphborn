@@ -1,0 +1,15 @@
+D:\Projects\Glyphborn Game\Glyphborn\source\camera.c;D:\Projects\Glyphborn Game\Glyphborn\x64\Release\camera.obj
+D:\Projects\Glyphborn Game\Glyphborn\source\game.c;D:\Projects\Glyphborn Game\Glyphborn\x64\Release\game.obj
+D:\Projects\Glyphborn Game\Glyphborn\source\input\input_linux.c;D:\Projects\Glyphborn Game\Glyphborn\x64\Release\input_linux.obj
+D:\Projects\Glyphborn Game\Glyphborn\source\input\input_windows.c;D:\Projects\Glyphborn Game\Glyphborn\x64\Release\input_windows.obj
+D:\Projects\Glyphborn Game\Glyphborn\source\main.c;D:\Projects\Glyphborn Game\Glyphborn\x64\Release\main.obj
+D:\Projects\Glyphborn Game\Glyphborn\source\maths\mat4.c;D:\Projects\Glyphborn Game\Glyphborn\x64\Release\mat4.obj
+D:\Projects\Glyphborn Game\Glyphborn\source\maths\quat.c;D:\Projects\Glyphborn Game\Glyphborn\x64\Release\quat.obj
+D:\Projects\Glyphborn Game\Glyphborn\source\maths\vec2.c;D:\Projects\Glyphborn Game\Glyphborn\x64\Release\vec2.obj
+D:\Projects\Glyphborn Game\Glyphborn\source\maths\vec3.c;D:\Projects\Glyphborn Game\Glyphborn\x64\Release\vec3.obj
+D:\Projects\Glyphborn Game\Glyphborn\source\maths\vec4.c;D:\Projects\Glyphborn Game\Glyphborn\x64\Release\vec4.obj
+D:\Projects\Glyphborn Game\Glyphborn\source\platform\platform_linux.c;D:\Projects\Glyphborn Game\Glyphborn\x64\Release\platform_linux.obj
+D:\Projects\Glyphborn Game\Glyphborn\source\platform\platform_windows.c;D:\Projects\Glyphborn Game\Glyphborn\x64\Release\platform_windows.obj
+D:\Projects\Glyphborn Game\Glyphborn\source\render\render_linux.c;D:\Projects\Glyphborn Game\Glyphborn\x64\Release\render_linux.obj
+D:\Projects\Glyphborn Game\Glyphborn\source\render\render_windows.c;D:\Projects\Glyphborn Game\Glyphborn\x64\Release\render_windows.obj
+D:\Projects\Glyphborn Game\Glyphborn\source\test_cube.c;D:\Projects\Glyphborn Game\Glyphborn\x64\Release\test_cube.obj
