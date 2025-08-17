@@ -3,7 +3,7 @@
 
 #include <maths/vec3.h>
 
-Vec3 cube_vertices[8];
-int cube_edges[12][2];
+extern Vec3 cube_vertices[8];
+extern int cube_edges[12][2];
 
 #endif // !TEST_CUBE_H
