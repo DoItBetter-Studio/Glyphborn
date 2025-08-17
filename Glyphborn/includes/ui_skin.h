@@ -20,7 +20,7 @@ typedef struct Element
 typedef struct UISkin
 {
 	const char* active_palette;
-	const uint8_t* const* palettes;
+	const char* const* palettes;
 	Element panel;
 } UISkin;
 

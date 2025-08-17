@@ -1,9 +1,9 @@
 #include "ui_skin.h"
 #include "images/ui/glyphborn_windowskin.h"
 
-static UISkin* g_current_skin;
+static const UISkin* g_current_skin;
 
-static const uint8_t* glyphborn_palettes[] = {
+static const char* glyphborn_palettes[] = {
 	glyphborn_windowskin0_palette_default,
 };
 

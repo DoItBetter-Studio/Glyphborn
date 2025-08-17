@@ -1,12 +1,12 @@
 #include "game.h"
 #include "input.h"
-#include "render.h"
 #include "camera.h"
 #include "test_cube.h"
 #include "audio.h"
 #include "audio/player_jump.h"
 #include "ui_skin.h"
 #include "ui.h"
+#include "sketch.h"
 
 Camera main_camera = { 0 };
 Mat4 view;
@@ -82,7 +82,7 @@ void game_render(void)
 		.edge_count = sizeof(cube_edges) / (2 * sizeof(int))
 	};
 
-	render_draw_wireframe(&cube_mesh, model, view, projection, 0xFF000000);
+	sketch_draw_wireframe(&cube_mesh, model, view, projection, 0xFF000000);
 }
 
 void game_render_ui(void)

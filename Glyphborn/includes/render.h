@@ -3,9 +3,6 @@
 
 #include <stdint.h>
 #include <stdbool.h>
-#include "maths/mat4.h"
-#include "maths/vec4.h"
-#include "mesh.h"
 
 #define FB_WIDTH		480
 #define FB_HEIGHT		320
@@ -23,6 +20,5 @@ void render_present(void);
 void render_shutdown(void);
 
 // 3D rendering functions
-void render_draw_wireframe(RenderMesh* mesh, Mat4 model, Mat4 view, Mat4 projection, uint32_t color);
 
 #endif // !RENDER_H

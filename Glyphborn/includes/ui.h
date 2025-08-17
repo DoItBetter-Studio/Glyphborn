@@ -40,6 +40,4 @@ void ui_end_frame(void);
 // -------------------------------------
 bool ui_button(int x, int y, int width, int height, const char* label, uint32_t bg_color, uint32_t text_color);
 
-
-
 #endif // !UI_H

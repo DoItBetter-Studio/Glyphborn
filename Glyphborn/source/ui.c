@@ -273,7 +273,7 @@ bool ui_button(int x, int y, int width, int height, const char* label, uint32_t 
 	int text_x = ui_text_width(label);
 	int text_y = ui_text_height(label, width - 32);
 
-	UISkin* skin = ui_get_skin();
+	const UISkin* skin = ui_get_skin();
 
 	ui_draw_nineslice(x, y, width, height, skin->panel.pixels, skin->active_palette, skin->panel.depth, skin->panel.width, skin->panel.height, 16, 16, 16, 16);
 	ui_draw_text_colored(text_x, text_y + 8, label, text_color);
