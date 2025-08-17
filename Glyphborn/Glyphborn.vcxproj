@@ -37,11 +37,14 @@
     <ClCompile Include="source\render\render_windows.c" />
     <ClCompile Include="source\test_cube.c" />
     <ClCompile Include="source\ui.c" />
+    <ClCompile Include="source\ui_skin.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="includes\ui.h" />
+    <ClInclude Include="includes\ui_skin.h" />
     <ClInclude Include="resources\audio\player_jump.h" />
     <ClInclude Include="resources\font\ascii_tileset.h" />
+    <ClInclude Include="resources\images\ui\glyphborn_windowskin.h" />
     <ClInclude Include="resources\windowskin_0.h" />
     <ClInclude Include="includes\audio.h" />
     <ClInclude Include="includes\camera.h" />
@@ -64,6 +67,9 @@
     <None Include="tools\build_assets.py" />
     <None Include="tools\convert_audio.py" />
     <None Include="tools\convert_image.py" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="Makefile" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>

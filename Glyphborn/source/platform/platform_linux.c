@@ -6,17 +6,33 @@
 #include <stdint.h>
 #include <unistd.h>
 #include <stdio.h>
+#include <time.h>
+#include <sys/types.h>
+
+typedef struct
+{
+	Display* display;
+	Window window;
+	GC gc;
+} X11Context;
+
 
 static bool running = false;
 static Display* display;
 static Window window;
-
+static GC gc;
+static X11Context x11;
 static struct timespec last_time;
+static Atom wm_delete_window;
 
 void platform_init(const PlatformWindowDesc* desc)
 {
 	display = XOpenDisplay(NULL);
-	if (!display) return;
+	if (!display)
+	{
+		fprintf(stderr, "XOpenDisplay fialed\n");
+		return;
+	}
 
 	int screen = DefaultScreen(display);
 	window = XCreateSimpleWindow(
@@ -27,7 +43,18 @@ void platform_init(const PlatformWindowDesc* desc)
 
 	XStoreName(display, window, desc->title);
 	XSelectInput(display, window, ExposureMask | KeyPress | KeyRelease | StructureNotifyMask);
+
+	wm_delete_window = XInternAtom(display, "WM_DELETE_WINDOW", False);
+	XSetWMProtocols(display, window, &wm_delete_window, 1);
+
+	gc = XCreateGC(display, window, 0, NULL);
+
 	XMapWindow(display, window);
+	XFlush(display);
+
+	x11.display = display;
+	x11.window = window;
+	x11.gc = gc;
 
 	running = true;
 	clock_gettime(CLOCK_MONOTONIC, &last_time);
@@ -48,12 +75,22 @@ void platform_poll_events(void)
 {
 	if (!display) return;
 
+	XEvent event;
 	while (XPending(display))
 	{
-		XEvent event;
 		XNextEvent(display, &event);
 
-		if (event.type == DestroyNotify) running = false;
+		if (event.type == ClientMessage)
+		{
+			if ((Atom)event.xclient.data.l[0] == wm_delete_window)
+				running = false;
+		}
+		else if (event.type == KeyPress)
+		{
+			KeySym key = XLookupKeysym(&event.xkey, 0);
+			if (key == XK_Escape)
+				running = false;
+		}
 	}
 }
 
@@ -64,7 +101,7 @@ bool platform_running(void)
 
 void* platform_get_native_window(void)
 {
-	return (void*)window;
+	return (void*)&x11;
 }
 
 float platform_frame_timing(void)

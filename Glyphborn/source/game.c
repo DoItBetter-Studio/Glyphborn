@@ -3,16 +3,14 @@
 #include "render.h"
 #include "camera.h"
 #include "test_cube.h"
-#include "windowskin_0.h"
 #include "audio.h"
 #include "audio/player_jump.h"
+#include "ui_skin.h"
 #include "ui.h"
 
 Camera main_camera = { 0 };
 Mat4 view;
 Mat4 projection;
-
-UISystem ui;
 
 static void draw_test_pattern_ui(void)
 {
@@ -35,7 +33,7 @@ static void on_click_jump(void* data)
 void game_init(void)
 {
 	input_init();
-	ui_init(&ui);
+	ui_set_skin(SKIN_GLYPHBORN);
 
 	main_camera.position = (Vec3){ 0.0f, 0.0f, -5.0f };
 	main_camera.target = (Vec3){ 0.0f, 0.0f, 0.0f };
@@ -43,55 +41,32 @@ void game_init(void)
 
 	view = camera_get_view_matrix(&main_camera);
 	projection = mat4_perspective(3.14159f / 4.0f, (float)FB_WIDTH / (float)FB_HEIGHT, 0.1f, 100.0f);
-
-	ui_add_element(&ui, ui_create_button(50, 50, 120, 32, "Click Me", 0xFF333333, 0xFF000000, on_click_jump));
-	ui_add_element(&ui, ui_create_button(50, 100, 120, 32, "Button 2", 0xFF333333, 0xFF000000, on_click_jump));
-
-	ui_add_element(&ui, ui_create_label(50, 200, "Hello, UI!", 0xFF0000FF)); // Blue text
 }
 
 static bool activate = false;
+int nav_dx = 0, nav_dy = 0;
+static bool showUI = false;
 
 void game_update(float delta_time)
 {
 	input_update();
 
-	int nav_dx = 0, nav_dy = 0;
-
-	if (input_button_down(BUTTON_START))
-	{
-		ui.input_locked = !ui.input_locked; // Toggle input lock
-	}
-
-	if (ui.input_locked)
-	{
-		if (input_button_down(BUTTON_UP)) nav_dy += 1;
-		if (input_button_down(BUTTON_DOWN)) nav_dy += -1;
-		if (input_button_down(BUTTON_LEFT)) nav_dx += -1;
-		if (input_button_down(BUTTON_RIGHT)) nav_dx += 1;
-		if (input_button_down(BUTTON_A)) activate = true;
-	}
-
-	// TODO: Implement mouse input
-	ui_update(&ui, delta_time, 0, 0, false, nav_dx, nav_dy, activate);
-	activate = false; // Reset activation state after processing
+	// These come from your input layer
+	nav_dx = 0;
+	nav_dy = 0;
+	if (input_button_down(BUTTON_UP))   nav_dy += -1;
+	if (input_button_down(BUTTON_DOWN)) nav_dy += 1;
+	activate = input_button_down(BUTTON_A);
 
 	if (input_button_down(BUTTON_B))
 	{
 		audio_play_sound(player_jump, PLAYER_JUMP_LEN);
 	}
 
-	if (!ui.input_locked)
-	{
-		if (input_get_button(BUTTON_UP))
-			main_camera.position.z += 1.0f * delta_time;
-		if (input_get_button(BUTTON_DOWN))
-			main_camera.position.z -= 1.0f * delta_time;
-		if (input_get_button(BUTTON_LEFT))
-			main_camera.position.x -= 1.0f * delta_time;
-		if (input_get_button(BUTTON_RIGHT))
-			main_camera.position.x += 1.0f * delta_time;
-	}
+	if (input_get_button(BUTTON_UP)) main_camera.position.z += 1.0f * delta_time;
+	if (input_get_button(BUTTON_DOWN)) main_camera.position.z -= 1.0f * delta_time;
+	if (input_get_button(BUTTON_LEFT)) main_camera.position.x -= 1.0f * delta_time;
+	if (input_get_button(BUTTON_RIGHT)) main_camera.position.x += 1.0f * delta_time;
 
 	view = camera_get_view_matrix(&main_camera);
 }
@@ -112,10 +87,29 @@ void game_render(void)
 
 void game_render_ui(void)
 {
-	ui_render(&ui);
+	ui_begin_frame(0, 0, false, activate);
+
+	if (nav_dx || nav_dy)
+	{
+		g_ui.nav_mode = true;
+		g_ui.focused_id += nav_dy;
+		if (g_ui.focused_id < 1) g_ui.focused_id = 1;
+	}
+
+	if (ui_button(16, 16, 100, 30, "Jump", 0xFF888888, 0xFFFFFFFF))
+	{
+		audio_play_sound(player_jump, PLAYER_JUMP_LEN);
+	}
+
+	if (showUI)
+	{
+		draw_test_pattern_ui();
+	}
+
+	ui_end_frame();
 }
 
 void game_shutdown(void)
 {
-	ui_clear(&ui);
+
 }

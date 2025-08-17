@@ -7,20 +7,21 @@
 #include <unistd.h>
 #include <string.h>
 #include <stdio.h>
+#include <errno.h>
 
 static InputMapping button_mappings[BUTTON_COUNT] = {
-	[BUTTON_UP]				= { 'W', 0x01 },
-	[BUTTON_DOWN]			= { 'S', 0x02 },
-	[BUTTON_LEFT]			= { 'A', 0x04 },
-	[BUTTON_RIGHT]			= { 'D', 0x08 },
-	[BUTTON_A]				= { 'Z', 0x10 },
-	[BUTTON_B]				= { 'X', 0x20 },
-	[BUTTON_X]				= { 'Q', 0x40 },
-	[BUTTON_Y]				= { 'E', 0x80 },
-	[BUTTON_LEFT_BUMPER]	= { 'L', 0x100 },
-	[BUTTON_RIGHT_BUMPER]	= { 'R', 0x200 },
-	[BUTTON_START]			= { '\r', 0x400 },
-	[BUTTON_SELECT]			= { '\t', 0x800 },
+	[BUTTON_UP] = { 'W', 0x01 },
+	[BUTTON_DOWN] = { 'S', 0x02 },
+	[BUTTON_LEFT] = { 'A', 0x04 },
+	[BUTTON_RIGHT] = { 'D', 0x08 },
+	[BUTTON_A] = { 'Z', 0x10 },
+	[BUTTON_B] = { 'X', 0x20 },
+	[BUTTON_X] = { 'Q', 0x40 },
+	[BUTTON_Y] = { 'E', 0x80 },
+	[BUTTON_LEFT_BUMPER] = { 'L', 0x100 },
+	[BUTTON_RIGHT_BUMPER] = { 'R', 0x200 },
+	[BUTTON_START] = { '\r', 0x400 },
+	[BUTTON_SELECT] = { '\t', 0x800 },
 };
 
 static InputState input_state;
@@ -63,14 +64,14 @@ void input_update(void)
 		}
 	}
 
-	if (joystick_fd >= 0) 
+	if (joystick_fd >= 0)
 	{
 		struct js_event js;
-		while (read(joystick_fd, &js, sizeof(js)) > 0) 
+		while (read(joystick_fd, &js, sizeof(js)) > 0)
 		{
-			if (js.type & JS_EVENT_BUTTON) 
+			if (js.type & JS_EVENT_BUTTON)
 			{
-				for (int i = 0; i < BUTTON_COUNT; i++) 
+				for (int i = 0; i < BUTTON_COUNT; i++)
 				{
 					if (js.number == i)
 						input_state.button_down[i] |= js.value;

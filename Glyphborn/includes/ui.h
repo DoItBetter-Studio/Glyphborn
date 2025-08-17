@@ -5,74 +5,41 @@
 #include <stdint.h>
 
 #include "render.h"
-
-#define MAX_UI_ELEMENTS 128
-
-typedef enum
-{
-	UI_BUTTON,
-	UI_LABEL,
-	UI_PANEL,
-	UI_CUSTOM,
-} UIElementType;
-
-struct UIElement;
-
-typedef void (*UIRenderFunc)(struct UIElement* element);
-typedef void (*UIUpdateFunc)(struct UIElement* element, float delta_time);
-typedef void (*UIInputFunc)(struct UIElement* element, int mouse_x, int mouse_y, bool mouse_down);
-
-typedef struct UIElement
-{
-	UIElementType type;
-	int x, y, width, height;
-	bool visible;
-
-	UIRenderFunc render_func;
-	UIUpdateFunc update_func;
-	UIInputFunc handle_input_func;
-
-	void* user_data;
-} UIElement;
+#include "ui_skin.h"
 
 typedef struct
 {
-	const char* text;
-	uint32_t bg_color;
-	uint32_t fg_color;
-	bool pressed;
-	bool focused;
-	void (*on_click)(void* user_data);
-} UIButton;
+	int mouse_x, mouse_y;
+	bool mouse_down;
+	bool nav_activate;
+	int hot_item;
+	int active_item;
+	int next_id;
+	int focused_id;
+	bool nav_mode;
+} UIContext;
 
-typedef struct
-{
-	const char* text;
-	uint32_t color;
-} UILabel;
+extern UIContext g_ui;
 
-typedef struct
-{
-	uint32_t bg_color;
-} UIPanel;
+// 2D rendering functions
+void ui_draw_image(int x, int y, int width, int height, int depth, const unsigned char* image_data, const unsigned char* palette);
+void ui_draw_text(int x, int y, const char* text);
+void ui_draw_text_colored(int x, int y, const char* text, uint32_t color);
+int ui_text_width(const char* text);
+int ui_text_height(const char* text, int max_width);
+void ui_draw_nineslice(int dst_x, int dst_y, int dst_w, int dst_h, const char* pixels, const char* palette, int depth, int src_w, int src_h, int slice_left, int slice_top, int slice_right, int slice_bottom);
 
-typedef struct
-{
-	UIElement* elements[MAX_UI_ELEMENTS];
-	int count;
-	int focused_element;	// Index of the currently focused element
-	bool input_locked;		// When UI is active, lock game input
-} UISystem;
+// -------------------------------------
+// Frame lifecycle
+// -------------------------------------
+void ui_begin_frame(int mouse_x, int mouse_y, bool mouse_down, bool nav_activate);
+void ui_end_frame(void);
 
-void ui_init(UISystem* ui);
-void ui_add_element(UISystem* ui, UIElement* element);
-void ui_handle_navigation(UISystem* ui, int nav_dx, int nav_dy, bool activate);
-void ui_update(UISystem* ui, float delta_time, int mouse_x, int mouse_y, bool mouse_pressed, int nav_dx, int nav_dy, bool activate);
-void ui_render(UISystem* ui);
-void ui_clear(UISystem* ui);
+// -------------------------------------
+// Widgets
+// -------------------------------------
+bool ui_button(int x, int y, int width, int height, const char* label, uint32_t bg_color, uint32_t text_color);
 
-UIElement* ui_create_button(int x, int y, int width, int height, const char* text, uint32_t bg_color, uint32_t fg_color, void (*on_click)(void* user_data));
-UIElement* ui_create_label(int x, int y, const char* text, uint32_t color);
-UIElement* ui_create_panel(int x, int y, int width, int height, uint32_t bg_color);
+
 
 #endif // !UI_H

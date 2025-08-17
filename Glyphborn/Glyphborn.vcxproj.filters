@@ -69,6 +69,9 @@
     <ClCompile Include="source\ui.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="source\ui_skin.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="includes\platform.h">
@@ -122,6 +125,12 @@
     <ClInclude Include="includes\ui.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="includes\ui_skin.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="resources\images\ui\glyphborn_windowskin.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Media Include="assets\audio\player_jump.wav">
@@ -132,5 +141,8 @@
     <None Include="tools\build_assets.py" />
     <None Include="tools\convert_audio.py" />
     <None Include="tools\convert_image.py" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="Makefile" />
   </ItemGroup>
 </Project>

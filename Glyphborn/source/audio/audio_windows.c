@@ -8,11 +8,19 @@ typedef struct
 	HWAVEOUT hWaveOut;
 	WAVEHDR buffers[NUM_BUFFERS];
 	short samples[NUM_BUFFERS][BUFFER_SAMPLES];
+	int buffer_index;
+
+	// Currently playing (could be bgm, jingle, or sfx)
 	const signed char* playing_sample;
 	int sample_length;
 	int sample_position;
-	int buffer_index;
 	bool is_playing;
+
+	// Only used for channel 0 (music): saved state to resume after an interrupt/jingle
+	const signed char* saved_sample;
+	int saved_length;
+	int saved_position;
+	bool interrupted;
 } AudioChannel;
 
 static AudioChannel audio_channels[NUM_CHANNELS];
@@ -28,12 +36,29 @@ static void fill_buffer(AudioChannel* channel, short* buffer, int samplesPerBuff
 			int s8 = channel->playing_sample[channel->sample_position++];
 			sample = (short)(s8 << 8); // Convert 8-bit signed to 16-bit signed
 		}
-		else
+		else if (channel == &audio_channels[0] && channel->interrupted && channel->saved_sample)
 		{
-			channel->playing_sample = NULL;
+			channel->playing_sample = channel->saved_sample;
+			channel->sample_length = channel->saved_length;
+			channel->sample_position = channel->saved_position;
+			channel->interrupted = false;
+
+			if (channel->sample_position < channel->sample_length)
+			{
+				int s8 = channel->playing_sample[channel->sample_position++];
+				sample = (short)(s8 << 8);
+			}
+			else
+			{
+				channel->playing_sample = NULL;
+			}
 		}
+
 		buffer[i] = sample;
 	}
+
+	if (!channel->playing_sample && !(channel == &audio_channels[0] && channel->interrupted))
+		channel->is_playing = false;
 }
 
 void audio_init(void)
@@ -97,8 +122,11 @@ void audio_update(void)
 			channel->buffer_index = (channel->buffer_index + 1) % NUM_BUFFERS;
 
 			// If sample ended, mark channel as stopped
-			if (channel->playing_sample == NULL)
-				channel->is_playing = false;
+			if (channel->playing_sample == NULL && channel == &audio_channels[0] && channel->interrupted)
+			{
+				fill_buffer(channel, (short*)hdr->lpData, BUFFER_SAMPLES);
+				waveOutWrite(channel->hWaveOut, hdr, sizeof(WAVEHDR));
+			}
 		}
 	}
 }
@@ -151,8 +179,25 @@ static void audio_play_sample_channel(int channelIndex, const signed char* sampl
 	channel->is_playing = true;
 }
 
-void audio_play_music(const signed char* music_data, int length)
+void audio_play_music(const signed char* music_data, int length, bool interrupt)
 {
+	AudioChannel* bgm = &audio_channels[0];
+
+	if (interrupt && bgm->is_playing && bgm->playing_sample)
+	{
+		bgm->saved_sample = bgm->playing_sample;
+		bgm->saved_length = bgm->sample_length;
+		bgm->saved_position = bgm->sample_position;
+		bgm->interrupted = true;
+	}
+	else
+	{
+		bgm->saved_sample = NULL;
+		bgm->saved_length = 0;
+		bgm->saved_position = 0;
+		bgm->interrupted = false;
+	}
+
 	audio_play_sample_channel(0, music_data, length);
 }
 

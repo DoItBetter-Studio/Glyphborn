@@ -3,8 +3,20 @@
   "WorkspaceRootPath": "D:\\Projects\\GlyphbornGame\\",
   "Documents": [
     {
+      "AbsoluteMoniker": "D:0:0:{2A5BE369-A5AF-4BAC-988F-F35142842AD7}|Glyphborn\\Glyphborn.vcxproj|D:\\Projects\\GlyphbornGame\\Glyphborn\\source\\audio\\audio_windows.c||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{2A5BE369-A5AF-4BAC-988F-F35142842AD7}|Glyphborn\\Glyphborn.vcxproj|solutionrelative:Glyphborn\\source\\audio\\audio_windows.c||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{2A5BE369-A5AF-4BAC-988F-F35142842AD7}|Glyphborn\\Glyphborn.vcxproj|D:\\Projects\\GlyphbornGame\\Glyphborn\\source\\ui.c||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{2A5BE369-A5AF-4BAC-988F-F35142842AD7}|Glyphborn\\Glyphborn.vcxproj|solutionrelative:Glyphborn\\source\\ui.c||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
       "AbsoluteMoniker": "D:0:0:{2A5BE369-A5AF-4BAC-988F-F35142842AD7}|Glyphborn\\Glyphborn.vcxproj|D:\\Projects\\GlyphbornGame\\Glyphborn\\source\\render\\render_windows.c||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
       "RelativeMoniker": "D:0:0:{2A5BE369-A5AF-4BAC-988F-F35142842AD7}|Glyphborn\\Glyphborn.vcxproj|solutionrelative:Glyphborn\\source\\render\\render_windows.c||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{2A5BE369-A5AF-4BAC-988F-F35142842AD7}|Glyphborn\\Glyphborn.vcxproj|D:\\Projects\\GlyphbornGame\\Glyphborn\\includes\\ui.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{2A5BE369-A5AF-4BAC-988F-F35142842AD7}|Glyphborn\\Glyphborn.vcxproj|solutionrelative:Glyphborn\\includes\\ui.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{2A5BE369-A5AF-4BAC-988F-F35142842AD7}|Glyphborn\\Glyphborn.vcxproj|D:\\Projects\\GlyphbornGame\\Glyphborn\\includes\\audio.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
@@ -15,112 +27,44 @@
       "RelativeMoniker": "D:0:0:{2A5BE369-A5AF-4BAC-988F-F35142842AD7}|Glyphborn\\Glyphborn.vcxproj|solutionrelative:Glyphborn\\includes\\render.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{2A5BE369-A5AF-4BAC-988F-F35142842AD7}|Glyphborn\\Glyphborn.vcxproj|D:\\Projects\\GlyphbornGame\\Glyphborn\\assets\\windowskin_0.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
-      "RelativeMoniker": "D:0:0:{2A5BE369-A5AF-4BAC-988F-F35142842AD7}|Glyphborn\\Glyphborn.vcxproj|solutionrelative:Glyphborn\\assets\\windowskin_0.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{2A5BE369-A5AF-4BAC-988F-F35142842AD7}|Glyphborn\\Glyphborn.vcxproj|D:\\Projects\\GlyphbornGame\\Glyphborn\\source\\game.c||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
-      "RelativeMoniker": "D:0:0:{2A5BE369-A5AF-4BAC-988F-F35142842AD7}|Glyphborn\\Glyphborn.vcxproj|solutionrelative:Glyphborn\\source\\game.c||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{2A5BE369-A5AF-4BAC-988F-F35142842AD7}|Glyphborn\\Glyphborn.vcxproj|D:\\Projects\\GlyphbornGame\\Glyphborn\\assets\\ascii_tileset.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
-      "RelativeMoniker": "D:0:0:{2A5BE369-A5AF-4BAC-988F-F35142842AD7}|Glyphborn\\Glyphborn.vcxproj|solutionrelative:Glyphborn\\assets\\ascii_tileset.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{2A5BE369-A5AF-4BAC-988F-F35142842AD7}|Glyphborn\\Glyphborn.vcxproj|D:\\Projects\\GlyphbornGame\\Glyphborn\\source\\main.c||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
-      "RelativeMoniker": "D:0:0:{2A5BE369-A5AF-4BAC-988F-F35142842AD7}|Glyphborn\\Glyphborn.vcxproj|solutionrelative:Glyphborn\\source\\main.c||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
-    },
-    {
       "AbsoluteMoniker": "D:0:0:{2A5BE369-A5AF-4BAC-988F-F35142842AD7}|Glyphborn\\Glyphborn.vcxproj|D:\\Projects\\GlyphbornGame\\Glyphborn\\source\\render\\render_linux.c||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
       "RelativeMoniker": "D:0:0:{2A5BE369-A5AF-4BAC-988F-F35142842AD7}|Glyphborn\\Glyphborn.vcxproj|solutionrelative:Glyphborn\\source\\render\\render_linux.c||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{2A5BE369-A5AF-4BAC-988F-F35142842AD7}|Glyphborn\\Glyphborn.vcxproj|D:\\Projects\\GlyphbornGame\\Glyphborn\\includes\\ui_skin.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{2A5BE369-A5AF-4BAC-988F-F35142842AD7}|Glyphborn\\Glyphborn.vcxproj|solutionrelative:Glyphborn\\includes\\ui_skin.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{2A5BE369-A5AF-4BAC-988F-F35142842AD7}|Glyphborn\\Glyphborn.vcxproj|D:\\Projects\\GlyphbornGame\\Glyphborn\\source\\audio\\audio_linux.c||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{2A5BE369-A5AF-4BAC-988F-F35142842AD7}|Glyphborn\\Glyphborn.vcxproj|solutionrelative:Glyphborn\\source\\audio\\audio_linux.c||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{2A5BE369-A5AF-4BAC-988F-F35142842AD7}|Glyphborn\\Glyphborn.vcxproj|D:\\Projects\\GlyphbornGame\\Glyphborn\\source\\ui_skin.c||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{2A5BE369-A5AF-4BAC-988F-F35142842AD7}|Glyphborn\\Glyphborn.vcxproj|solutionrelative:Glyphborn\\source\\ui_skin.c||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{2A5BE369-A5AF-4BAC-988F-F35142842AD7}|Glyphborn\\Glyphborn.vcxproj|D:\\Projects\\GlyphbornGame\\Glyphborn\\Makefile||{3B902123-F8A7-4915-9F01-361F908088D0}",
+      "RelativeMoniker": "D:0:0:{2A5BE369-A5AF-4BAC-988F-F35142842AD7}|Glyphborn\\Glyphborn.vcxproj|solutionrelative:Glyphborn\\Makefile||{3B902123-F8A7-4915-9F01-361F908088D0}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{2A5BE369-A5AF-4BAC-988F-F35142842AD7}|Glyphborn\\Glyphborn.vcxproj|D:\\Projects\\GlyphbornGame\\Glyphborn\\source\\input\\input_linux.c||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
       "RelativeMoniker": "D:0:0:{2A5BE369-A5AF-4BAC-988F-F35142842AD7}|Glyphborn\\Glyphborn.vcxproj|solutionrelative:Glyphborn\\source\\input\\input_linux.c||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{2A5BE369-A5AF-4BAC-988F-F35142842AD7}|Glyphborn\\Glyphborn.vcxproj|D:\\Projects\\GlyphbornGame\\Glyphborn\\source\\input\\input_windows.c||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
-      "RelativeMoniker": "D:0:0:{2A5BE369-A5AF-4BAC-988F-F35142842AD7}|Glyphborn\\Glyphborn.vcxproj|solutionrelative:Glyphborn\\source\\input\\input_windows.c||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{2A5BE369-A5AF-4BAC-988F-F35142842AD7}|Glyphborn\\Glyphborn.vcxproj|D:\\Projects\\GlyphbornGame\\Glyphborn\\source\\platform\\platform_windows.c||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
-      "RelativeMoniker": "D:0:0:{2A5BE369-A5AF-4BAC-988F-F35142842AD7}|Glyphborn\\Glyphborn.vcxproj|solutionrelative:Glyphborn\\source\\platform\\platform_windows.c||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
-    },
-    {
       "AbsoluteMoniker": "D:0:0:{2A5BE369-A5AF-4BAC-988F-F35142842AD7}|Glyphborn\\Glyphborn.vcxproj|D:\\Projects\\GlyphbornGame\\Glyphborn\\source\\platform\\platform_linux.c||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
       "RelativeMoniker": "D:0:0:{2A5BE369-A5AF-4BAC-988F-F35142842AD7}|Glyphborn\\Glyphborn.vcxproj|solutionrelative:Glyphborn\\source\\platform\\platform_linux.c||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{2A5BE369-A5AF-4BAC-988F-F35142842AD7}|Glyphborn\\Glyphborn.vcxproj|D:\\Projects\\GlyphbornGame\\Glyphborn\\includes\\input.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
-      "RelativeMoniker": "D:0:0:{2A5BE369-A5AF-4BAC-988F-F35142842AD7}|Glyphborn\\Glyphborn.vcxproj|solutionrelative:Glyphborn\\includes\\input.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+      "AbsoluteMoniker": "D:0:0:{2A5BE369-A5AF-4BAC-988F-F35142842AD7}|Glyphborn\\Glyphborn.vcxproj|D:\\Projects\\GlyphbornGame\\Glyphborn\\Makefile||{8B382828-6202-11D1-8870-0000F87579D2}",
+      "RelativeMoniker": "D:0:0:{2A5BE369-A5AF-4BAC-988F-F35142842AD7}|Glyphborn\\Glyphborn.vcxproj|solutionrelative:Glyphborn\\Makefile||{8B382828-6202-11D1-8870-0000F87579D2}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{2A5BE369-A5AF-4BAC-988F-F35142842AD7}|Glyphborn\\Glyphborn.vcxproj|D:\\Projects\\GlyphbornGame\\Glyphborn\\includes\\platform.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
       "RelativeMoniker": "D:0:0:{2A5BE369-A5AF-4BAC-988F-F35142842AD7}|Glyphborn\\Glyphborn.vcxproj|solutionrelative:Glyphborn\\includes\\platform.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{2A5BE369-A5AF-4BAC-988F-F35142842AD7}|Glyphborn\\Glyphborn.vcxproj|D:\\Projects\\GlyphbornGame\\Glyphborn\\includes\\maths\\vec2.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
-      "RelativeMoniker": "D:0:0:{2A5BE369-A5AF-4BAC-988F-F35142842AD7}|Glyphborn\\Glyphborn.vcxproj|solutionrelative:Glyphborn\\includes\\maths\\vec2.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{2A5BE369-A5AF-4BAC-988F-F35142842AD7}|Glyphborn\\Glyphborn.vcxproj|D:\\Projects\\GlyphbornGame\\Glyphborn\\includes\\mesh.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
-      "RelativeMoniker": "D:0:0:{2A5BE369-A5AF-4BAC-988F-F35142842AD7}|Glyphborn\\Glyphborn.vcxproj|solutionrelative:Glyphborn\\includes\\mesh.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{2A5BE369-A5AF-4BAC-988F-F35142842AD7}|Glyphborn\\Glyphborn.vcxproj|D:\\Projects\\GlyphbornGame\\Glyphborn\\source\\test_cube.c||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
-      "RelativeMoniker": "D:0:0:{2A5BE369-A5AF-4BAC-988F-F35142842AD7}|Glyphborn\\Glyphborn.vcxproj|solutionrelative:Glyphborn\\source\\test_cube.c||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{2A5BE369-A5AF-4BAC-988F-F35142842AD7}|Glyphborn\\Glyphborn.vcxproj|D:\\Projects\\GlyphbornGame\\Glyphborn\\includes\\test_cube.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
-      "RelativeMoniker": "D:0:0:{2A5BE369-A5AF-4BAC-988F-F35142842AD7}|Glyphborn\\Glyphborn.vcxproj|solutionrelative:Glyphborn\\includes\\test_cube.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{2A5BE369-A5AF-4BAC-988F-F35142842AD7}|Glyphborn\\Glyphborn.vcxproj|D:\\Projects\\GlyphbornGame\\Glyphborn\\includes\\camera.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
-      "RelativeMoniker": "D:0:0:{2A5BE369-A5AF-4BAC-988F-F35142842AD7}|Glyphborn\\Glyphborn.vcxproj|solutionrelative:Glyphborn\\includes\\camera.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{2A5BE369-A5AF-4BAC-988F-F35142842AD7}|Glyphborn\\Glyphborn.vcxproj|D:\\Projects\\GlyphbornGame\\Glyphborn\\includes\\game.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
-      "RelativeMoniker": "D:0:0:{2A5BE369-A5AF-4BAC-988F-F35142842AD7}|Glyphborn\\Glyphborn.vcxproj|solutionrelative:Glyphborn\\includes\\game.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{2A5BE369-A5AF-4BAC-988F-F35142842AD7}|Glyphborn\\Glyphborn.vcxproj|D:\\Projects\\GlyphbornGame\\Glyphborn\\includes\\maths\\vec4.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
-      "RelativeMoniker": "D:0:0:{2A5BE369-A5AF-4BAC-988F-F35142842AD7}|Glyphborn\\Glyphborn.vcxproj|solutionrelative:Glyphborn\\includes\\maths\\vec4.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{2A5BE369-A5AF-4BAC-988F-F35142842AD7}|Glyphborn\\Glyphborn.vcxproj|D:\\Projects\\GlyphbornGame\\Glyphborn\\includes\\maths\\quat.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
-      "RelativeMoniker": "D:0:0:{2A5BE369-A5AF-4BAC-988F-F35142842AD7}|Glyphborn\\Glyphborn.vcxproj|solutionrelative:Glyphborn\\includes\\maths\\quat.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{2A5BE369-A5AF-4BAC-988F-F35142842AD7}|Glyphborn\\Glyphborn.vcxproj|D:\\Projects\\GlyphbornGame\\Glyphborn\\includes\\maths\\mat4.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
-      "RelativeMoniker": "D:0:0:{2A5BE369-A5AF-4BAC-988F-F35142842AD7}|Glyphborn\\Glyphborn.vcxproj|solutionrelative:Glyphborn\\includes\\maths\\mat4.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{2A5BE369-A5AF-4BAC-988F-F35142842AD7}|Glyphborn\\Glyphborn.vcxproj|D:\\Projects\\GlyphbornGame\\Glyphborn\\includes\\maths\\vec3.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
-      "RelativeMoniker": "D:0:0:{2A5BE369-A5AF-4BAC-988F-F35142842AD7}|Glyphborn\\Glyphborn.vcxproj|solutionrelative:Glyphborn\\includes\\maths\\vec3.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{2A5BE369-A5AF-4BAC-988F-F35142842AD7}|Glyphborn\\Glyphborn.vcxproj|D:\\Projects\\GlyphbornGame\\Glyphborn\\source\\camera.c||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
-      "RelativeMoniker": "D:0:0:{2A5BE369-A5AF-4BAC-988F-F35142842AD7}|Glyphborn\\Glyphborn.vcxproj|solutionrelative:Glyphborn\\source\\camera.c||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{2A5BE369-A5AF-4BAC-988F-F35142842AD7}|Glyphborn\\Glyphborn.vcxproj|D:\\Projects\\GlyphbornGame\\Glyphborn\\source\\maths\\vec4.c||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
-      "RelativeMoniker": "D:0:0:{2A5BE369-A5AF-4BAC-988F-F35142842AD7}|Glyphborn\\Glyphborn.vcxproj|solutionrelative:Glyphborn\\source\\maths\\vec4.c||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{2A5BE369-A5AF-4BAC-988F-F35142842AD7}|Glyphborn\\Glyphborn.vcxproj|D:\\Projects\\GlyphbornGame\\Glyphborn\\source\\maths\\quat.c||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
-      "RelativeMoniker": "D:0:0:{2A5BE369-A5AF-4BAC-988F-F35142842AD7}|Glyphborn\\Glyphborn.vcxproj|solutionrelative:Glyphborn\\source\\maths\\quat.c||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{2A5BE369-A5AF-4BAC-988F-F35142842AD7}|Glyphborn\\Glyphborn.vcxproj|D:\\Projects\\GlyphbornGame\\Glyphborn\\source\\maths\\mat4.c||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
-      "RelativeMoniker": "D:0:0:{2A5BE369-A5AF-4BAC-988F-F35142842AD7}|Glyphborn\\Glyphborn.vcxproj|solutionrelative:Glyphborn\\source\\maths\\mat4.c||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{2A5BE369-A5AF-4BAC-988F-F35142842AD7}|Glyphborn\\Glyphborn.vcxproj|D:\\Projects\\GlyphbornGame\\Glyphborn\\source\\maths\\vec3.c||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
-      "RelativeMoniker": "D:0:0:{2A5BE369-A5AF-4BAC-988F-F35142842AD7}|Glyphborn\\Glyphborn.vcxproj|solutionrelative:Glyphborn\\source\\maths\\vec3.c||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{2A5BE369-A5AF-4BAC-988F-F35142842AD7}|Glyphborn\\Glyphborn.vcxproj|D:\\Projects\\GlyphbornGame\\Glyphborn\\source\\maths\\vec2.c||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
-      "RelativeMoniker": "D:0:0:{2A5BE369-A5AF-4BAC-988F-F35142842AD7}|Glyphborn\\Glyphborn.vcxproj|solutionrelative:Glyphborn\\source\\maths\\vec2.c||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+      "AbsoluteMoniker": "D:0:0:{2A5BE369-A5AF-4BAC-988F-F35142842AD7}|Glyphborn\\Glyphborn.vcxproj|D:\\Projects\\GlyphbornGame\\Glyphborn\\includes\\input.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{2A5BE369-A5AF-4BAC-988F-F35142842AD7}|Glyphborn\\Glyphborn.vcxproj|solutionrelative:Glyphborn\\includes\\input.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
     }
   ],
   "DocumentGroupContainers": [
@@ -129,7 +73,7 @@
       "VerticalTabListWidth": 256,
       "DocumentGroups": [
         {
-          "DockedWidth": 309,
+          "DockedWidth": 435,
           "SelectedChildIndex": 11,
           "Children": [
             {
@@ -146,370 +90,237 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 3,
-              "Title": "windowskin_0.h",
-              "DocumentMoniker": "D:\\Projects\\GlyphbornGame\\Glyphborn\\assets\\windowskin_0.h",
-              "RelativeDocumentMoniker": "Glyphborn\\assets\\windowskin_0.h",
-              "ToolTip": "D:\\Projects\\GlyphbornGame\\Glyphborn\\assets\\windowskin_0.h",
-              "RelativeToolTip": "Glyphborn\\assets\\windowskin_0.h",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAUAAAAfAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
-              "WhenOpened": "2025-08-15T11:27:37.539Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 4,
-              "Title": "game.c",
-              "DocumentMoniker": "D:\\Projects\\GlyphbornGame\\Glyphborn\\source\\game.c",
-              "RelativeDocumentMoniker": "Glyphborn\\source\\game.c",
-              "ToolTip": "D:\\Projects\\GlyphbornGame\\Glyphborn\\source\\game.c",
-              "RelativeToolTip": "Glyphborn\\source\\game.c",
-              "ViewState": "AgIAADwAAAAAAAAAAAAAAFEAAAAqAAAAAAAAAA==",
+              "DocumentIndex": 1,
+              "Title": "ui.c",
+              "DocumentMoniker": "D:\\Projects\\GlyphbornGame\\Glyphborn\\source\\ui.c",
+              "RelativeDocumentMoniker": "Glyphborn\\source\\ui.c",
+              "ToolTip": "D:\\Projects\\GlyphbornGame\\Glyphborn\\source\\ui.c",
+              "RelativeToolTip": "Glyphborn\\source\\ui.c",
+              "ViewState": "AgIAAP8AAAAAAAAAAAAAAA4BAAAYAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000423|",
-              "WhenOpened": "2025-08-15T11:21:46.969Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 5,
-              "Title": "ascii_tileset.h",
-              "DocumentMoniker": "D:\\Projects\\GlyphbornGame\\Glyphborn\\assets\\ascii_tileset.h",
-              "RelativeDocumentMoniker": "Glyphborn\\assets\\ascii_tileset.h",
-              "ToolTip": "D:\\Projects\\GlyphbornGame\\Glyphborn\\assets\\ascii_tileset.h",
-              "RelativeToolTip": "Glyphborn\\assets\\ascii_tileset.h",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAsAAAAfAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
-              "WhenOpened": "2025-08-15T11:14:17.675Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 6,
-              "Title": "main.c",
-              "DocumentMoniker": "D:\\Projects\\GlyphbornGame\\Glyphborn\\source\\main.c",
-              "RelativeDocumentMoniker": "Glyphborn\\source\\main.c",
-              "ToolTip": "D:\\Projects\\GlyphbornGame\\Glyphborn\\source\\main.c",
-              "RelativeToolTip": "Glyphborn\\source\\main.c",
-              "ViewState": "AgIAABgAAAAAAAAAAAAAAAwAAAABAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000423|",
-              "WhenOpened": "2025-08-13T20:43:30.241Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 10,
-              "Title": "platform_windows.c",
-              "DocumentMoniker": "D:\\Projects\\GlyphbornGame\\Glyphborn\\source\\platform\\platform_windows.c",
-              "RelativeDocumentMoniker": "Glyphborn\\source\\platform\\platform_windows.c",
-              "ToolTip": "D:\\Projects\\GlyphbornGame\\Glyphborn\\source\\platform\\platform_windows.c",
-              "RelativeToolTip": "Glyphborn\\source\\platform\\platform_windows.c",
-              "ViewState": "AgIAAFYAAAAAAAAAAAAYwHgAAAAQAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000423|",
-              "WhenOpened": "2025-08-14T02:11:53.317Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 11,
-              "Title": "platform_linux.c",
-              "DocumentMoniker": "D:\\Projects\\GlyphbornGame\\Glyphborn\\source\\platform\\platform_linux.c",
-              "RelativeDocumentMoniker": "Glyphborn\\source\\platform\\platform_linux.c",
-              "ToolTip": "D:\\Projects\\GlyphbornGame\\Glyphborn\\source\\platform\\platform_linux.c",
-              "RelativeToolTip": "Glyphborn\\source\\platform\\platform_linux.c",
-              "ViewState": "AgIAADYAAAAAAAAAAAAYwFgAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000423|",
-              "WhenOpened": "2025-08-14T02:11:53.946Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 9,
-              "Title": "input_windows.c",
-              "DocumentMoniker": "D:\\Projects\\GlyphbornGame\\Glyphborn\\source\\input\\input_windows.c",
-              "RelativeDocumentMoniker": "Glyphborn\\source\\input\\input_windows.c",
-              "ToolTip": "D:\\Projects\\GlyphbornGame\\Glyphborn\\source\\input\\input_windows.c",
-              "RelativeToolTip": "Glyphborn\\source\\input\\input_windows.c",
-              "ViewState": "AgIAAB4AAAAAAAAAAAAYwEAAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000423|",
-              "WhenOpened": "2025-08-14T02:11:55.747Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 8,
-              "Title": "input_linux.c",
-              "DocumentMoniker": "D:\\Projects\\GlyphbornGame\\Glyphborn\\source\\input\\input_linux.c",
-              "RelativeDocumentMoniker": "Glyphborn\\source\\input\\input_linux.c",
-              "ToolTip": "D:\\Projects\\GlyphbornGame\\Glyphborn\\source\\input\\input_linux.c",
-              "RelativeToolTip": "Glyphborn\\source\\input\\input_linux.c",
-              "ViewState": "AgIAAD4AAAAAAAAAAAAYwGAAAAAGAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000423|",
-              "WhenOpened": "2025-08-14T02:11:56.349Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 0,
-              "Title": "render_windows.c",
-              "DocumentMoniker": "D:\\Projects\\GlyphbornGame\\Glyphborn\\source\\render\\render_windows.c",
-              "RelativeDocumentMoniker": "Glyphborn\\source\\render\\render_windows.c",
-              "ToolTip": "D:\\Projects\\GlyphbornGame\\Glyphborn\\source\\render\\render_windows.c",
-              "RelativeToolTip": "Glyphborn\\source\\render\\render_windows.c",
-              "ViewState": "AgIAAL8AAAAAAAAAAAAwwOUAAAACAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000423|",
-              "WhenOpened": "2025-08-15T03:42:03.336Z",
+              "WhenOpened": "2025-08-17T07:17:51.947Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
               "DocumentIndex": 7,
+              "Title": "ui_skin.h",
+              "DocumentMoniker": "D:\\Projects\\GlyphbornGame\\Glyphborn\\includes\\ui_skin.h",
+              "RelativeDocumentMoniker": "Glyphborn\\includes\\ui_skin.h",
+              "ToolTip": "D:\\Projects\\GlyphbornGame\\Glyphborn\\includes\\ui_skin.h",
+              "RelativeToolTip": "Glyphborn\\includes\\ui_skin.h",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAB0AAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
+              "WhenOpened": "2025-08-17T07:11:19.624Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 9,
+              "Title": "ui_skin.c",
+              "DocumentMoniker": "D:\\Projects\\GlyphbornGame\\Glyphborn\\source\\ui_skin.c",
+              "RelativeDocumentMoniker": "Glyphborn\\source\\ui_skin.c",
+              "ToolTip": "D:\\Projects\\GlyphbornGame\\Glyphborn\\source\\ui_skin.c",
+              "RelativeToolTip": "Glyphborn\\source\\ui_skin.c",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAACIAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000423|",
+              "WhenOpened": "2025-08-17T07:10:52.667Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 10,
+              "Title": "Makefile",
+              "DocumentMoniker": "D:\\Projects\\GlyphbornGame\\Glyphborn\\Makefile",
+              "RelativeDocumentMoniker": "Glyphborn\\Makefile",
+              "ToolTip": "D:\\Projects\\GlyphbornGame\\Glyphborn\\Makefile",
+              "RelativeToolTip": "Glyphborn\\Makefile",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABkAAAAaAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001001|",
+              "WhenOpened": "2025-08-17T07:05:13.553Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 13,
+              "Title": "Makefile",
+              "DocumentMoniker": "D:\\Projects\\GlyphbornGame\\Glyphborn\\Makefile",
+              "RelativeDocumentMoniker": "Glyphborn\\Makefile",
+              "ToolTip": "D:\\Projects\\GlyphbornGame\\Glyphborn\\Makefile",
+              "RelativeToolTip": "Glyphborn\\Makefile",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAACIAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001001|",
+              "WhenOpened": "2025-08-17T06:51:15.986Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 6,
               "Title": "render_linux.c",
               "DocumentMoniker": "D:\\Projects\\GlyphbornGame\\Glyphborn\\source\\render\\render_linux.c",
               "RelativeDocumentMoniker": "Glyphborn\\source\\render\\render_linux.c",
               "ToolTip": "D:\\Projects\\GlyphbornGame\\Glyphborn\\source\\render\\render_linux.c",
               "RelativeToolTip": "Glyphborn\\source\\render\\render_linux.c",
-              "ViewState": "AgIAAD8AAAAAAAAAAAAYwGEAAAAAAAAAAAAAAA==",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAH8BAAACAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000423|",
-              "WhenOpened": "2025-08-15T08:36:27.857Z"
+              "WhenOpened": "2025-08-17T06:49:58.659Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 29,
-              "Title": "vec2.c",
-              "DocumentMoniker": "D:\\Projects\\GlyphbornGame\\Glyphborn\\source\\maths\\vec2.c",
-              "RelativeDocumentMoniker": "Glyphborn\\source\\maths\\vec2.c",
-              "ToolTip": "D:\\Projects\\GlyphbornGame\\Glyphborn\\source\\maths\\vec2.c",
-              "RelativeToolTip": "Glyphborn\\source\\maths\\vec2.c",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAACAAAAABAAAAAAAAAA==",
+              "DocumentIndex": 12,
+              "Title": "platform_linux.c",
+              "DocumentMoniker": "D:\\Projects\\GlyphbornGame\\Glyphborn\\source\\platform\\platform_linux.c",
+              "RelativeDocumentMoniker": "Glyphborn\\source\\platform\\platform_linux.c",
+              "ToolTip": "D:\\Projects\\GlyphbornGame\\Glyphborn\\source\\platform\\platform_linux.c",
+              "RelativeToolTip": "Glyphborn\\source\\platform\\platform_linux.c",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAkAAAAWAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000423|",
-              "WhenOpened": "2025-08-14T05:14:16.771Z"
+              "WhenOpened": "2025-08-17T06:51:46.658Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 28,
-              "Title": "vec3.c",
-              "DocumentMoniker": "D:\\Projects\\GlyphbornGame\\Glyphborn\\source\\maths\\vec3.c",
-              "RelativeDocumentMoniker": "Glyphborn\\source\\maths\\vec3.c",
-              "ToolTip": "D:\\Projects\\GlyphbornGame\\Glyphborn\\source\\maths\\vec3.c",
-              "RelativeToolTip": "Glyphborn\\source\\maths\\vec3.c",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAACsAAAAAAAAAAAAAAA==",
+              "DocumentIndex": 11,
+              "Title": "input_linux.c",
+              "DocumentMoniker": "D:\\Projects\\GlyphbornGame\\Glyphborn\\source\\input\\input_linux.c",
+              "RelativeDocumentMoniker": "Glyphborn\\source\\input\\input_linux.c",
+              "ToolTip": "D:\\Projects\\GlyphbornGame\\Glyphborn\\source\\input\\input_linux.c",
+              "RelativeToolTip": "Glyphborn\\source\\input\\input_linux.c",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAGEAAAAGAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000423|",
-              "WhenOpened": "2025-08-14T05:16:33.892Z"
+              "WhenOpened": "2025-08-17T06:52:05.277Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 27,
-              "Title": "mat4.c",
-              "DocumentMoniker": "D:\\Projects\\GlyphbornGame\\Glyphborn\\source\\maths\\mat4.c",
-              "RelativeDocumentMoniker": "Glyphborn\\source\\maths\\mat4.c",
-              "ToolTip": "D:\\Projects\\GlyphbornGame\\Glyphborn\\source\\maths\\mat4.c",
-              "RelativeToolTip": "Glyphborn\\source\\maths\\mat4.c",
-              "ViewState": "AgIAAAUAAAAAAAAAAAAAAIEAAAAAAAAAAAAAAA==",
+              "DocumentIndex": 0,
+              "Title": "audio_windows.c",
+              "DocumentMoniker": "D:\\Projects\\GlyphbornGame\\Glyphborn\\source\\audio\\audio_windows.c",
+              "RelativeDocumentMoniker": "Glyphborn\\source\\audio\\audio_windows.c",
+              "ToolTip": "D:\\Projects\\GlyphbornGame\\Glyphborn\\source\\audio\\audio_windows.c",
+              "RelativeToolTip": "Glyphborn\\source\\audio\\audio_windows.c",
+              "ViewState": "AgIAAB0AAAAAAAAAAAAwwCYAAABEAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000423|",
-              "WhenOpened": "2025-08-14T05:17:43.379Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 26,
-              "Title": "quat.c",
-              "DocumentMoniker": "D:\\Projects\\GlyphbornGame\\Glyphborn\\source\\maths\\quat.c",
-              "RelativeDocumentMoniker": "Glyphborn\\source\\maths\\quat.c",
-              "ToolTip": "D:\\Projects\\GlyphbornGame\\Glyphborn\\source\\maths\\quat.c",
-              "RelativeToolTip": "Glyphborn\\source\\maths\\quat.c",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAACQAAAABAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000423|",
-              "WhenOpened": "2025-08-14T05:21:26.583Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 25,
-              "Title": "vec4.c",
-              "DocumentMoniker": "D:\\Projects\\GlyphbornGame\\Glyphborn\\source\\maths\\vec4.c",
-              "RelativeDocumentMoniker": "Glyphborn\\source\\maths\\vec4.c",
-              "ToolTip": "D:\\Projects\\GlyphbornGame\\Glyphborn\\source\\maths\\vec4.c",
-              "RelativeToolTip": "Glyphborn\\source\\maths\\vec4.c",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA4AAAAyAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000423|",
-              "WhenOpened": "2025-08-14T05:33:41.399Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 24,
-              "Title": "camera.c",
-              "DocumentMoniker": "D:\\Projects\\GlyphbornGame\\Glyphborn\\source\\camera.c",
-              "RelativeDocumentMoniker": "Glyphborn\\source\\camera.c",
-              "ToolTip": "D:\\Projects\\GlyphbornGame\\Glyphborn\\source\\camera.c",
-              "RelativeToolTip": "Glyphborn\\source\\camera.c",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAUAAAABAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000423|",
-              "WhenOpened": "2025-08-14T05:56:27.749Z"
+              "WhenOpened": "2025-08-17T06:54:17.872Z",
+              "EditorCaption": ""
             }
           ]
         },
         {
-          "DockedWidth": 253,
-          "SelectedChildIndex": 13,
+          "DockedWidth": 183,
+          "SelectedChildIndex": 3,
           "Children": [
             {
               "$type": "Document",
-              "DocumentIndex": 13,
+              "DocumentIndex": 14,
               "Title": "platform.h",
               "DocumentMoniker": "D:\\Projects\\GlyphbornGame\\Glyphborn\\includes\\platform.h",
               "RelativeDocumentMoniker": "Glyphborn\\includes\\platform.h",
               "ToolTip": "D:\\Projects\\GlyphbornGame\\Glyphborn\\includes\\platform.h",
               "RelativeToolTip": "Glyphborn\\includes\\platform.h",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA4AAAAVAAAAAAAAAA==",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
-              "WhenOpened": "2025-08-13T20:49:51.801Z"
+              "WhenOpened": "2025-08-17T06:49:55.161Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 12,
-              "Title": "input.h",
-              "DocumentMoniker": "D:\\Projects\\GlyphbornGame\\Glyphborn\\includes\\input.h",
-              "RelativeDocumentMoniker": "Glyphborn\\includes\\input.h",
-              "ToolTip": "D:\\Projects\\GlyphbornGame\\Glyphborn\\includes\\input.h",
-              "RelativeToolTip": "Glyphborn\\includes\\input.h",
-              "ViewState": "AgIAAA8AAAAAAAAAAAAAAAUAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
-              "WhenOpened": "2025-08-15T08:28:00.242Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 2,
+              "DocumentIndex": 5,
               "Title": "render.h",
               "DocumentMoniker": "D:\\Projects\\GlyphbornGame\\Glyphborn\\includes\\render.h",
               "RelativeDocumentMoniker": "Glyphborn\\includes\\render.h",
               "ToolTip": "D:\\Projects\\GlyphbornGame\\Glyphborn\\includes\\render.h",
               "RelativeToolTip": "Glyphborn\\includes\\render.h",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAABIAAAACAAAAAAAAAA==",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABsAAAATAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
-              "WhenOpened": "2025-08-15T08:13:42.366Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 14,
-              "Title": "vec2.h",
-              "DocumentMoniker": "D:\\Projects\\GlyphbornGame\\Glyphborn\\includes\\maths\\vec2.h",
-              "RelativeDocumentMoniker": "Glyphborn\\includes\\maths\\vec2.h",
-              "ToolTip": "D:\\Projects\\GlyphbornGame\\Glyphborn\\includes\\maths\\vec2.h",
-              "RelativeToolTip": "Glyphborn\\includes\\maths\\vec2.h",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAABEAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
-              "WhenOpened": "2025-08-14T05:06:14.314Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 23,
-              "Title": "vec3.h",
-              "DocumentMoniker": "D:\\Projects\\GlyphbornGame\\Glyphborn\\includes\\maths\\vec3.h",
-              "RelativeDocumentMoniker": "Glyphborn\\includes\\maths\\vec3.h",
-              "ToolTip": "D:\\Projects\\GlyphbornGame\\Glyphborn\\includes\\maths\\vec3.h",
-              "RelativeToolTip": "Glyphborn\\includes\\maths\\vec3.h",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAABQAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
-              "WhenOpened": "2025-08-14T05:10:56.386Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 22,
-              "Title": "mat4.h",
-              "DocumentMoniker": "D:\\Projects\\GlyphbornGame\\Glyphborn\\includes\\maths\\mat4.h",
-              "RelativeDocumentMoniker": "Glyphborn\\includes\\maths\\mat4.h",
-              "ToolTip": "D:\\Projects\\GlyphbornGame\\Glyphborn\\includes\\maths\\mat4.h",
-              "RelativeToolTip": "Glyphborn\\includes\\maths\\mat4.h",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAABYAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
-              "WhenOpened": "2025-08-14T05:11:56.081Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 21,
-              "Title": "quat.h",
-              "DocumentMoniker": "D:\\Projects\\GlyphbornGame\\Glyphborn\\includes\\maths\\quat.h",
-              "RelativeDocumentMoniker": "Glyphborn\\includes\\maths\\quat.h",
-              "ToolTip": "D:\\Projects\\GlyphbornGame\\Glyphborn\\includes\\maths\\quat.h",
-              "RelativeToolTip": "Glyphborn\\includes\\maths\\quat.h",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAABMAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
-              "WhenOpened": "2025-08-14T05:26:56.084Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 20,
-              "Title": "vec4.h",
-              "DocumentMoniker": "D:\\Projects\\GlyphbornGame\\Glyphborn\\includes\\maths\\vec4.h",
-              "RelativeDocumentMoniker": "Glyphborn\\includes\\maths\\vec4.h",
-              "ToolTip": "D:\\Projects\\GlyphbornGame\\Glyphborn\\includes\\maths\\vec4.h",
-              "RelativeToolTip": "Glyphborn\\includes\\maths\\vec4.h",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAABYAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
-              "WhenOpened": "2025-08-14T05:32:25.089Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 19,
-              "Title": "game.h",
-              "DocumentMoniker": "D:\\Projects\\GlyphbornGame\\Glyphborn\\includes\\game.h",
-              "RelativeDocumentMoniker": "Glyphborn\\includes\\game.h",
-              "ToolTip": "D:\\Projects\\GlyphbornGame\\Glyphborn\\includes\\game.h",
-              "RelativeToolTip": "Glyphborn\\includes\\game.h",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAoAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
-              "WhenOpened": "2025-08-14T05:52:21.231Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 18,
-              "Title": "camera.h",
-              "DocumentMoniker": "D:\\Projects\\GlyphbornGame\\Glyphborn\\includes\\camera.h",
-              "RelativeDocumentMoniker": "Glyphborn\\includes\\camera.h",
-              "ToolTip": "D:\\Projects\\GlyphbornGame\\Glyphborn\\includes\\camera.h",
-              "RelativeToolTip": "Glyphborn\\includes\\camera.h",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
-              "WhenOpened": "2025-08-14T05:55:27.911Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 17,
-              "Title": "test_cube.h",
-              "DocumentMoniker": "D:\\Projects\\GlyphbornGame\\Glyphborn\\includes\\test_cube.h",
-              "RelativeDocumentMoniker": "Glyphborn\\includes\\test_cube.h",
-              "ToolTip": "D:\\Projects\\GlyphbornGame\\Glyphborn\\includes\\test_cube.h",
-              "RelativeToolTip": "Glyphborn\\includes\\test_cube.h",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAMAAAAXAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
-              "WhenOpened": "2025-08-14T06:12:24.307Z"
+              "WhenOpened": "2025-08-17T06:49:55.766Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
               "DocumentIndex": 15,
-              "Title": "mesh.h",
-              "DocumentMoniker": "D:\\Projects\\GlyphbornGame\\Glyphborn\\includes\\mesh.h",
-              "RelativeDocumentMoniker": "Glyphborn\\includes\\mesh.h",
-              "ToolTip": "D:\\Projects\\GlyphbornGame\\Glyphborn\\includes\\mesh.h",
-              "RelativeToolTip": "Glyphborn\\includes\\mesh.h",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAwAAAARAAAAAAAAAA==",
+              "Title": "input.h",
+              "DocumentMoniker": "D:\\Projects\\GlyphbornGame\\Glyphborn\\includes\\input.h",
+              "RelativeDocumentMoniker": "Glyphborn\\includes\\input.h",
+              "ToolTip": "D:\\Projects\\GlyphbornGame\\Glyphborn\\includes\\input.h",
+              "RelativeToolTip": "Glyphborn\\includes\\input.h",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
-              "WhenOpened": "2025-08-15T02:42:31.779Z"
+              "WhenOpened": "2025-08-17T06:49:53.001Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 16,
-              "Title": "test_cube.c",
-              "DocumentMoniker": "D:\\Projects\\GlyphbornGame\\Glyphborn\\source\\test_cube.c",
-              "RelativeDocumentMoniker": "Glyphborn\\source\\test_cube.c",
-              "ToolTip": "D:\\Projects\\GlyphbornGame\\Glyphborn\\source\\test_cube.c",
-              "RelativeToolTip": "Glyphborn\\source\\test_cube.c",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAMAAAAJAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000423|",
-              "WhenOpened": "2025-08-14T06:13:35.615Z"
+              "DocumentIndex": 3,
+              "Title": "ui.h",
+              "DocumentMoniker": "D:\\Projects\\GlyphbornGame\\Glyphborn\\includes\\ui.h",
+              "RelativeDocumentMoniker": "Glyphborn\\includes\\ui.h",
+              "ToolTip": "D:\\Projects\\GlyphbornGame\\Glyphborn\\includes\\ui.h",
+              "RelativeToolTip": "Glyphborn\\includes\\ui.h",
+              "ViewState": "AgIAAAkAAAAAAAAAAAAkwBsAAAANAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
+              "WhenOpened": "2025-08-16T04:07:27.049Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 1,
+              "DocumentIndex": 4,
               "Title": "audio.h",
               "DocumentMoniker": "D:\\Projects\\GlyphbornGame\\Glyphborn\\includes\\audio.h",
               "RelativeDocumentMoniker": "Glyphborn\\includes\\audio.h",
               "ToolTip": "D:\\Projects\\GlyphbornGame\\Glyphborn\\includes\\audio.h",
               "RelativeToolTip": "Glyphborn\\includes\\audio.h",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAMAAAAAAAAAAAAAAA==",
+              "ViewState": "AgIAAAMAAAAAAAAAAAAAAA8AAABPAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
-              "WhenOpened": "2025-08-16T01:06:11.946Z",
+              "WhenOpened": "2025-08-17T06:49:52.067Z",
+              "EditorCaption": ""
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "FloatingWindowState": {
+        "Id": "e7d37d82-070b-4376-8799-4d2bb4c75067",
+        "Display": 1,
+        "X": 561,
+        "Y": 329,
+        "Width": 877,
+        "Height": 957,
+        "WindowState": 2
+      },
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 1,
+          "Children": [
+            {
+              "$type": "Document",
+              "DocumentIndex": 8,
+              "Title": "audio_linux.c",
+              "DocumentMoniker": "D:\\Projects\\GlyphbornGame\\Glyphborn\\source\\audio\\audio_linux.c",
+              "RelativeDocumentMoniker": "Glyphborn\\source\\audio\\audio_linux.c",
+              "ToolTip": "D:\\Projects\\GlyphbornGame\\Glyphborn\\source\\audio\\audio_linux.c",
+              "RelativeToolTip": "Glyphborn\\source\\audio\\audio_linux.c",
+              "ViewState": "AgIAAKEAAAAAAAAAAAAYwDEAAAACAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000423|",
+              "WhenOpened": "2025-08-17T06:52:32.885Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "render_windows.c",
+              "DocumentMoniker": "D:\\Projects\\GlyphbornGame\\Glyphborn\\source\\render\\render_windows.c",
+              "RelativeDocumentMoniker": "Glyphborn\\source\\render\\render_windows.c",
+              "ToolTip": "D:\\Projects\\GlyphbornGame\\Glyphborn\\source\\render\\render_windows.c",
+              "RelativeToolTip": "Glyphborn\\source\\render\\render_windows.c",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAIAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000423|",
+              "WhenOpened": "2025-08-17T07:15:03.16Z",
               "EditorCaption": ""
             }
           ]

@@ -1,11 +1,14 @@
 #ifdef _WIN32
 
-#include "font/ascii_tileset.h"
 #include "render.h"
 #include <Windows.h>
 
 static BITMAPINFO bmi;
 static HDC hdcWindow;
+
+uint32_t framebuffer[FB_WIDTH * FB_HEIGHT];
+uint32_t framebuffer_game[FB_WIDTH * FB_HEIGHT];
+uint32_t framebuffer_ui[FB_WIDTH * FB_HEIGHT];
 
 void render_init(void* platform_context)
 {
@@ -190,125 +193,6 @@ void render_draw_wireframe(RenderMesh* mesh, Mat4 model, Mat4 view, Mat4 project
 		int v1 = mesh->edges[i][1];
 		render_draw_line((int)projected[v0].x, (int)projected[v0].y,
 						 (int)projected[v1].x, (int)projected[v1].y, color);
-	}
-}
-
-void render_draw_image(int x, int y, int width, int height, int depth, const unsigned char* image_data, const unsigned char* palette)
-{
-	int pixels_per_byte = 8 / depth;
-	int mask = (1 << depth) - 1;
-
-	int total_pixels = width * height;
-	int data_index = 0;
-
-	for (int j = 0; j < height && (y + j) < FB_HEIGHT; ++j)
-	{
-		for (int i = 0; i < width && (x + i) < FB_WIDTH; ++i)
-		{
-			if (data_index >= total_pixels)
-				break;
-
-			int pixel_byte_index = (data_index * depth) / 8;
-			int bit_shift = 8 - depth - ((data_index * depth) % 8);
-
-			uint8_t byte = image_data[pixel_byte_index];
-			uint8_t index = (byte >> bit_shift) & mask;
-
-			if (index != 0)
-			{
-				// Each palette color is stored as 3 bytes: R, G, B
-				uint8_t r = palette[index * 3 + 0];
-				uint8_t g = palette[index * 3 + 1];
-				uint8_t b = palette[index * 3 + 2];
-
-				uint32_t color = (0xFF << 24) | (r << 16) | (g << 8) | b;
-				framebuffer_ui[(y + j) * FB_WIDTH + (x + i)] = color;
-			}
-
-			data_index++;
-		}
-	}
-}
-
-void render_draw_text(int x, int y, const char* text)
-{
-	render_draw_text_colored(x, y, text, 0xFF000000);
-}
-
-void render_draw_text_colored(int x, int y, const char* text, uint32_t color)
-{
-	int cursor_x = x;
-	int cursor_y = y;
-
-	while (*text)
-	{
-		char c = *text++;
-
-		if (c == '\n')
-		{
-			cursor_x = x;
-			cursor_y += ASCII_TILESET_GLYPH_HEIGHT;
-			continue;
-		}
-
-		int glyph_index = (unsigned char)c;
-		int glyph_col = glyph_index % ASCII_TILESET_SHEET_COLUMNS;
-		int glyph_row = glyph_index / ASCII_TILESET_SHEET_COLUMNS;
-
-		const int sheet_width = ASCII_TILESET_SHEET_COLUMNS * ASCII_TILESET_GLYPH_WIDTH;
-		const int pixels_per_byte = 8 / ASCII_TILESET_BITDEPTH;
-		const int mask = (1 << ASCII_TILESET_BITDEPTH) - 1;
-
-		int total_pixels = ASCII_TILESET_GLYPH_WIDTH * ASCII_TILESET_GLYPH_HEIGHT;
-		int bit_offset = (glyph_row * ASCII_TILESET_GLYPH_HEIGHT * sheet_width + glyph_col * ASCII_TILESET_GLYPH_WIDTH) * ASCII_TILESET_BITDEPTH;
-
-		int draw_width = ascii_tileset_widths[(unsigned char)c];
-
-		for (int j = 0; j < ASCII_TILESET_GLYPH_HEIGHT && (cursor_y + j) < FB_HEIGHT; ++j)
-		{
-			for (int i = 0; i < draw_width && (cursor_x + i) < FB_WIDTH; ++i)
-			{
-				int pixel_index = j * sheet_width + i + glyph_col * ASCII_TILESET_GLYPH_WIDTH + glyph_row * sheet_width * ASCII_TILESET_GLYPH_HEIGHT;
-				int bit_index = pixel_index * ASCII_TILESET_BITDEPTH;
-
-				int byte_index = bit_index / 8;
-				int bit_shift = 8 - ASCII_TILESET_BITDEPTH - (bit_index % 8);
-
-				uint8_t byte = ascii_tileset[byte_index];
-				uint8_t index = (byte >> bit_shift) & mask;
-
-				if (index == 0)
-					continue;
-
-				uint8_t r = ascii_tileset_palette[index * 3 + 0];
-				uint8_t g = ascii_tileset_palette[index * 3 + 1];
-				uint8_t b = ascii_tileset_palette[index * 3 + 2];
-
-				uint32_t glyph_color = (0xFF << 24) | (r << 16) | (g << 8) | b;
-				framebuffer_ui[(cursor_y + j) * FB_WIDTH + (cursor_x + i)] = color;
-			}
-		}
-
-		cursor_x += draw_width + ASCII_TILESET_SPACING;
-	}
-}
-
-void render_draw_rect(int x, int y, int width, int height, uint32_t color)
-{
-	if (x < 0) { width += x; x = 0; }
-	if (y < 0) { height += y; y = 0; }
-	if (x + width > FB_WIDTH) width = FB_WIDTH - x;
-	if (y + height > FB_HEIGHT) height = FB_HEIGHT - y;
-	if (width <= 0 || height <= 0) return;
-
-	for (int j = 0; j < height; ++j)
-	{
-		uint32_t* row = &framebuffer_ui[(y + j) * FB_WIDTH + x];
-
-		for (int i = 0; i < width; ++i)
-		{
-			row[i] = color;
-		}
 	}
 }
 

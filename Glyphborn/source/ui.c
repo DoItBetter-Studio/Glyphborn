@@ -1,223 +1,282 @@
 #include "ui.h"
-#include <stdlib.h>
-#include <string.h>
+#include "font/ascii_tileset.h"
 
-void ui_init(UISystem* ui)
+UIContext g_ui = { 0 };
+
+
+void ui_draw_image(int x, int y, int width, int height, int depth, const unsigned char* image_data, const unsigned char* palette)
 {
-	ui->count = 0;
-	ui->focused_element = -1;
-	ui->input_locked = false;
-	memset(ui->elements, 0, sizeof(ui->elements));
-}
+	int pixels_per_byte = 8 / depth;
+	int mask = (1 << depth) - 1;
 
-void ui_add_element(UISystem* ui, UIElement* element)
-{
-	if (ui->count >= MAX_UI_ELEMENTS) return;
-	ui->elements[ui->count++] = element;
-}
+	int total_pixels = width * height;
+	int data_index = 0;
 
-void ui_handle_navigation(UISystem* ui, int nav_dx, int nav_dy, bool activate)
-{
-	if (ui->count == 0) return;
-
-	int focusable_indices[MAX_UI_ELEMENTS];
-	int focusable_count = 0;
-	for (int i = 0; i < ui->count; ++i)
+	for (int j = 0; j < height && (y + j) < FB_HEIGHT; ++j)
 	{
-		UIElement* element = ui->elements[i];
-		if (element-> visible && element->type == UI_BUTTON)
+		for (int i = 0; i < width && (x + i) < FB_WIDTH; ++i)
 		{
-			focusable_indices[focusable_count++] = i;
+			if (data_index >= total_pixels)
+				break;
+
+			int pixel_byte_index = (data_index * depth) / 8;
+			int bit_shift = 8 - depth - ((data_index * depth) % 8);
+
+			uint8_t byte = image_data[pixel_byte_index];
+			uint8_t index = (byte >> bit_shift) & mask;
+
+			if (index != 0)
+			{
+				// Each palette color is stored as 3 bytes: R, G, B
+				uint8_t r = palette[index * 3 + 0];
+				uint8_t g = palette[index * 3 + 1];
+				uint8_t b = palette[index * 3 + 2];
+
+				uint32_t color = (0xFF << 24) | (r << 16) | (g << 8) | b;
+				framebuffer_ui[(y + j) * FB_WIDTH + (x + i)] = color;
+			}
+
+			data_index++;
 		}
 	}
+}
 
-	if (focusable_count == 0) return;
+void ui_draw_text(int x, int y, const char* text)
+{
+	ui_draw_text_colored(x, y, text, 0xFF000000);
+}
 
-	int current_focus = 0;
-	for (int i = 0; i < focusable_count; ++i)
+void ui_draw_text_colored(int x, int y, const char* text, uint32_t color)
+{
+	int cursor_x = x;
+	int cursor_y = y;
+
+	while (*text)
 	{
-		if (ui->focused_element == focusable_indices[i])
+		char c = *text++;
+
+		if (c == '\n')
 		{
-			current_focus = i;
-			break;
+			cursor_x = x;
+			cursor_y += ASCII_TILESET_GLYPH_HEIGHT;
+			continue;
+		}
+
+		int glyph_index = (unsigned char)c;
+		int glyph_col = glyph_index % ASCII_TILESET_SHEET_COLUMNS;
+		int glyph_row = glyph_index / ASCII_TILESET_SHEET_COLUMNS;
+
+		const int sheet_width = ASCII_TILESET_SHEET_COLUMNS * ASCII_TILESET_GLYPH_WIDTH;
+		const int pixels_per_byte = 8 / ASCII_TILESET_BITDEPTH;
+		const int mask = (1 << ASCII_TILESET_BITDEPTH) - 1;
+
+		int total_pixels = ASCII_TILESET_GLYPH_WIDTH * ASCII_TILESET_GLYPH_HEIGHT;
+		int bit_offset = (glyph_row * ASCII_TILESET_GLYPH_HEIGHT * sheet_width + glyph_col * ASCII_TILESET_GLYPH_WIDTH) * ASCII_TILESET_BITDEPTH;
+
+		int draw_width = ascii_tileset_widths[(unsigned char)c];
+
+		for (int j = 0; j < ASCII_TILESET_GLYPH_HEIGHT && (cursor_y + j) < FB_HEIGHT; ++j)
+		{
+			for (int i = 0; i < draw_width && (cursor_x + i) < FB_WIDTH; ++i)
+			{
+				int pixel_index = j * sheet_width + i + glyph_col * ASCII_TILESET_GLYPH_WIDTH + glyph_row * sheet_width * ASCII_TILESET_GLYPH_HEIGHT;
+				int bit_index = pixel_index * ASCII_TILESET_BITDEPTH;
+
+				int byte_index = bit_index / 8;
+				int bit_shift = 8 - ASCII_TILESET_BITDEPTH - (bit_index % 8);
+
+				uint8_t byte = ascii_tileset[byte_index];
+				uint8_t index = (byte >> bit_shift) & mask;
+
+				if (index == 0)
+					continue;
+
+				uint8_t r = ascii_tileset_palette[index * 3 + 0];
+				uint8_t g = ascii_tileset_palette[index * 3 + 1];
+				uint8_t b = ascii_tileset_palette[index * 3 + 2];
+
+				uint32_t glyph_color = (0xFF << 24) | (r << 16) | (g << 8) | b;
+				framebuffer_ui[(cursor_y + j) * FB_WIDTH + (cursor_x + i)] = color;
+			}
+		}
+
+		cursor_x += draw_width + ASCII_TILESET_SPACING;
+	}
+}
+
+int ui_text_width(const char* text)
+{
+	int label_width = 0;
+	for (const char* c = text; *c; ++c)
+		label_width += ascii_tileset_widths[(unsigned char)*c] + ASCII_TILESET_SPACING;
+
+	return label_width;
+}
+
+int ui_text_height(const char* text, int max_width)
+{
+	int line_width = 0;
+	int total_height = ASCII_TILESET_GLYPH_HEIGHT;
+
+	for (const char* c = text; *c; ++c)
+	{
+		if (*c == '\n')
+		{
+			line_width = 0;
+			total_height += ASCII_TILESET_GLYPH_HEIGHT;
+			continue;
+		}
+
+		int glyph_width = ascii_tileset_widths[(unsigned char)*c] + ASCII_TILESET_SPACING;
+
+		if (line_width + glyph_width > max_width)
+		{
+			line_width = 0;
+			total_height += ASCII_TILESET_GLYPH_HEIGHT;
+		}
+
+		line_width += glyph_width;
+	}
+
+	return total_height;
+}
+
+static void blit_tiled_region(int dst_x, int dst_y, int dst_w, int dst_h, int src_x, int src_y, int src_w, int src_h, const char* pixels, const char* palette, int image_w, int image_h, int depth)
+{
+	int pixels_per_byte = 8 / depth;
+	int mask = (1 << depth) - 1;
+
+	for (int dy = 0; dy < dst_h; ++dy) {
+		for (int dx = 0; dx < dst_w; ++dx) {
+			// Tile source coordinates
+			int tx = dx % src_w;
+			int ty = dy % src_h;
+			int src_px_x = src_x + tx;
+			int src_px_y = src_y + ty;
+
+			// Bounds check
+			if (src_px_x >= image_w || src_px_y >= image_h)
+				continue;
+
+			int pixel_index = src_px_y * image_w + src_px_x;
+			int byte_index = (pixel_index * depth) / 8;
+			int bit_shift = 8 - depth - ((pixel_index * depth) % 8);
+
+			uint8_t byte = pixels[byte_index];
+			uint8_t index = (byte >> bit_shift) & mask;
+
+			if (index == 0)
+				continue;
+
+			uint8_t r = palette[index * 3 + 0];
+			uint8_t g = palette[index * 3 + 1];
+			uint8_t b = palette[index * 3 + 2];
+			uint32_t color = (0xFF << 24) | (r << 16) | (g << 8) | b;
+
+			int dst_px_x = dst_x + dx;
+			int dst_px_y = dst_y + dy;
+
+			if (dst_px_x < 0 || dst_px_x >= FB_WIDTH || dst_px_y < 0 || dst_px_y >= FB_HEIGHT)
+				continue;
+
+			framebuffer_ui[dst_px_y * FB_WIDTH + dst_px_x] = color;
 		}
 	}
-
-	if (nav_dy != 0)
-	{
-		int old_focus_index = focusable_indices[current_focus];
-		UIButton* old_btn = (UIButton*)ui->elements[old_focus_index]->user_data;
-		if (old_btn) old_btn->focused = false; // Unfocus old button
-
-		current_focus += nav_dy;
-		if (current_focus < 0) current_focus = 0;
-		if (current_focus >= focusable_count) current_focus = focusable_count - 1;
-
-		ui->focused_element = focusable_indices[current_focus];
-	}
-
-	UIElement* focused_element = ui->elements[ui->focused_element];
-	if (!focused_element || !focused_element->user_data) return;
-
-	UIButton* focused_button = (UIButton*)focused_element->user_data;
-	if (focused_button) focused_button->focused = true; // Focus new button
-
-	if (activate && focused_button && focused_button->on_click)
-	{
-		focused_button->pressed = true; // Set pressed state
-		focused_button->on_click(focused_button);
-	}
 }
 
-void ui_update(UISystem* ui, float delta_time, int mouse_x, int mouse_y, bool mouse_pressed, int nav_dx, int nav_dy, bool activate)
+void ui_draw_nineslice(int dst_x, int dst_y, int dst_w, int dst_h, const char* pixels, const char* palette, int depth, int src_w, int src_h, int slice_left, int slice_top, int slice_right, int slice_bottom)
 {
-	ui_handle_navigation(ui, nav_dx, nav_dy, activate); // No navigation input by default
+	int center_src_w = src_w - slice_left - slice_right;
+	int center_src_h = src_h - slice_top - slice_bottom;
 
-	for (int i = 0; i < ui->count; ++i)
+	int center_dst_w = dst_w - slice_left - slice_right;
+	int center_dst_h = dst_h - slice_top - slice_bottom;
+
+	// Corners
+	blit_tiled_region(dst_x, dst_y, slice_left, slice_top, 0, 0, slice_left, slice_top, pixels, palette, src_w, src_h, depth); // top-left
+	blit_tiled_region(dst_x + dst_w - slice_right, dst_y, slice_right, slice_top, src_w - slice_right, 0, slice_right, slice_top, pixels, palette, src_w, src_h, depth); // top-right
+	blit_tiled_region(dst_x, dst_y + dst_h - slice_bottom, slice_left, slice_bottom, 0, src_h - slice_bottom, slice_left, slice_bottom, pixels, palette, src_w, src_h, depth); // bottom-left
+	blit_tiled_region(dst_x + dst_w - slice_right, dst_y + dst_h - slice_bottom, slice_right, slice_bottom, src_w - slice_right, src_h - slice_bottom, slice_right, slice_bottom, pixels, palette, src_w, src_h, depth); // bottom-right
+
+	// Edges
+	blit_tiled_region(dst_x + slice_left, dst_y, center_dst_w, slice_top, slice_left, 0, center_src_w, slice_top, pixels, palette, src_w, src_h, depth); // top
+	blit_tiled_region(dst_x + slice_left, dst_y + dst_h - slice_bottom, center_dst_w, slice_bottom, slice_left, src_h - slice_bottom, center_src_w, slice_bottom, pixels, palette, src_w, src_h, depth); // bottom
+	blit_tiled_region(dst_x, dst_y + slice_top, slice_left, center_dst_h, 0, slice_top, slice_left, center_src_h, pixels, palette, src_w, src_h, depth); // left
+	blit_tiled_region(dst_x + dst_w - slice_right, dst_y + slice_top, slice_right, center_dst_h, src_w - slice_right, slice_top, slice_right, center_src_h, pixels, palette, src_w, src_h, depth); // right
+
+	// Center
+	blit_tiled_region(dst_x + slice_left, dst_y + slice_top, center_dst_w, center_dst_h, slice_left, slice_top, center_src_w, center_src_h, pixels, palette, src_w, src_h, depth);
+}
+
+static int ui_gen_id(void)
+{
+	return g_ui.next_id++;
+}
+
+void ui_begin_frame(int mouse_x, int mouse_y, bool mouse_down, bool nav_activate)
+{
+	g_ui.mouse_x = mouse_x;
+	g_ui.mouse_y = mouse_y;
+	g_ui.mouse_down = mouse_down;
+	g_ui.nav_activate = nav_activate;
+	g_ui.hot_item = 0;
+	g_ui.next_id = 1;
+
+	if (g_ui.focused_id == 0)
 	{
-		UIElement* element = ui->elements[i];
-		if (!element->visible) continue;
-
-		if (element->update_func)
-			element->update_func(element, delta_time);
-		
-		bool ignore_mouse = false;
-		if (element->type == UI_BUTTON && ((UIButton*)element->user_data)->focused)
-			ignore_mouse = true; // Ignore mouse input for focused button to prevent conflicts
-
-		if (element->handle_input_func)
-			element->handle_input_func(element, mouse_x, mouse_y, mouse_pressed);
+		g_ui.focused_id = 1; // Start with the first item focused
 	}
 }
 
-void ui_render(UISystem* ui)
+void ui_end_frame(void)
 {
-	for (int i = 0; i < ui->count; ++i)
+	if (!g_ui.mouse_down)
 	{
-		UIElement* element = ui->elements[i];
-		if (!element->visible) continue;
-		if (element->render_func)
-			element->render_func(element);
+		g_ui.active_item = 0;
 	}
 }
 
-void ui_clear(UISystem* ui)
+bool ui_button(int x, int y, int width, int height, const char* label, uint32_t bg_color, uint32_t text_color)
 {
-	for (int i = 0; i < ui->count; ++i)
+	int id = ui_gen_id();
+
+	bool inside = (g_ui.mouse_x >= x && g_ui.mouse_x < x + width &&
+		g_ui.mouse_y >= y && g_ui.mouse_y < y + height);
+
+	if (inside) g_ui.hot_item = id;
+
+	if (inside && g_ui.mouse_down && g_ui.active_item == 0)
 	{
-		free(ui->elements[i]);
+		g_ui.active_item = id;
+		g_ui.nav_mode = false; // Disable nav mode when clicking a button
 	}
-	ui->count = 0;
-}
 
-// -------------------- Button Element --------------------
-static void button_render(UIElement* element)
-{
-	UIButton* btn = (UIButton*)element->user_data;
+	bool focused = (g_ui.nav_mode && g_ui.focused_id == id);
 
-	uint32_t color = btn->bg_color;
-	if (btn->focused)
-		color = 0xFFAAAAAA; // Yellow for focused
-
-	render_draw_rect(element->x, element->y, element->width, element->height, color);
-	int text_x = element->x + 4;
-	int text_y = element->y + 4;
-	render_draw_text_colored(text_x, text_y, btn->text, btn->fg_color);
-}
-
-static void button_update(UIElement* element, float delta_time)
-{
-}
-
-static void button_input(UIElement* element, int mouse_x, int mouse_y, bool mouse_down)
-{
-	UIButton* btn = (UIButton*)element->user_data;
-	bool inside = mouse_x >= element->x && mouse_x < element->x + element->width &&
-		mouse_y >= element->y && mouse_y < element->y + element->height;
-	if (inside && mouse_down)
+	if ((inside && g_ui.mouse_down && g_ui.active_item == 0) ||
+		(focused && g_ui.nav_activate))
 	{
-		btn->pressed = true;
-		if (btn->on_click)
-			btn->on_click(btn);
+		g_ui.active_item = id;
 	}
-	else
+
+	bool clicked = false;
+
+	if ((!g_ui.mouse_down && g_ui.active_item == id && inside) ||
+		(focused && g_ui.nav_activate))
 	{
-		btn->pressed = false;
+		clicked = true;
 	}
-}
 
-UIElement* ui_create_button(int x, int y, int width, int height, const char* text, uint32_t bg_color, uint32_t fg_color, void (*on_click)(void* user_data))
-{
-	UIElement* element = malloc(sizeof(UIElement));
-	UIButton* button = malloc(sizeof(UIButton));
-	button->text = text;
-	button->bg_color = bg_color;
-	button->fg_color = fg_color;
-	button->pressed = false;
-	button->on_click = on_click;
+	bool is_hot = (g_ui.hot_item == id) || focused;
+	bool is_pressed = (g_ui.active_item == id && inside);
 
-	element->type = UI_BUTTON;
-	element->x = x;
-	element->y = y;
-	element->width = width;
-	element->height = height;
-	element->visible = true;
-	element->render_func = button_render;
-	element->update_func = button_update;
-	element->handle_input_func = button_input;
-	element->user_data = button;
-	return element;
-}
+	int text_x = ui_text_width(label);
+	int text_y = ui_text_height(label, width - 32);
 
-// -------------------- Label Element --------------------
-static void label_render(UIElement* element)
-{
-	UILabel* label = (UILabel*)element->user_data;
-	render_draw_text_colored(element->x, element->y, label->text, label->color);
-}
+	UISkin* skin = ui_get_skin();
 
-UIElement* ui_create_label(int x, int y, const char* text, uint32_t color)
-{
-	UIElement* element = malloc(sizeof(UIElement));
-	UILabel* label = malloc(sizeof(UILabel));
-	label->text = text;
-	label->color = color;
+	ui_draw_nineslice(x, y, width, height, skin->panel.pixels, skin->active_palette, skin->panel.depth, skin->panel.width, skin->panel.height, 16, 16, 16, 16);
+	ui_draw_text_colored(text_x, text_y + 8, label, text_color);
 
-	element->type = UI_LABEL;
-	element->x = x;
-	element->y = y;
-	element->width = 0; // Width is not used for labels
-	element->height = 0; // Height is not used for labels
-	element->visible = true;
-	element->render_func = label_render;
-	element->update_func = NULL; // Labels do not need updates
-	element->handle_input_func = NULL; // Labels do not handle input
-	element->user_data = label;
-	return element;
-}
-
-// -------------------- Panel Element --------------------
-static void panel_render(UIElement* element)
-{
-	UIPanel* panel = (UIPanel*)element->user_data;
-	render_draw_rect(element->x, element->y, element->width, element->height, panel->bg_color);
-}
-
-UIElement* ui_create_panel(int x, int y, int width, int height, uint32_t bg_color)
-{
-	UIElement* element = malloc(sizeof(UIElement));
-	UIPanel* panel = malloc(sizeof(UIPanel));
-	panel->bg_color = bg_color;
-
-	element->type = UI_PANEL;
-	element->x = x;
-	element->y = y;
-	element->width = width;
-	element->height = height;
-	element->visible = true;
-	element->render_func = panel_render;
-	element->update_func = NULL; // Panels do not need updates
-	element->handle_input_func = NULL; // Panels do not handle input
-	element->user_data = panel;
-	return element;
+	return clicked;
 }
