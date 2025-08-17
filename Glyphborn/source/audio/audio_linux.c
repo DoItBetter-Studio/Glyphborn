@@ -16,13 +16,13 @@ typedef struct
 	int buffer_index;
 
 	// Currently playing (could be bgm, jingle, or sfx)
-	const signed char* playing_sample;
+	const unsigned char* playing_sample;
 	int sample_length;
 	int sample_position;
 	bool is_playing;
 
 	// Only used for channel 0 (music): saved state to resume after an interrupt/jingle
-	const signed char* saved_sample;
+	const unsigned char* saved_sample;
 	int saved_length;
 	int saved_position;
 	bool interrupted;
@@ -128,8 +128,7 @@ void audio_update(void)
 		if (!channel->is_playing)
 		{
 			int16_t* buffer = channel->buffers[channel->buffer_index];
-			for (int sample = 0; sample < BUFFER_SAMPLES; ++sample)
-				buffer[sample] = 0;
+			fill_buffer(channel, buffer, BUFFER_SAMPLES);
 
 			snd_pcm_sframes_t wrote = snd_pcm_writei(channel->handle, buffer, BUFFER_SAMPLES);
 			if (wrote < 0)
@@ -155,7 +154,7 @@ void audio_shutdown(void)
 	}
 }
 
-static void audio_play_sample_channel(int channelIndex, const signed char* sample_data, int length)
+static void audio_play_sample_channel(int channelIndex, const unsigned char* sample_data, int length)
 {
 	if (channelIndex < 0 || channelIndex >= NUM_CHANNELS) return;
 
@@ -169,7 +168,7 @@ static void audio_play_sample_channel(int channelIndex, const signed char* sampl
 	channel->buffer_index = 0;
 }
 
-void audio_play_music(const signed char* music_data, int length, bool interrupt)
+void audio_play_music(const unsigned char* music_data, int length, bool interrupt)
 {
 	AudioChannel* bgm = &audio_channels[0];
 
@@ -191,7 +190,7 @@ void audio_play_music(const signed char* music_data, int length, bool interrupt)
 	audio_play_sample_channel(0, music_data, length);
 }
 
-void audio_play_sound(const signed char* sound_data, int length)
+void audio_play_sound(const unsigned char* sound_data, int length)
 {
 	audio_play_sample_channel(0, sound_data, length);
 }

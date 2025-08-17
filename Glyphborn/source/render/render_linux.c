@@ -36,6 +36,8 @@ void render_init(void* platform_context)
 		24, ZPixmap, 0, (char*)framebuffer,
 		FB_WIDTH, FB_HEIGHT, 32, 0
 	);
+
+	ximage->f.destroy_image = NULL;
 }
 
 uint32_t* render_get_framebuffer(void)
@@ -148,7 +150,8 @@ void render_shutdown(void)
 {
 	if (ximage)
 	{
-		XDestroyImage(ximage);
+		ximage->data = NULL;
+		free(ximage);
 		ximage = NULL;
 	}
 }

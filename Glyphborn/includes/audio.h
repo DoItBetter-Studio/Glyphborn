@@ -13,7 +13,7 @@ void audio_init(void);
 void audio_update(void);
 void audio_shutdown(void);
 
-void audio_play_music(const signed char* music_data, int length, bool interrupt);
-void audio_play_sound(const signed char* sound_data, int length);
+void audio_play_music(const unsigned char* music_data, int length, bool interrupt);
+void audio_play_sound(const unsigned char* sound_data, int length);
 
 #endif // !AUDIO_H

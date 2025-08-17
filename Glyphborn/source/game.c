@@ -14,20 +14,15 @@ Mat4 projection;
 
 static void draw_test_pattern_ui(void)
 {
-	for (int y = 200; y < FB_HEIGHT-16; ++y)
+	for (int y = 200; y < FB_HEIGHT - 16; ++y)
 	{
-		for (int x = 16; x < FB_WIDTH-16; ++x)
+		for (int x = 16; x < FB_WIDTH - 16; ++x)
 		{
 			bool is_light = ((x / 16) + (y / 16)) % 2 == 0;
 			uint32_t color = is_light ? 0x88FFFFFF : 0x88000000; // semi-transparent white/black
 			framebuffer_ui[y * FB_WIDTH + x] = color;
 		}
 	}
-}
-
-static void on_click_jump(void* data)
-{
-	audio_play_sound(player_jump, PLAYER_JUMP_LEN);
 }
 
 void game_init(void)
@@ -96,7 +91,7 @@ void game_render_ui(void)
 		if (g_ui.focused_id < 1) g_ui.focused_id = 1;
 	}
 
-	if (ui_button(16, 16, 100, 30, "Jump", 0xFF888888, 0xFFFFFFFF))
+	if (ui_button(16, 16, 100, 30, "Jump", 0xFFFFFFFF))
 	{
 		audio_play_sound(player_jump, PLAYER_JUMP_LEN);
 	}

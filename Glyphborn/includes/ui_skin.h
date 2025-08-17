@@ -11,7 +11,7 @@ typedef enum
 
 typedef struct Element
 {
-	const char* pixels;
+	const unsigned char* pixels;
 	int width;
 	int height;
 	int depth;
@@ -19,8 +19,8 @@ typedef struct Element
 
 typedef struct UISkin
 {
-	const char* active_palette;
-	const char* const* palettes;
+	const unsigned char* active_palette;
+	const unsigned char* const* palettes;
 	Element panel;
 } UISkin;
 

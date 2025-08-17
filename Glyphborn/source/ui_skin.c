@@ -3,12 +3,12 @@
 
 static const UISkin* g_current_skin;
 
-static const char* glyphborn_palettes[] = {
+static const unsigned char* glyphborn_palettes[] = {
 	glyphborn_windowskin0_palette_default,
 };
 
 static const UISkin g_skins[] = {
-	[SKIN_GLYPHBORN] = 
+	[SKIN_GLYPHBORN] =
 	{
 		.active_palette = glyphborn_windowskin0_palette_default,
 		.palettes = glyphborn_palettes,

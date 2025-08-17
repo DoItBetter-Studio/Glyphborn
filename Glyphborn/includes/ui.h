@@ -27,7 +27,7 @@ void ui_draw_text(int x, int y, const char* text);
 void ui_draw_text_colored(int x, int y, const char* text, uint32_t color);
 int ui_text_width(const char* text);
 int ui_text_height(const char* text, int max_width);
-void ui_draw_nineslice(int dst_x, int dst_y, int dst_w, int dst_h, const char* pixels, const char* palette, int depth, int src_w, int src_h, int slice_left, int slice_top, int slice_right, int slice_bottom);
+void ui_draw_nineslice(int dst_x, int dst_y, int dst_w, int dst_h, const unsigned char* pixels, unsigned const char* palette, int depth, int src_w, int src_h, int slice_left, int slice_top, int slice_right, int slice_bottom);
 
 // -------------------------------------
 // Frame lifecycle
@@ -38,6 +38,6 @@ void ui_end_frame(void);
 // -------------------------------------
 // Widgets
 // -------------------------------------
-bool ui_button(int x, int y, int width, int height, const char* label, uint32_t bg_color, uint32_t text_color);
+bool ui_button(int x, int y, int width, int height, const char* label, uint32_t text_color);
 
 #endif // !UI_H

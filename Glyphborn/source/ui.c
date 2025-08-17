@@ -6,7 +6,6 @@ UIContext g_ui = { 0 };
 
 void ui_draw_image(int x, int y, int width, int height, int depth, const unsigned char* image_data, const unsigned char* palette)
 {
-	int pixels_per_byte = 8 / depth;
 	int mask = (1 << depth) - 1;
 
 	int total_pixels = width * height;
@@ -67,11 +66,7 @@ void ui_draw_text_colored(int x, int y, const char* text, uint32_t color)
 		int glyph_row = glyph_index / ASCII_TILESET_SHEET_COLUMNS;
 
 		const int sheet_width = ASCII_TILESET_SHEET_COLUMNS * ASCII_TILESET_GLYPH_WIDTH;
-		const int pixels_per_byte = 8 / ASCII_TILESET_BITDEPTH;
 		const int mask = (1 << ASCII_TILESET_BITDEPTH) - 1;
-
-		int total_pixels = ASCII_TILESET_GLYPH_WIDTH * ASCII_TILESET_GLYPH_HEIGHT;
-		int bit_offset = (glyph_row * ASCII_TILESET_GLYPH_HEIGHT * sheet_width + glyph_col * ASCII_TILESET_GLYPH_WIDTH) * ASCII_TILESET_BITDEPTH;
 
 		int draw_width = ascii_tileset_widths[(unsigned char)c];
 
@@ -91,11 +86,6 @@ void ui_draw_text_colored(int x, int y, const char* text, uint32_t color)
 				if (index == 0)
 					continue;
 
-				uint8_t r = ascii_tileset_palette[index * 3 + 0];
-				uint8_t g = ascii_tileset_palette[index * 3 + 1];
-				uint8_t b = ascii_tileset_palette[index * 3 + 2];
-
-				uint32_t glyph_color = (0xFF << 24) | (r << 16) | (g << 8) | b;
 				framebuffer_ui[(cursor_y + j) * FB_WIDTH + (cursor_x + i)] = color;
 			}
 		}
@@ -141,9 +131,8 @@ int ui_text_height(const char* text, int max_width)
 	return total_height;
 }
 
-static void blit_tiled_region(int dst_x, int dst_y, int dst_w, int dst_h, int src_x, int src_y, int src_w, int src_h, const char* pixels, const char* palette, int image_w, int image_h, int depth)
+static void blit_tiled_region(int dst_x, int dst_y, int dst_w, int dst_h, int src_x, int src_y, int src_w, int src_h, const unsigned char* pixels, const unsigned char* palette, int image_w, int image_h, int depth)
 {
-	int pixels_per_byte = 8 / depth;
 	int mask = (1 << depth) - 1;
 
 	for (int dy = 0; dy < dst_h; ++dy) {
@@ -184,7 +173,7 @@ static void blit_tiled_region(int dst_x, int dst_y, int dst_w, int dst_h, int sr
 	}
 }
 
-void ui_draw_nineslice(int dst_x, int dst_y, int dst_w, int dst_h, const char* pixels, const char* palette, int depth, int src_w, int src_h, int slice_left, int slice_top, int slice_right, int slice_bottom)
+void ui_draw_nineslice(int dst_x, int dst_y, int dst_w, int dst_h, const unsigned char* pixels, const unsigned char* palette, int depth, int src_w, int src_h, int slice_left, int slice_top, int slice_right, int slice_bottom)
 {
 	int center_src_w = src_w - slice_left - slice_right;
 	int center_src_h = src_h - slice_top - slice_bottom;
@@ -236,7 +225,7 @@ void ui_end_frame(void)
 	}
 }
 
-bool ui_button(int x, int y, int width, int height, const char* label, uint32_t bg_color, uint32_t text_color)
+bool ui_button(int x, int y, int width, int height, const char* label, uint32_t text_color)
 {
 	int id = ui_gen_id();
 
