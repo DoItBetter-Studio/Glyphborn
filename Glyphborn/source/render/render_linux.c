@@ -14,7 +14,6 @@ typedef struct
 	GC gc;
 } X11Context;
 
-
 static Display* display = NULL;
 static Window window;
 static GC gc;

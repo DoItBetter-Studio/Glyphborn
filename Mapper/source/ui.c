@@ -3,6 +3,19 @@
 
 UIContext g_ui = { 0 };
 
+UIPanelLayout default_panels[] = {
+	{ PANEL_MENU,				DOCK_TOP,		0,		30,		true },
+	{ PANEL_ASSET_BROWSER,		DOCK_LEFT,		150,	0,		true },
+	{ PANEL_ASSET_BROWSER,		DOCK_LEFT,		150,	0,		true },
+	{ PANEL_PALETTE_INSPECTOR,	DOCK_RIGHT,		300,	0,		true },
+	{ PANEL_CONSOLE,			DOCK_BOTTOM,	0,		200,	true },
+	{ PANEL_MAP,				DOCK_CENTER,	0,		0,		true },
+};
+
+UIDockLayout mapper_layout = {
+	.panels = default_panels,
+	.panel_count = sizeof(default_panels) / sizeof(UIPanelLayout)
+};
 
 void ui_draw_image(int x, int y, int width, int height, int depth, const unsigned char* image_data, const unsigned char* palette)
 {
@@ -11,9 +24,9 @@ void ui_draw_image(int x, int y, int width, int height, int depth, const unsigne
 	int total_pixels = width * height;
 	int data_index = 0;
 
-	for (int j = 0; j < height && (y + j) < FB_HEIGHT; ++j)
+	for (int j = 0; j < height && (y + j) < fb_height; ++j)
 	{
-		for (int i = 0; i < width && (x + i) < FB_WIDTH; ++i)
+		for (int i = 0; i < width && (x + i) < fb_width; ++i)
 		{
 			if (data_index >= total_pixels)
 				break;
@@ -24,16 +37,14 @@ void ui_draw_image(int x, int y, int width, int height, int depth, const unsigne
 			uint8_t byte = image_data[pixel_byte_index];
 			uint8_t index = (byte >> bit_shift) & mask;
 
-			if (index != 0)
-			{
-				// Each palette color is stored as 3 bytes: R, G, B
-				uint8_t r = palette[index * 3 + 0];
-				uint8_t g = palette[index * 3 + 1];
-				uint8_t b = palette[index * 3 + 2];
+			// Each palette color is stored as 3 bytes: R, G, B
+			uint8_t r = palette[index * 4 + 0];
+			uint8_t g = palette[index * 4 + 1];
+			uint8_t b = palette[index * 4 + 2];
+			uint8_t a = palette[index * 4 + 3];
 
-				uint32_t color = (0xFF << 24) | (r << 16) | (g << 8) | b;
-				framebuffer_ui[(y + j) * FB_WIDTH + (x + i)] = color;
-			}
+			uint32_t color = (a << 24) | (r << 16) | (g << 8) | b;
+			framebuffer_ui[(y + j) * fb_width + (x + i)] = color;
 
 			data_index++;
 		}
@@ -70,9 +81,9 @@ void ui_draw_text_colored(int x, int y, const char* text, uint32_t color)
 
 		int draw_width = ascii_tileset_widths[(unsigned char)c];
 
-		for (int j = 0; j < ASCII_TILESET_GLYPH_HEIGHT && (cursor_y + j) < FB_HEIGHT; ++j)
+		for (int j = 0; j < ASCII_TILESET_GLYPH_HEIGHT && (cursor_y + j) < fb_height; ++j)
 		{
-			for (int i = 0; i < draw_width && (cursor_x + i) < FB_WIDTH; ++i)
+			for (int i = 0; i < draw_width && (cursor_x + i) < fb_width; ++i)
 			{
 				int pixel_index = j * sheet_width + i + glyph_col * ASCII_TILESET_GLYPH_WIDTH + glyph_row * sheet_width * ASCII_TILESET_GLYPH_HEIGHT;
 				int bit_index = pixel_index * ASCII_TILESET_BITDEPTH;
@@ -86,7 +97,7 @@ void ui_draw_text_colored(int x, int y, const char* text, uint32_t color)
 				if (index == 0)
 					continue;
 
-				framebuffer_ui[(cursor_y + j) * FB_WIDTH + (cursor_x + i)] = color;
+				framebuffer_ui[(cursor_y + j) * fb_width + (cursor_x + i)] = color;
 			}
 		}
 
@@ -154,21 +165,33 @@ static void blit_tiled_region(int dst_x, int dst_y, int dst_w, int dst_h, int sr
 			uint8_t byte = pixels[byte_index];
 			uint8_t index = (byte >> bit_shift) & mask;
 
-			if (index == 0)
-				continue;
-
-			uint8_t r = palette[index * 3 + 0];
-			uint8_t g = palette[index * 3 + 1];
-			uint8_t b = palette[index * 3 + 2];
-			uint32_t color = (0xFF << 24) | (r << 16) | (g << 8) | b;
+			uint8_t r = palette[index * 4 + 0];
+			uint8_t g = palette[index * 4 + 1];
+			uint8_t b = palette[index * 4 + 2];
+			uint8_t a = palette[index * 4 + 3];
 
 			int dst_px_x = dst_x + dx;
 			int dst_px_y = dst_y + dy;
 
-			if (dst_px_x < 0 || dst_px_x >= FB_WIDTH || dst_px_y < 0 || dst_px_y >= FB_HEIGHT)
+			if (dst_px_x < 0 || dst_px_x >= fb_width || dst_px_y < 0 || dst_px_y >= fb_height)
 				continue;
 
-			framebuffer_ui[dst_px_y * FB_WIDTH + dst_px_x] = color;
+			uint32_t dst = framebuffer_ui[dst_px_y * fb_width + dst_px_x];
+
+			uint8_t src_r = r, src_g = g, src_b = b, src_a = a;
+			uint8_t dst_r = (dst >> 16) & 0xFF;
+			uint8_t dst_g = (dst >> 8) & 0xFF;
+			uint8_t dst_b = dst & 0xFF;
+			uint8_t dst_a = (dst >> 24) & 0xFF;
+
+			float alpha = src_a / 255.0f;
+			uint8_t out_r = (uint8_t)(src_r * alpha + dst_r * (1.0f - alpha));
+			uint8_t out_g = (uint8_t)(src_g * alpha + dst_g * (1.0f - alpha));
+			uint8_t out_b = (uint8_t)(src_b * alpha + dst_b * (1.0f - alpha));
+			uint8_t out_a = 255; // Or blend alpha if you want
+
+			framebuffer_ui[dst_px_y * fb_width + dst_px_x] =
+				(out_a << 24) | (out_r << 16) | (out_g << 8) | out_b;
 		}
 	}
 }
@@ -225,12 +248,103 @@ void ui_end_frame(void)
 	}
 }
 
+void resolve_layout(const UIDockLayout* layout, int fb_width, int fb_height, UIPanelResolved* out_panels, int max_panels)
+{
+	int left = 0;
+	int right = fb_width;
+	int top = 0;
+	int bottom = fb_height;
+
+	int count = 0;
+	for (int i = 0; i < layout->panel_count && count < max_panels; ++i)
+	{
+		UIPanelLayout* p = &layout->panels[i];
+		if (!p->visible) continue;
+
+		Rect r = { 0 };
+		switch (p->zone)
+		{
+		case DOCK_LEFT:
+			r.x = left;
+			r.y = top;
+			r.width = p->width;
+			r.height = bottom - top;
+			left += p->width;
+			break;
+		case DOCK_RIGHT:
+			r.x = right - p->width;
+			r.y = top;
+			r.width = p->width;
+			r.height = bottom - top;
+			right -= p->width;
+			break;
+		case DOCK_TOP:
+			r.x = left;
+			r.y = top;
+			r.width = right - left;
+			r.height = p->height;
+			top += p->height;
+			break;
+		case DOCK_BOTTOM:
+			r.x = left;
+			r.y = bottom - p->height;
+			r.width = right - left;
+			r.height = p->height;
+			bottom -= p->height;
+			break;
+		case DOCK_CENTER:
+			r.x = left;
+			r.y = top;
+			r.width = right - left;
+			r.height = bottom - top;
+			break;
+		}
+
+		out_panels[count++] = (UIPanelResolved){
+			.type = p->type,
+			.rect = r,
+			.visible = true
+		};
+	}
+}
+
+bool ui_mouse_inside(int x, int y, int w, int h)
+{
+	return	g_ui.mouse_x >= x && g_ui.mouse_x < x + w &&
+		g_ui.mouse_y >= y && g_ui.mouse_y < y + h;
+}
+
+void ui_menu(int x, int y, int width, int height)
+{
+	const UISkin* skin = ui_get_skin();
+	ui_draw_nineslice(x, y, width, height, skin->menu_bar.pixels, skin->active_palette, skin->menu_bar.depth, skin->menu_bar.width, skin->menu_bar.height, 8, 8, 8, 8);
+}
+
+void ui_panel(const UIPanelResolved* panel)
+{
+	if (!panel) return;
+
+	const UISkin* skin = ui_get_skin();
+
+	ui_draw_nineslice(
+		panel->rect.x,
+		panel->rect.y,
+		panel->rect.width,
+		panel->rect.height,
+		skin->panel.pixels,
+		skin->active_palette,
+		skin->panel.depth,
+		skin->panel.width,
+		skin->panel.height,
+		8, 8, 8, 8
+	);
+}
+
 bool ui_button(int x, int y, int width, int height, const char* label, uint32_t text_color)
 {
 	int id = ui_gen_id();
 
-	bool inside = (g_ui.mouse_x >= x && g_ui.mouse_x < x + width &&
-		g_ui.mouse_y >= y && g_ui.mouse_y < y + height);
+	bool inside = ui_mouse_inside(x, y, width, height);
 
 	if (inside) g_ui.hot_item = id;
 
@@ -260,14 +374,16 @@ bool ui_button(int x, int y, int width, int height, const char* label, uint32_t 
 	bool is_pressed = (g_ui.active_item == id && inside);
 
 	int label_w = ui_text_width(label);
-	int label_h = ui_text_height(label, width - 32);
+	int label_h = ui_text_height(label, width);
 
 	int text_x = x + (width - label_w) / 2;
 	int text_y = y + (height - label_h) / 2;
 
 	const UISkin* skin = ui_get_skin();
 
-	ui_draw_nineslice(x, y, width, height, skin->panel.pixels, skin->active_palette, skin->panel.depth, skin->panel.width, skin->panel.height, 16, 16, 16, 16);
+	const unsigned char* color = is_pressed ? skin->button_pressed.pixels : is_hot ? skin->button_hover.pixels : skin->button_normal.pixels;
+
+	ui_draw_nineslice(x, y, width, height, color, skin->active_palette, skin->button_normal.depth, skin->button_normal.width, skin->button_normal.height, 8, 8, 8, 8);
 	ui_draw_text_colored(text_x, text_y, label, text_color);
 
 	return clicked;

@@ -2,9 +2,9 @@
 
 static void sketch_draw_pixel(int x, int y, uint32_t color)
 {
-	if (x >= 0 && x < FB_WIDTH && y >= 0 && y < FB_HEIGHT)
+	if (x >= 0 && x < fb_width && y >= 0 && y < fb_height)
 	{
-		framebuffer_game[y * FB_WIDTH + x] = color;
+		framebuffer_mapview[y * fb_width + x] = color;
 	}
 }
 
@@ -38,8 +38,8 @@ void sketch_draw_wireframe(RenderMesh* mesh, Mat4 model, Mat4 view, Mat4 project
 		v.x /= v.w;
 		v.y /= v.w;
 
-		projected[i].x = (v.x + 1.0f) * 0.5f * FB_WIDTH;
-		projected[i].y = (1.0f - (v.y + 1.0f) * 0.5f) * FB_HEIGHT; // Invert Y for top-down
+		projected[i].x = (v.x + 1.0f) * 0.5f * fb_width;
+		projected[i].y = (1.0f - (v.y + 1.0f) * 0.5f) * fb_height; // Invert Y for top-down
 	}
 
 	for (int i = 0; i < mesh->edge_count; i++)
