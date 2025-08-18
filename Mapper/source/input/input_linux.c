@@ -1,6 +1,6 @@
 #ifdef __linux__
 #include "input.h"
-#include <X11/Xlib.h>
+#include "platform.h"
 #include <X11/keysym.h>
 #include <fcntl.h>
 #include <linux/joystick.h>
@@ -33,8 +33,9 @@ void input_init(void)
 {
 	memset(&input_state, 0, sizeof(InputState));
 
-	display = XOpenDisplay(NULL);
-	if (display) root_window = DefaultRootWindow(display);
+	// platform_context is expected to contain display + window
+	display = x11.display;
+	root_window = x11.window;
 
 	joystick_fd = open("/dev/input/js0", O_RDONLY | O_NONBLOCK);
 	if (joystick_fd < 0)
@@ -61,6 +62,23 @@ void input_update(void)
 			bool key_down = (keys[keycode / 8] & (1 << (keycode % 8))) != 0;
 
 			input_state.button_down[i] = key_down;
+		}
+
+		Window root_return, child_return;
+		int root_x, root_y, win_x, win_y;
+		unsigned int mask;
+
+		if (XQueryPointer(display, root_window,	&root_return, &child_return, &root_x, &root_y, &win_x, &win_y, &mask))
+		{
+			input_state.mouse_x = win_x;
+			input_state.mouse_y = win_y;
+
+			printf("Mouse X: %d - Mouse Y: %d\n", root_x, root_y);
+			printf("Window X: %d - Window Y: %d\n", win_x, win_y);
+
+			input_state.mouse_left = (mask & Button1Mask) != 0;
+			input_state.mouse_middle = (mask & Button2Mask) != 0;
+			input_state.mouse_right = (mask & Button3Mask) != 0;
 		}
 	}
 
@@ -95,4 +113,30 @@ bool input_button_up(InputKey key)
 {
 	return !input_state.button_down[key] && input_state.button_prev[key];
 }
+
+int input_get_mouse_x(void)
+{
+	return input_state.mouse_x;
+}
+
+int input_get_mouse_y(void)
+{
+	return input_state.mouse_y;
+}
+
+bool input_get_mouse_left(void)
+{
+	return input_state.mouse_left;
+}
+
+bool input_get_mouse_right(void)
+{
+	return input_state.mouse_right;
+}
+
+bool input_get_mouse_middle(void)
+{
+	return input_state.mouse_middle;
+}
+
 #endif

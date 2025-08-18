@@ -8,8 +8,8 @@ extern uint32_t* framebuffer;
 extern uint32_t* framebuffer_mapview;
 extern uint32_t* framebuffer_ui;
 
-int fb_width;
-int fb_height;
+extern int fb_width;
+extern int fb_height;
 
 void render_init(void* platform_context);
 uint32_t* render_get_framebuffer(void);

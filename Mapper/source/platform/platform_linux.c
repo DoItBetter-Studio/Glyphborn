@@ -1,27 +1,17 @@
 #ifdef __linux__
 
 #include "platform.h"
-#include <X11/Xlib.h>
-#include <X11/Xutil.h>
 #include <stdint.h>
 #include <unistd.h>
 #include <stdio.h>
 #include <time.h>
 #include <sys/types.h>
 
-typedef struct
-{
-	Display* display;
-	Window window;
-	GC gc;
-} X11Context;
-
-
 static bool running = false;
 static Display* display;
 static Window window;
 static GC gc;
-static X11Context x11;
+X11Context x11;
 static struct timespec last_time;
 static Atom wm_delete_window;
 
@@ -42,7 +32,7 @@ void platform_init(const PlatformWindowDesc* desc)
 		WhitePixel(display, screen));
 
 	XStoreName(display, window, desc->title);
-	XSelectInput(display, window, ExposureMask | KeyPress | KeyRelease | StructureNotifyMask);
+	XSelectInput(display, window, ExposureMask | KeyPressMask | KeyReleaseMask | ButtonPressMask | ButtonReleaseMask | PointerMotionMask | StructureNotifyMask);
 
 	wm_delete_window = XInternAtom(display, "WM_DELETE_WINDOW", False);
 	XSetWMProtocols(display, window, &wm_delete_window, 1);

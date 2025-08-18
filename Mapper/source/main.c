@@ -19,7 +19,7 @@ int main()
 
 	platform_init(&window);
 	render_init(platform_get_native_window());
-	audio_init();
+	//audio_init();
 	mapper_init();
 
 	while (platform_running())
@@ -31,7 +31,7 @@ int main()
 		render_clear(framebuffer_mapview, 0x00000000);
 
 		mapper_update(platform_frame_timing());
-		audio_update();
+		//audio_update();
 
 		mapper_render_ui();
 		mapper_render();
@@ -41,7 +41,7 @@ int main()
 	}
 
 	mapper_shutdown();
-	audio_shutdown();
+	//audio_shutdown();
 	render_shutdown();
 	platform_shutdown();
 	return 0;

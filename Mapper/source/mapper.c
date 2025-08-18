@@ -1,7 +1,6 @@
 #include "mapper.h"
-#include "input.h";
+#include "input.h"
 #include "ui.h"
-#include "windows.h"
 
 static void draw_test_pattern_ui(void)
 {

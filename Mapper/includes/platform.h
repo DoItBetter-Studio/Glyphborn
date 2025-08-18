@@ -7,6 +7,19 @@
 #define TARGET_FPS			30
 #define TARGET_FRAME_TIME	(1000 / TARGET_FPS)
 
+#ifdef __linux__
+#include <X11/Xlib.h>
+#include <X11/Xutil.h>
+typedef struct
+{
+	Display* display;
+	Window window;
+	GC gc;
+} X11Context;
+
+extern X11Context x11;
+#endif
+
 typedef struct
 {
 	int width;

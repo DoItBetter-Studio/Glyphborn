@@ -2,7 +2,7 @@
 CC = gcc
 CFLAGS = -Wall -Wextra -Iincludes -Iresources
 LDFLAGS = -lX11 -lXext -lXrandr -lXrender -lasound -lm
-TARGET = glyphborn
+TARGET = mapper
 
 # Detect platform
 UNAME_S := $(shell uname -s)
