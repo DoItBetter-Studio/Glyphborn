@@ -6,6 +6,9 @@
 #include <stdint.h>
 #pragma comment(lib, "winmm.lib")
 
+int fb_width;
+int fb_height;
+
 static bool running = false;
 static HWND hwnd;
 static uint64_t last_time = 0;
