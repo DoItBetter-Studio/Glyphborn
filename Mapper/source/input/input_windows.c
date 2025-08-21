@@ -5,19 +5,10 @@
 #include <Xinput.h>
 #pragma comment(lib, "Xinput.lib")
 
-static InputMapping button_mappings[BUTTON_COUNT] = {
-	[BUTTON_UP]				= { 'W', XINPUT_GAMEPAD_DPAD_UP },
-	[BUTTON_DOWN]			= { 'S', XINPUT_GAMEPAD_DPAD_DOWN },
-	[BUTTON_LEFT]			= { 'A', XINPUT_GAMEPAD_DPAD_LEFT },
-	[BUTTON_RIGHT]			= { 'D', XINPUT_GAMEPAD_DPAD_RIGHT },
-	[BUTTON_A]				= { 'Z', XINPUT_GAMEPAD_A },
-	[BUTTON_B]				= { 'X', XINPUT_GAMEPAD_B },
-	[BUTTON_X]				= { 'Q', XINPUT_GAMEPAD_X },
-	[BUTTON_Y]				= { 'E', XINPUT_GAMEPAD_Y },
-	[BUTTON_LEFT_BUMPER]	= { VK_SHIFT, XINPUT_GAMEPAD_LEFT_SHOULDER },
-	[BUTTON_RIGHT_BUMPER]	= { VK_CONTROL, XINPUT_GAMEPAD_RIGHT_SHOULDER },
-	[BUTTON_START]			= { VK_RETURN, XINPUT_GAMEPAD_START },
-	[BUTTON_SELECT]			= { VK_TAB, XINPUT_GAMEPAD_BACK },
+static InputMapping button_mappings[MOUSE_COUNT] = {
+	[MOUSE_LEFT]			= { VK_LBUTTON },
+	[MOUSE_MIDDLE]			= { VK_MBUTTON },
+	[MOUSE_RIGHT]			= { VK_RBUTTON },
 };
 
 static InputState input_state;
@@ -29,21 +20,8 @@ void input_init(void)
 
 void input_update(void)
 {
-	for (int i = 0; i < BUTTON_COUNT; ++i)
-		input_state.button_prev[i] = input_state.button_down[i];
-
-	XINPUT_STATE state;
-	DWORD result = XInputGetState(0, &state);
-	bool controller_connected = (result == ERROR_SUCCESS);
-
-	for (int i = 0; i < BUTTON_COUNT; i++)
-	{
-		const InputMapping* map = &button_mappings[i];
-		bool key_down = (GetAsyncKeyState(map->keyboard_key) & 0x8000) != 0;
-		bool pad_down = controller_connected && (state.Gamepad.wButtons & map->controller_button);
-
-		input_state.button_down[i] = key_down || pad_down;
-	}
+	for (int i = 0; i < MOUSE_COUNT; ++i)
+		input_state.mouse_prev[i] = input_state.mouse_down[i];
 
 	POINT pt;
 	GetCursorPos(&pt);
@@ -51,24 +29,9 @@ void input_update(void)
 	input_state.mouse_x = pt.x;
 	input_state.mouse_y = pt.y;
 
-	input_state.mouse_left = (GetAsyncKeyState(VK_LBUTTON) & 0x8000) != 0;
-	input_state.mouse_right = (GetAsyncKeyState(VK_RBUTTON) & 0x8000) != 0;
-	input_state.mouse_middle = (GetAsyncKeyState(VK_MBUTTON) & 0x8000) != 0;
-}
-
-bool input_get_button(InputKey key)
-{
-	return input_state.button_down[key];
-}
-
-bool input_button_down(InputKey key)
-{
-	return input_state.button_down[key] && !input_state.button_prev[key];
-}
-
-bool input_button_up(InputKey key)
-{
-	return !input_state.button_down[key] && input_state.button_prev[key];
+	input_state.mouse_down[0] = (GetAsyncKeyState(VK_LBUTTON) & 0x8000) != 0;
+	input_state.mouse_down[1] = (GetAsyncKeyState(VK_MBUTTON) & 0x8000) != 0;
+	input_state.mouse_down[2] = (GetAsyncKeyState(VK_RBUTTON) & 0x8000) != 0;
 }
 
 int input_get_mouse_x(void)
@@ -81,19 +44,19 @@ int input_get_mouse_y(void)
 	return input_state.mouse_y;
 }
 
-bool input_get_mouse_left(void)
+bool input_get_mouse(MouseButton button)
 {
-	return input_state.mouse_left;
+	return input_state.mouse_down[button];
 }
 
-bool input_get_mouse_right(void)
+bool input_get_mouse_down(MouseButton button)
 {
-	return input_state.mouse_right;
+	return input_state.mouse_down[button] && !input_state.mouse_prev[button];
 }
 
-bool input_get_mouse_middle(void)
+bool input_get_mouse_up(MouseButton button)
 {
-	return input_state.mouse_middle;
+	return !input_state.mouse_down[button] && input_state.mouse_prev[button];
 }
 
 #endif // _WIN32

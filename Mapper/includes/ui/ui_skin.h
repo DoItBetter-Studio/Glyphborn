@@ -20,7 +20,7 @@ typedef struct Element
 typedef enum
 {
 	PALETTE_DEFAULT,
-	PALETTE_TEST,
+	PALETTE_DARK,
 	PALETTE_COUNT
 } Palette;
 
@@ -28,10 +28,15 @@ typedef struct UISkin
 {
 	const unsigned char* active_palette;
 	const unsigned char* const* palettes;
-	Element menu_bar;
+	Element menu;
+	Element menu_button_normal;
+	Element menu_button_hover;
+	Element menu_button_pressed;
 	Element button_normal;
 	Element button_hover;
 	Element button_pressed;
+	Element button_checked_hover;
+	Element button_checked;
 	Element panel;
 } UISkin;
 

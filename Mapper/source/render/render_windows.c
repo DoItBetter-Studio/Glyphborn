@@ -5,20 +5,21 @@
 
 static BITMAPINFO bmi;
 static HDC hdcWindow;
+static HBITMAP hBitmap = NULL;
 
 uint32_t* framebuffer = NULL;
 uint32_t* framebuffer_mapview = NULL;
 uint32_t* framebuffer_ui = NULL;
+
+float* depthbuffer_mapview = NULL;
 
 static void render_resize(int width, int height)
 {
 	fb_width = width;
 	fb_height = height;
 
-	if (framebuffer_mapview) free(framebuffer_mapview);
 	if (framebuffer_ui) free(framebuffer_ui);
 
-	framebuffer_mapview = calloc(fb_width * fb_height, sizeof(uint32_t));
 	framebuffer_ui = calloc(fb_width * fb_height, sizeof(uint32_t));
 
 	ZeroMemory(&bmi, sizeof(BITMAPINFO));
@@ -29,15 +30,17 @@ static void render_resize(int width, int height)
 	bmi.bmiHeader.biBitCount = 32;
 	bmi.bmiHeader.biCompression = BI_RGB;
 
-	HBITMAP hBitmap = CreateDIBSection(hdcWindow, &bmi, DIB_RGB_COLORS, (void**)&framebuffer, NULL, 0);
+	if (hBitmap)
+	{
+		DeleteObject(hBitmap);
+		hBitmap = NULL;
+	}
+
+	hBitmap = CreateDIBSection(hdcWindow, &bmi, DIB_RGB_COLORS, (void**)&framebuffer, NULL, 0);
 	if (!hBitmap)
-	{
 		return;
-	}
-	else
-	{
-		SelectObject(hdcWindow, hBitmap);
-	}
+
+	SelectObject(hdcWindow, hBitmap);
 }
 
 void render_init(void* platform_context)
@@ -50,6 +53,7 @@ void render_init(void* platform_context)
 	int window_width = rect.right - rect.left;
 	int window_height = rect.bottom - rect.top;
 
+	framebuffer = calloc(window_width * window_height, sizeof(uint32_t));
 	render_resize(window_width, window_height);
 }
 
@@ -133,6 +137,12 @@ void render_present(void)
 
 void render_shutdown(void)
 {
+	if (hBitmap)
+	{
+		DeleteObject(hBitmap);
+		hBitmap = NULL;
+	}
+
 	if (hdcWindow)
 	{
 		ReleaseDC(WindowFromDC(hdcWindow), hdcWindow);

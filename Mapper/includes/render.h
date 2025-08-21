@@ -8,6 +8,8 @@ extern uint32_t* framebuffer;
 extern uint32_t* framebuffer_mapview;
 extern uint32_t* framebuffer_ui;
 
+extern float* depthbuffer_mapview;
+
 extern int fb_width;
 extern int fb_height;
 

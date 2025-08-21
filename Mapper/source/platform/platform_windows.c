@@ -39,7 +39,7 @@ void platform_init(const PlatformWindowDesc* desc)
 {
 	timeBeginPeriod(1);
 
-	LPCWSTR className = L"GameWindow";
+	LPCWSTR className = L"EditorWindow";
 
 	WNDCLASS wc = { 0 };
 	wc.lpfnWndProc = window_proc;

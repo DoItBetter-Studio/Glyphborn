@@ -66,16 +66,16 @@ void game_update(float delta_time)
 	view = camera_get_view_matrix(&main_camera);
 }
 
+RenderMesh cube_mesh = {
+	.vertices = cube_vertices,
+	.vertex_count = sizeof(cube_vertices) / sizeof(Vec3),
+	.edges = cube_edges,
+	.edge_count = sizeof(cube_edges) / (2 * sizeof(int))
+};
+
 void game_render(void)
 {
 	Mat4 model = mat4_identity();
-
-	RenderMesh cube_mesh = {
-		.vertices = cube_vertices,
-		.vertex_count = sizeof(cube_vertices) / sizeof(Vec3),
-		.edges = cube_edges,
-		.edge_count = sizeof(cube_edges) / (2 * sizeof(int))
-	};
 
 	sketch_draw_wireframe(&cube_mesh, model, view, projection, 0xFF000000);
 }

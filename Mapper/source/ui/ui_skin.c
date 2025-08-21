@@ -1,29 +1,47 @@
-#include "ui_skin.h"
+#include "ui/ui_skin.h"
 #include "images/ui/glyphborn_mapper_windowskin.h"
 
 static UISkin* g_current_skin;
 
 static const unsigned char* glyphborn_palettes[] = {
 	[PALETTE_DEFAULT]	= glyphborn_mapper_panel_palette_default,
-	[PALETTE_TEST]		= glyphborn_mapper_test_palette
+	[PALETTE_DARK]		= glyphborn_mapper_dark_palette
 };
 
 static UISkin g_skins[] = {
 	[SKIN_GLYPHBORN] =
 	{
-		.active_palette = glyphborn_mapper_test_palette,
+		.active_palette = glyphborn_mapper_dark_palette,
 		.palettes = glyphborn_palettes,
-		.menu_bar = {
+		.menu = {
 			.pixels = glyphborn_mapper_menu_bar_pixels,
 			.depth = GLYPHBORN_MAPPER_MENU_BAR_BITDEPTH,
 			.width = GLYPHBORN_MAPPER_MENU_BAR_WIDTH,
 			.height = GLYPHBORN_MAPPER_MENU_BAR_HEIGHT,
 		},
+		.menu_button_normal = {
+			.pixels = glyphborn_mapper_menu_button_pixels,
+			.depth = GLYPHBORN_MAPPER_MENU_BUTTON_BITDEPTH,
+			.width = GLYPHBORN_MAPPER_MENU_BUTTON_WIDTH,
+			.height = GLYPHBORN_MAPPER_MENU_BUTTON_HEIGHT,
+		},
+		.menu_button_hover = {
+			.pixels = glyphborn_mapper_menu_button_hover_pixels,
+			.depth = GLYPHBORN_MAPPER_MENU_BUTTON_HOVER_BITDEPTH,
+			.width = GLYPHBORN_MAPPER_MENU_BUTTON_HOVER_WIDTH,
+			.height = GLYPHBORN_MAPPER_MENU_BUTTON_HOVER_HEIGHT,
+		},
+		.menu_button_pressed = {
+			.pixels = glyphborn_mapper_menu_button_pressed_pixels,
+			.depth = GLYPHBORN_MAPPER_MENU_BUTTON_PRESSED_BITDEPTH,
+			.width = GLYPHBORN_MAPPER_MENU_BUTTON_PRESSED_WIDTH,
+			.height = GLYPHBORN_MAPPER_MENU_BUTTON_PRESSED_HEIGHT,
+		},
 		.button_normal = {
-			.pixels = glyphborn_mapper_button_normal_pixels,
-			.depth = GLYPHBORN_MAPPER_BUTTON_NORMAL_BITDEPTH,
-			.width = GLYPHBORN_MAPPER_BUTTON_NORMAL_WIDTH,
-			.height = GLYPHBORN_MAPPER_BUTTON_NORMAL_HEIGHT,
+			.pixels = glyphborn_mapper_button_pixels,
+			.depth = GLYPHBORN_MAPPER_BUTTON_BITDEPTH,
+			.width = GLYPHBORN_MAPPER_BUTTON_WIDTH,
+			.height = GLYPHBORN_MAPPER_BUTTON_HEIGHT,
 		},
 		.button_hover = {
 			.pixels = glyphborn_mapper_button_hover_pixels,
@@ -36,6 +54,18 @@ static UISkin g_skins[] = {
 			.depth = GLYPHBORN_MAPPER_BUTTON_PRESSED_BITDEPTH,
 			.width = GLYPHBORN_MAPPER_BUTTON_PRESSED_WIDTH,
 			.height = GLYPHBORN_MAPPER_BUTTON_PRESSED_HEIGHT,
+		},
+		.button_checked_hover = {
+			.pixels = glyphborn_mapper_button_checked_hover_pixels,
+			.depth = GLYPHBORN_MAPPER_BUTTON_CHECKED_BITDEPTH,
+			.width = GLYPHBORN_MAPPER_BUTTON_CHECKED_WIDTH,
+			.height = GLYPHBORN_MAPPER_BUTTON_CHECKED_HEIGHT,
+		},
+		.button_checked = {
+			.pixels = glyphborn_mapper_button_checked_pixels,
+			.depth = GLYPHBORN_MAPPER_BUTTON_CHECKED_BITDEPTH,
+			.width = GLYPHBORN_MAPPER_BUTTON_CHECKED_WIDTH,
+			.height = GLYPHBORN_MAPPER_BUTTON_CHECKED_HEIGHT,
 		},
 		.panel = {
 			.pixels = glyphborn_mapper_panel_pixels,

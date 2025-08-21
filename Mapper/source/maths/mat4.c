@@ -127,3 +127,19 @@ Mat4 mat4_look_at(Vec3 eye, Vec3 center, Vec3 up)
 
 	return result;
 }
+
+Mat4 orbit_camera(float radius, float yaw, float pitch)
+{
+	Mat4 transform = mat4_identity();
+
+	transform = mat4_multiply(transform, mat4_rotate_x(pitch));
+
+	transform = mat4_multiply(transform, mat4_rotate_y(yaw));
+
+	transform = mat4_multiply(transform, mat4_translate((Vec3) { 0.0f, 0.0f, -radius }));
+
+	Vec3 eye = { transform.m[3][0], transform.m[3][1], transform.m[3][2] };
+	Vec3 center = { 0.0f, 0.0f, 0.0f };
+	Vec3 up = { 0.0f, 1.0f, 0.0f };
+	return mat4_look_at(eye, center, up);
+}
