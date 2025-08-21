@@ -7,6 +7,7 @@
 #include "ui/ui_layout.h"
 #include "ui/ui_menu.h"
 #include <stdio.h>
+#include <stdlib.h>
 
 static void draw_test_pattern_ui(void)
 {
@@ -32,6 +33,8 @@ void mapper_init()
 
 void mapper_update(float delta_time)
 {
+	(void)delta_time;
+	
 	input_update();
 	ui_resolve_dock_layout(dock_root, (Rect) { 0, MENU_BAR_HEIGHT, fb_width, fb_height - MENU_BAR_HEIGHT });
 }

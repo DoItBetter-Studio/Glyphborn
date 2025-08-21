@@ -169,7 +169,6 @@ static void blit_tiled_region(int dst_x, int dst_y, int dst_w, int dst_h, int sr
 			uint8_t dst_r = (dst >> 16) & 0xFF;
 			uint8_t dst_g = (dst >> 8) & 0xFF;
 			uint8_t dst_b = dst & 0xFF;
-			uint8_t dst_a = (dst >> 24) & 0xFF;
 
 			float alpha = src_a / 255.0f;
 			uint8_t out_r = (uint8_t)(src_r * alpha + dst_r * (1.0f - alpha));

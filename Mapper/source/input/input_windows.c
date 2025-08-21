@@ -5,12 +5,6 @@
 #include <Xinput.h>
 #pragma comment(lib, "Xinput.lib")
 
-static InputMapping button_mappings[MOUSE_COUNT] = {
-	[MOUSE_LEFT]			= { VK_LBUTTON },
-	[MOUSE_MIDDLE]			= { VK_MBUTTON },
-	[MOUSE_RIGHT]			= { VK_RBUTTON },
-};
-
 static InputState input_state;
 
 void input_init(void)

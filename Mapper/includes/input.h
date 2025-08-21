@@ -19,7 +19,6 @@ typedef struct
 
 typedef struct
 {
-
 	int mouse_x;
 	int mouse_y;
 	bool mouse_down[MOUSE_COUNT];

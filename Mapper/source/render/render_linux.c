@@ -19,6 +19,7 @@ int fb_height;
 uint32_t* framebuffer = NULL;
 uint32_t* framebuffer_mapview = NULL;
 uint32_t* framebuffer_ui = NULL;
+float* depthbuffer_mapview = NULL;
 
 static void render_resize(int width, int height)
 {

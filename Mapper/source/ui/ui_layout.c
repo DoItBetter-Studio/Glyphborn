@@ -7,6 +7,7 @@
 #include "camera.h"
 #include "input.h"
 #include "test_tile.h"
+#include <stdio.h>
 
 UIDockNode* dock_root;
 
@@ -79,6 +80,9 @@ static void ui_map_panel(const UIPanelResolved* panel)
 {
 	int id = ui_gen_id();
 
+	bool hover, click;
+	ui_get_interaction(id, &hover, &click);
+
 	if (!panel)	return;
 
 	if (!once)
@@ -92,8 +96,6 @@ static void ui_map_panel(const UIPanelResolved* panel)
 
 	view = camera_get_view_matrix(&main_camera);
 	projection = mat4_perspective(3.14159f / 4.0f, (float)fb_mapview_width / (float)fb_mapview_height, 0.1f, 100.0f);
-
-	const UISkin* skin = ui_get_skin();
 
 	ui_panel(panel);
 
@@ -133,11 +135,15 @@ static void ui_map_panel(const UIPanelResolved* panel)
 			framebuffer_ui[y * fb_width + x] = framebuffer_mapview[local_y * fb_mapview_width + local_x];
 		}
 	}
+
+	if (!g_ui.mouse_consumed)
+	{
+		ui_set_interaction(id, hover, click);
+	}
 }
 
 static void ui_layers_panel(const UIPanelResolved* panel)
 {
-	int id = ui_gen_id();
 	if (!panel)	return;
 
 	ui_panel(panel);
@@ -147,7 +153,7 @@ static void ui_layers_panel(const UIPanelResolved* panel)
 	for (int i = 0; i < 8; ++i)
 	{
 		char buffer[100];
-		sprintf_s(buffer, sizeof(buffer), "Label %d", i + 1);
+		snprintf(buffer, sizeof(buffer), "Label %d", i + 1);
 		uint32_t color = g_ui.current_layer == i ? 0xFF00FF00 : 0xFFFFFFFF;
 		if (ui_button(rect.x + 8, rect.y + 8 + (i * (32 + 4)), rect.width - 16, 32, buffer, color))
 		{
@@ -162,7 +168,6 @@ UIScrollView assetView;
 
 static void ui_asset_panel(const UIPanelResolved* panel)
 {
-	int id = ui_gen_id();
 	if (!panel)	return;
 
 	ui_panel(panel);
@@ -171,7 +176,7 @@ static void ui_asset_panel(const UIPanelResolved* panel)
 
 	ui_begin_scroll(&assetView, rect.x + 8, rect.y + 36, rect.width - 16, 40);
 
-	for (int i = 0; i < sizeof(checked); ++i)
+	for (int i = 0; i < 32; ++i)
 		checked[i] = ui_checkbox(rect.x + 8, rect.y + 8 + (i * 32), 24, 24, "Test", &checked[i]);
 
 	ui_end_scroll(&assetView, rect.x + 8, rect.y + 36, rect.width - 16, 40);
@@ -247,12 +252,12 @@ void ui_draw_layout_node(UIDockNode* node)
 	{
 		if (node->split_type == SPLIT_VERTICAL)
 		{
-			int split_x = node->rect.x + (int)(node->rect.width * node->ratio);
+			//int split_x = node->rect.x + (int)(node->rect.width * node->ratio);
 			//draw_rect(split_x - 2, node->rect.y, 4, node->rect.height, 0xFF444444);
 		}
 		else
 		{
-			int split_y = node->rect.y + (int)(node->rect.height * node->ratio);
+			//int split_y = node->rect.y + (int)(node->rect.height * node->ratio);
 			//draw_rect(node->rect.x, split_y - 2, node->rect.width, 4, 0xFF444444);
 		}
 

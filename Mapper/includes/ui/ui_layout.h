@@ -84,7 +84,7 @@ extern int fb_mapview_width;
 extern int fb_mapview_height;
 
 void ui_init_default_layout(void);
-void ui_resolve_dock_layout(const UIDockNode* node, Rect parent);
+void ui_resolve_dock_layout(UIDockNode* node, Rect parent);
 void ui_draw_layout();
 
 #endif // !UI_LAYOUT_H

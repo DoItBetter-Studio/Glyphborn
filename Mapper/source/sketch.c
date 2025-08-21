@@ -6,9 +6,6 @@ extern int fb_mapview_height;
 extern uint32_t* framebuffer_mapview;
 extern float* depthbuffer_mapview;
 
-static Vec3* projected_buffer = NULL;
-static size_t projected_capacity = 0;
-
 static void sketch_draw_pixel(int x, int y, float z, uint32_t color)
 {
 	if (x < 0 || y < 0 || x >= fb_mapview_width || y >= fb_mapview_height)
@@ -52,7 +49,7 @@ void sketch_draw_wireframe(RenderMesh* mesh, Mat4 model, Mat4 view, Mat4 project
 	Vec3* projected = malloc(sizeof(Vec3) * mesh->vertex_count);
 	if (!projected) return;
 
-	for (int i = 0; i < mesh->vertex_count; i++)
+	for (uint32_t i = 0; i < mesh->vertex_count; i++)
 	{
 		Vec4 v = { mesh->vertices[i].x, mesh->vertices[i].y, mesh->vertices[i].z, 1.0f };
 		v = mat4_mul_vec4(model, v);
@@ -68,7 +65,7 @@ void sketch_draw_wireframe(RenderMesh* mesh, Mat4 model, Mat4 view, Mat4 project
 		projected[i].z = v.z;
 	}
 
-	for (int i = 0; i < mesh->index_count; i += 3)
+	for (uint32_t i = 0; i < mesh->index_count; i += 3)
 	{
 		int i0 = mesh->indices[i + 0];
 		int i1 = mesh->indices[i + 1];

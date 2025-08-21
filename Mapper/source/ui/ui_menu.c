@@ -5,6 +5,7 @@
 #include "ui/ui_core.h"
 #include "render.h"
 #include "input.h"
+#include "stddef.h"
 
 #define MENU_ITEM_HEIGHT	24
 #define SUB_MENU_WIDTH		196
@@ -62,7 +63,7 @@ static void ui_menu_draw_item(UIMenuItem* item, int x, int y, int width, int hei
 		ui_draw_text_colored(shortcut_x, shortcut_y, item->shortcut, 0xFF555555);
 	}
 
-	int text_x = x + item->shortcut ? SHORTCUT_WIDTH + 4 : 0;
+	int text_x = item->shortcut ? x + SHORTCUT_WIDTH + 4 : x + 4;
 	int label_width = width - SHORTCUT_WIDTH - 4;
 	int text_y = y + (height - ui_text_height(item->label, label_width)) / 2;
 	ui_draw_text_colored(text_x, text_y, item->label, 0xFF000000);
