@@ -3,6 +3,7 @@
 #include "ui/ui_render.h"
 #include "ui/ui_skin.h"
 
+#pragma region Basic UI
 void ui_label(int x, int y, const char* text, uint32_t color)
 {
 	ui_draw_text_colored(x, y, text, color);
@@ -108,3 +109,63 @@ bool ui_checkbox(int x, int y, int width, int height, const char* label, bool* v
 
 	return *value;
 }
+#pragma endregion
+
+#pragma region Scroll Views
+#pragma region Vertical Scroll
+void ui_begin_vertical_scroll(UIScrollView* view, int x, int y, int width, int height)
+{
+}
+
+void ui_end_vertical_scroll(UIScrollView* view, int x, int y, int width, int height)
+{
+}
+#pragma endregion
+
+#pragma region Vertical Scroll
+void ui_begin_horizontal_scroll(UIScrollView* view, int x, int y, int width, int height)
+{
+}
+
+void ui_end_horizontal_scroll(UIScrollView* view, int x, int y, int width, int height)
+{
+}
+#pragma endregion
+
+#pragma region Scroll
+void ui_begin_scroll(UIScrollView* view, int x, int y, int width, int height)
+{
+	ui_push_clip(x, y, width, height);
+	ui_translate(0, -view->offset_y);
+}
+
+void ui_end_scroll(UIScrollView* view, int x, int y, int width, int height)
+{
+	ui_pop_clip();
+
+	if (view->context_height > height)
+	{
+		float ratio = (float)height / view->context_height;
+		int handle_h = height * ratio;
+		int handle_y = y + (view->offset_y * ratio);
+
+		if (ui_button(x + width - 12, handle_y, 12, handle_h, "", 0))
+		{
+
+		}
+	}
+
+	if (view->context_width > width)
+	{
+		float ratio = (float)width / view->context_width;
+		int handle_w = width * ratio;
+		int handle_x = x + (view->offset_x * ratio);
+
+		if (ui_button(handle_x, y + height - 12, handle_w, 12, "", 0))
+		{
+
+		}
+	}
+}
+#pragma endregion
+#pragma endregion

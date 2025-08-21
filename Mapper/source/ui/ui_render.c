@@ -2,6 +2,9 @@
 #include "render.h"
 #include "font/ascii_tileset.h"
 
+static int clip_x, clip_y, clip_width, clip_height;
+static int transform_x, transform_y;
+
 void ui_draw_image(int x, int y, int width, int height, const unsigned char* image_data, const unsigned char* palette, int depth)
 {
 	int mask = (1 << depth) - 1;
@@ -202,4 +205,18 @@ void ui_draw_nineslice(int dst_x, int dst_y, int dst_w, int dst_h, const unsigne
 
 	// Center
 	blit_tiled_region(dst_x + slice_left, dst_y + slice_top, center_dst_w, center_dst_h, slice_left, slice_top, center_src_w, center_src_h, image_data, palette, src_w, src_h, depth);
+}
+
+void ui_set_clip(int x, int y, int width, int height)
+{
+	clip_x = x;
+	clip_y = y;
+	clip_width = width;
+	clip_height = height;
+}
+
+void ui_set_transform(int tx, int ty)
+{
+	transform_x = tx;
+	transform_y = ty;
 }

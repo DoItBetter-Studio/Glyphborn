@@ -3,6 +3,7 @@
 #include "render.h"
 #include "ui/ui_skin.h"
 #include "ui/ui_core.h"
+#include "ui/ui_render.h"
 #include "ui/ui_layout.h"
 #include "ui/ui_menu.h"
 #include <stdio.h>
