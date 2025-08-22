@@ -1,9 +1,17 @@
 #include "ui/ui_render.h"
+#include "ui/ui_core.h"
 #include "render.h"
 #include "font/ascii_tileset.h"
 
-static int clip_x, clip_y, clip_width, clip_height;
-static int transform_x, transform_y;
+static Rect g_clip = { 0, 0, 0, 0 };
+static int g_tx = 0;
+static int g_ty = 0;
+
+static inline bool in_clip(int x, int y, int width, int height)
+{
+	return !(x + width < g_clip.x || x > g_clip.x + g_clip.width ||
+		y + height < g_clip.y || y > g_clip.y + g_clip.height);
+}
 
 void ui_draw_image(int x, int y, int width, int height, const unsigned char* image_data, const unsigned char* palette, int depth)
 {
@@ -72,6 +80,14 @@ void ui_draw_text_colored(int x, int y, const char* text, uint32_t color)
 		{
 			for (int i = 0; i < draw_width && (cursor_x + i) < fb_width; ++i)
 			{
+				int dst_x = cursor_x + i + g_tx;
+				int dst_y = cursor_y + j + g_ty;
+
+				if (dst_x < g_clip.x || dst_y < g_clip.y ||
+					dst_x >= g_clip.x + g_clip.width ||
+					dst_y >= g_clip.y + g_clip.height)
+					continue;
+				
 				int pixel_index = j * sheet_width + i + glyph_col * ASCII_TILESET_GLYPH_WIDTH + glyph_row * sheet_width * ASCII_TILESET_GLYPH_HEIGHT;
 				int bit_index = pixel_index * ASCII_TILESET_BITDEPTH;
 
@@ -131,10 +147,26 @@ int ui_text_height(const char* text, int max_width)
 
 static void blit_tiled_region(int dst_x, int dst_y, int dst_w, int dst_h, int src_x, int src_y, int src_w, int src_h, const unsigned char* pixels, const unsigned char* palette, int image_w, int image_h, int depth)
 {
+	dst_x += g_tx;
+	dst_y += g_ty;
+
+	if (!in_clip(dst_x, dst_y, dst_w, dst_h))
+		return;
+
 	int mask = (1 << depth) - 1;
 
 	for (int dy = 0; dy < dst_h; ++dy) {
 		for (int dx = 0; dx < dst_w; ++dx) {
+			int dst_px_x = dst_x + dx;
+			int dst_px_y = dst_y + dy;
+
+
+			if (dst_px_x < g_clip.x || dst_px_y < g_clip.y ||
+				dst_px_x >= g_clip.x + g_clip.width ||
+				dst_px_y >= g_clip.y + g_clip.height)
+				continue;
+
+
 			// Tile source coordinates
 			int tx = dx % src_w;
 			int ty = dy % src_h;
@@ -156,9 +188,6 @@ static void blit_tiled_region(int dst_x, int dst_y, int dst_w, int dst_h, int sr
 			uint8_t g = palette[index * 4 + 1];
 			uint8_t b = palette[index * 4 + 2];
 			uint8_t a = palette[index * 4 + 3];
-
-			int dst_px_x = dst_x + dx;
-			int dst_px_y = dst_y + dy;
 
 			if (dst_px_x < 0 || dst_px_x >= fb_width || dst_px_y < 0 || dst_px_y >= fb_height)
 				continue;
@@ -208,14 +237,14 @@ void ui_draw_nineslice(int dst_x, int dst_y, int dst_w, int dst_h, const unsigne
 
 void ui_set_clip(int x, int y, int width, int height)
 {
-	clip_x = x;
-	clip_y = y;
-	clip_width = width;
-	clip_height = height;
+	g_clip.x = x;
+	g_clip.y = y;
+	g_clip.width = width;
+	g_clip.height = height;
 }
 
 void ui_set_transform(int tx, int ty)
 {
-	transform_x = tx;
-	transform_y = ty;
+	g_tx = tx;
+	g_ty = ty;
 }

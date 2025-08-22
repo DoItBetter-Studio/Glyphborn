@@ -1,6 +1,7 @@
 #include "ui/ui_core.h"
 #include "ui/ui_render.h"
 #include "input.h"
+#include "render.h"
 
 UIContext g_ui = { 0 };
 static UIState g_ui_state;
@@ -16,6 +17,15 @@ void ui_begin_frame(int mouse_x, int mouse_y)
 	g_ui.current_layer = !g_ui.current_layer ? 0 : g_ui.current_layer;
 
 	g_ui.mouse_consumed = false;
+
+	g_ui.clip_top = 0;
+	g_ui.transform_top = 0;
+
+	g_ui.current_clip = (Rect){ 0, 0, fb_width, fb_height };
+	ui_set_clip(0, 0, fb_width, fb_height);
+
+	g_ui.current_transform = (UITransform){ 0,0 };
+	ui_set_transform(0, 0);
 }
 
 void ui_end_frame(void)
@@ -74,16 +84,16 @@ void ui_push_clip(int x, int y, int width, int height)
 	int nx = (x > g_ui.current_clip.x) ? x : g_ui.current_clip.x;
 	int ny = (y > g_ui.current_clip.y) ? y : g_ui.current_clip.y;
 
-	int nw = ((x + width < g_ui.current_clip.x + g_ui.current_clip.width) ? x + width : g_ui.current_clip.x + g_ui.current_clip.width) - nx;
-	int nh = ((y + height < g_ui.current_clip.y + g_ui.current_clip.height) ? x + height : g_ui.current_clip.y + g_ui.current_clip.height) - ny;
+	int rx = g_ui.current_clip.x + g_ui.current_clip.width;
+	int ry = g_ui.current_clip.y + g_ui.current_clip.height;
+
+	int nw = ((x + width < g_ui.current_clip.x + g_ui.current_clip.width) ? x + width : rx) - nx;
+	int nh = ((y + height < g_ui.current_clip.y + g_ui.current_clip.height) ? y + height : ry) - ny;
 
 	if (nw < 0) nw = 0;
 	if (nh < 0) nh = 0;
 
-	g_ui.current_clip.x = nx;
-	g_ui.current_clip.y = ny;
-	g_ui.current_clip.width = nw;
-	g_ui.current_clip.height = nh;
+	g_ui.current_clip = (Rect){ nx, ny, nw, nh };
 
 	ui_set_clip(nx, ny, nw, nh);
 }

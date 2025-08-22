@@ -40,14 +40,14 @@ void input_update(void)
 		if (XQueryPointer(display, root_window,	&root_return, &child_return, &root_x, &root_y, &win_x, &win_y, &mask))
 		{
 			for (int i = 0; i < MOUSE_COUNT; ++i)
-				input_state.mouse_prev[i] = input_state.mouse_down[i];
+				input_state.mouse_prev[i] = input_state.right_mouse_down[i];
 
 			input_state.mouse_x = win_x;
 			input_state.mouse_y = win_y;
 
-			input_state.mouse_down[0] = (mask & Button1Mask) != 0;
-			input_state.mouse_down[1] = (mask & Button2Mask) != 0;
-			input_state.mouse_down[2] = (mask & Button3Mask) != 0;
+			input_state.right_mouse_down[0] = (mask & Button1Mask) != 0;
+			input_state.right_mouse_down[1] = (mask & Button2Mask) != 0;
+			input_state.right_mouse_down[2] = (mask & Button3Mask) != 0;
 		}
 	}
 }
@@ -64,17 +64,17 @@ int input_get_mouse_y(void)
 
 bool input_get_mouse(MouseButton button)
 {
-	return input_state.mouse_down[button];
+	return input_state.right_mouse_down[button];
 }
 
 bool input_get_mouse_down(MouseButton button)
 {
-	return input_state.mouse_down[button] && !input_state.mouse_prev[button];
+	return input_state.right_mouse_down[button] && !input_state.mouse_prev[button];
 }
 
 bool input_get_mouse_up(MouseButton button)
 {
-	return !input_state.mouse_down[button] && input_state.mouse_prev[button];
+	return !input_state.right_mouse_down[button] && input_state.mouse_prev[button];
 }
 
 #endif

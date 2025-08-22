@@ -164,7 +164,7 @@ static void ui_layers_panel(const UIPanelResolved* panel)
 
 bool checked[32];
 
-UIScrollView assetView;
+UIScrollView asset_scroll_view;
 
 static void ui_asset_panel(const UIPanelResolved* panel)
 {
@@ -174,12 +174,29 @@ static void ui_asset_panel(const UIPanelResolved* panel)
 
 	Rect rect = panel->rect;
 
-	ui_begin_scroll(&assetView, rect.x + 8, rect.y + 36, rect.width - 16, 40);
+	ui_begin_vertical_scroll(&asset_scroll_view, (Rect) { rect.x + 4, rect.y + 4, rect.width - 8, rect.height - 8 });
 
 	for (int i = 0; i < 32; ++i)
 		checked[i] = ui_checkbox(rect.x + 8, rect.y + 8 + (i * 32), 24, 24, "Test", &checked[i]);
 
-	ui_end_scroll(&assetView, rect.x + 8, rect.y + 36, rect.width - 16, 40);
+	ui_end_vertical_scroll(&asset_scroll_view);
+}
+
+UIScrollView map_matrix_scroll_view;
+
+static void ui_map_matrix_panel(const UIPanelResolved* panel)
+{
+	if (!panel)	return;
+
+	ui_panel(panel);
+
+	Rect rect = panel->rect;
+
+	ui_begin_scroll(&map_matrix_scroll_view, (Rect) { rect.x + 4, rect.y + 4, rect.width - 8, rect.height - 8 });
+
+
+
+	ui_end_scroll(&map_matrix_scroll_view);
 }
 
 void ui_init_default_layout(void)
