@@ -177,8 +177,9 @@ static void ui_asset_panel(const UIPanelResolved* panel)
 	ui_begin_vertical_scroll(&asset_scroll_view, (Rect) { rect.x + 4, rect.y + 4, rect.width - 8, rect.height - 8 });
 
 	for (int i = 0; i < 32; ++i)
+	{
 		checked[i] = ui_checkbox(rect.x + 8, rect.y + 8 + (i * 32), 24, 24, "Test", &checked[i]);
-
+	}
 	ui_end_vertical_scroll(&asset_scroll_view);
 }
 
@@ -194,7 +195,16 @@ static void ui_map_matrix_panel(const UIPanelResolved* panel)
 
 	ui_begin_scroll(&map_matrix_scroll_view, (Rect) { rect.x + 4, rect.y + 4, rect.width - 8, rect.height - 8 });
 
-
+	for (int y = 0; y < 8; ++y)
+	{
+		for (int x = 0; x < 8; ++x)
+		{
+			if (ui_button(rect.x + 8 + (x * 32), rect.y + 8 + (y * 32), 24, 24, "", 0xFF000000))
+			{
+					
+			}
+		}
+	}
 
 	ui_end_scroll(&map_matrix_scroll_view);
 }
@@ -206,7 +216,7 @@ void ui_init_default_layout(void)
 	static UIPanelLayout panel_palette = { "Palettes", PANEL_PALETTE_INSPECTOR, DOCK_RIGHT, {0}, true, ui_panel };
 	static UIPanelLayout panel_console = { "Console", PANEL_CONSOLE, DOCK_BOTTOM, {0}, true, ui_panel };
 	static UIPanelLayout panel_map = { "Map", PANEL_MAP, DOCK_CENTER, {0}, true, ui_map_panel };
-	static UIPanelLayout panel_map_matrix = { "Matrix", PANEL_MATRIX, DOCK_RIGHT, {0}, true, ui_panel };
+	static UIPanelLayout panel_map_matrix = { "Matrix", PANEL_MATRIX, DOCK_RIGHT, {0}, true, ui_map_matrix_panel };
 
 	UIDockNode* left_leaf = make_leaf(&panel_asset);
 	UIDockNode* layers_leaf = make_leaf(&panel_layers);

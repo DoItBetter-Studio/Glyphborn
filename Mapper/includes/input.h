@@ -1,6 +1,7 @@
 #ifndef INPUT_H
 #define INPUT_H
 
+#include "maths/vec2.h"
 #include <stdbool.h>
 #include <stdint.h>
 
@@ -28,8 +29,8 @@ typedef struct
 void input_init(void);
 void input_update(void);
 
-int input_get_mouse_x(void);
-int input_get_mouse_y(void);
+Vec2 input_get_mouse_delta(void);
+Vec2 input_get_mouse_position(void);
 bool input_get_mouse(MouseButton button);
 bool input_get_mouse_down(MouseButton button);
 bool input_get_mouse_up(MouseButton button);

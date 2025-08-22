@@ -70,7 +70,7 @@ UIMenu menus[] =
 
 void mapper_render_ui()
 {
-	ui_begin_frame(input_get_mouse_x(), input_get_mouse_y());
+	ui_begin_frame();
 
 	ui_draw_layout();
 	ui_menu_bar(menus, 2);

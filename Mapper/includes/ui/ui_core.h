@@ -50,9 +50,12 @@ typedef struct
 } UIState;
 
 extern UIContext g_ui;
+extern Rect g_clip;
+extern int g_tx;
+extern int g_ty;
 
 // Lifecycle
-void ui_begin_frame(int mouse_x, int mouse_y);
+void ui_begin_frame();
 void ui_end_frame(void);
 
 // Utilities

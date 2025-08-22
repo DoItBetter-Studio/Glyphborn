@@ -1,6 +1,9 @@
 ﻿#include "ui/ui_widgets.h"
 #include "ui/ui_render.h"
 #include "ui/ui_skin.h"
+#include "input.h"
+#include <stddef.h>
+#include <stdio.h>
 
 static UIScrollView* g_current_scroll;
 
@@ -9,12 +12,15 @@ static void ui_expand_bounds(int x, int y, int width, int height)
 {
 	if (!g_current_scroll) return;
 
-	int right = x + width;
-	int bottom = y + height;
+	int local_x = x - g_current_scroll->rect.x;
+	int local_y = y - g_current_scroll->rect.y;
+
+	int right = local_x + width;
+	int bottom = local_y + height;
 
 	if (right > g_current_scroll->context_width)
 		g_current_scroll->context_width = right;
-	if (bottom > g_current_scroll->context_width)
+	if (bottom > g_current_scroll->context_height)
 		g_current_scroll->context_height = bottom;
 }
 
@@ -56,7 +62,7 @@ bool ui_button(int x, int y, int width, int height, const char* label, uint32_t 
 	if (!g_ui.mouse_consumed)
 	{
 		hover = ui_mouse_inside(x, y, width, height);
-		click = ui_mouse_inside(x, y, width, height) && g_ui.mouse_pressed;
+		click = ui_mouse_inside(x, y, width, height) && input_get_mouse(MOUSE_LEFT);
 		ui_set_interaction(id, hover, click);
 	}
 
@@ -70,7 +76,7 @@ bool ui_checkbox(int x, int y, int width, int height, const char* label, bool* v
 	bool hover, click;
 	ui_get_interaction(id, &hover, &click);
 
-	if (click) *value = !*value;
+	if (click && input_get_mouse_up(MOUSE_LEFT)) *value = !*value;
 
 	const UISkin* skin = ui_get_skin();
 
@@ -115,18 +121,23 @@ bool ui_checkbox(int x, int y, int width, int height, const char* label, bool* v
 			8, 8, 8, 8);
 	}
 
-	int text_w = ui_text_height(label, width + 64);
+	int label_w = ui_text_width(label);
+	int label_h = ui_text_height(label, label_w);
 
-	ui_draw_text_colored(x + width + 4, y + (height - text_w) / 2, label, 0xFFFFFFFF);
+	int text_x = x + width + 4;
+	int text_y = y + (height - label_h) / 2;
+
+	ui_draw_text_colored(text_x, text_y, label, 0xFFFFFFFF);
 
 	if (!g_ui.mouse_consumed)
 	{
 		hover = ui_mouse_inside(x, y, width, height);
-		click = hover && g_ui.mouse_pressed;
+		click = hover && input_get_mouse(MOUSE_LEFT);
 		ui_set_interaction(id, hover, click);
 	}
 
 	ui_expand_bounds(x, y, width, height);
+
 	return *value;
 }
 #pragma endregion
@@ -143,6 +154,16 @@ void ui_begin_scroll(UIScrollView* view, Rect rect)
 	view->rect = rect;
 
 	g_current_scroll = view;
+
+	const UISkin* skin = ui_get_skin();
+
+	ui_draw_nineslice(rect.x, rect.y, rect.width, rect.height,
+			skin->menu.pixels,
+			skin->active_palette,
+			skin->menu.depth,
+			skin->menu.width,
+			skin->menu.height,
+			8, 8, 8, 8);
 }
 
 void ui_end_scroll(UIScrollView* view)
@@ -154,25 +175,56 @@ void ui_end_scroll(UIScrollView* view)
 
 	if (view->context_height > view->rect.height)
 	{
-		float ratio = ((float)view->rect.height - 4) / view->context_height;
-		int handle_h = (int)(view->rect.height * ratio);
-		int handle_y = view->rect.y + 4 + ((int)view->offset_y * ratio);
+		int content_h = view->context_height + 24;
+		int view_h = view->rect.height;
 
-		if (ui_button(view->rect.x + view->rect.width - 16, handle_y, 12, handle_h, "", 0))
+		if (view->offset_y < 0) view->offset_y = 0;
+
+		if (view->offset_y < 0) view->offset_y = 0;
+		if (view->offset_y > content_h - view_h)
+		if (view->offset_y > content_h - view_h)
+			view->offset_y = content_h - view_h;
+
+		float ratio = (float)view_h / content_h;
+		if (ratio > 1.0f) ratio = 1.0f;
+
+		int handle_h = (int)(ratio * view_h);
+
+		int track_h = view_h - handle_h;
+		int handle_y = view->rect.y + (int)((float)view->offset_y / (content_h - view_h) * track_h);
+
+		if (ui_button(view->rect.x + view->rect.width - 20, handle_y + 4, 16, handle_h - 32, "", 0))
 		{
+			int dy = input_get_mouse_delta().y;
 
+			float scroll_per_px = (float)(content_h - view_h) / track_h;
+			view->offset_y += (int)(dy * scroll_per_px);
 		}
 	}
 
 	if (view->context_width > view->rect.width)
 	{
-		float ratio = (float)view->rect.width / view->context_width;
-		int handle_w = (int)view->rect.width * ratio;
-		int handle_x = view->rect.x + ((int)view->offset_x * ratio);
+		int content_w = view->context_width + 24;
+		int view_w = view->rect.width;
 
-		if (ui_button(handle_x, view->rect.y + view->rect.height, handle_w, 12, "", 0))
+		if (view->offset_x < 0) view->offset_x = 0;
+		if (view->offset_x > content_w - view_w)
+			view->offset_x = content_w - view_w;
+
+		float ratio = (float)view_w / content_w;
+		if (ratio > 1.0f) ratio = 1.0f;
+
+		int handle_w = (int)(ratio * view_w);
+
+		int track_w = view_w - handle_w;
+		int handle_x = view->rect.x + (int)((float)view->offset_x / (content_w - view_w) * track_w);
+
+		if (ui_button(handle_x + 4, view->rect.y + view->rect.height - 20, handle_w - 32, 16, "", 0))
 		{
+			int dx = input_get_mouse_delta().x;
 
+			float scroll_per_px = (float)(content_w - view_w) / track_w;
+			view->offset_x += (int)(dx * scroll_per_px);
 		}
 	}
 }
@@ -193,13 +245,27 @@ void ui_end_vertical_scroll(UIScrollView* view)
 
 	if (view->context_height > view->rect.height)
 	{
-		float ratio = ((float)view->rect.height - 4) / view->context_height;
-		int handle_h = (int)(view->rect.height * ratio);
-		int handle_y = view->rect.y + 4 + ((int)view->offset_y * ratio);
+		int content_h = view->context_height + 4;
+		int view_h = view->rect.height;
 
-		if (ui_button(view->rect.x + view->rect.width - 16, handle_y, 12, handle_h, "", 0))
+		if (view->offset_y < 0) view->offset_y = 0;
+		if (view->offset_y > content_h - view_h)
+			view->offset_y = content_h - view_h;
+
+		float ratio = (float)view_h / content_h;
+		if (ratio > 1.0f) ratio = 1.0f;
+
+		int handle_h = (int)(ratio * view_h);
+
+		int track_h = view_h - handle_h;
+		int handle_y = view->rect.y + (int)((float)view->offset_y / (content_h - view_h) * track_h);
+
+		if (ui_button(view->rect.x + view->rect.width - 20, handle_y + 4, 16, handle_h - 8, "", 0))
 		{
+			int dy = input_get_mouse_delta().y;
 
+			float scroll_per_px = (float)(content_h - view_h) / track_h;
+			view->offset_y += (int)(dy * scroll_per_px);
 		}
 	}
 }
@@ -213,15 +279,34 @@ void ui_begin_horizontal_scroll(UIScrollView* view, Rect rect)
 
 void ui_end_horizontal_scroll(UIScrollView* view)
 {
+	g_current_scroll = NULL;
+
+	ui_pop_transform();
+	ui_pop_clip();
+
 	if (view->context_width > view->rect.width)
 	{
-		float ratio = (float)view->rect.width / view->context_width;
-		int handle_w = (int)view->rect.width * ratio;
-		int handle_x = view->rect.x + ((int)view->offset_x * ratio);
+		int content_w = view->context_width + 4;
+		int view_w = view->rect.width;
 
-		if (ui_button(handle_x, view->rect.y + view->rect.height, handle_w, 12, "", 0))
+		if (view->offset_y < 0) view->offset_y = 0;
+		if (view->offset_y > content_w - view_w)
+			view->offset_y = content_w - view_w;
+
+		float ratio = (float)view_w / content_w;
+		if (ratio > 1.0f) ratio = 1.0f;
+
+		int handle_w = (int)(ratio * view_w);
+
+		int track_w = view_w - handle_w;
+		int handle_x = view->rect.y + (int)((float)view->offset_y / (content_w - view_w) * track_w);
+
+		if (ui_button(handle_x + 4, view->rect.y + view->rect.height - 20, handle_w - 8, 16, "", 0))
 		{
+			int dx = input_get_mouse_delta().x;
 
+			float scroll_per_px = (float)(content_w - view_w) / track_w;
+			view->offset_x += (int)(dx * scroll_per_px);
 		}
 	}
 }

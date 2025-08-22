@@ -3,10 +3,6 @@
 #include "render.h"
 #include "font/ascii_tileset.h"
 
-static Rect g_clip = { 0, 0, 0, 0 };
-static int g_tx = 0;
-static int g_ty = 0;
-
 static inline bool in_clip(int x, int y, int width, int height)
 {
 	return !(x + width < g_clip.x || x > g_clip.x + g_clip.width ||
@@ -53,8 +49,8 @@ void ui_draw_text(int x, int y, const char* text)
 
 void ui_draw_text_colored(int x, int y, const char* text, uint32_t color)
 {
-	int cursor_x = x;
-	int cursor_y = y;
+	int cursor_x = x + g_tx;
+	int cursor_y = y + g_ty;
 
 	while (*text)
 	{
@@ -80,8 +76,8 @@ void ui_draw_text_colored(int x, int y, const char* text, uint32_t color)
 		{
 			for (int i = 0; i < draw_width && (cursor_x + i) < fb_width; ++i)
 			{
-				int dst_x = cursor_x + i + g_tx;
-				int dst_y = cursor_y + j + g_ty;
+				int dst_x = cursor_x + i;
+				int dst_y = cursor_y + j;
 
 				if (dst_x < g_clip.x || dst_y < g_clip.y ||
 					dst_x >= g_clip.x + g_clip.width ||
