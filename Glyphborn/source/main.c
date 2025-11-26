@@ -4,14 +4,21 @@
 #include "render.h"
 #include "game.h"
 #include "audio.h"
+#include "achievements.h"
 
 #ifdef _WIN32
-#include <Windows.h>
+#include <windows.h>
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nShowCmd)
+{
+	(void)hInstance;
+	(void)hPrevInstance;
+	(void)lpCmdLine;
+	(void)nShowCmd;
 #else
 int main()
-#endif
 {
+#endif
+
 	PlatformWindowDesc window = { 0 };
 	window.width = 1280;
 	window.height = 720;

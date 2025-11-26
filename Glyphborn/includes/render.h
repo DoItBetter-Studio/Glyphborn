@@ -12,6 +12,8 @@ extern uint32_t framebuffer[FB_WIDTH * FB_HEIGHT];
 extern uint32_t framebuffer_game[FB_WIDTH * FB_HEIGHT];
 extern uint32_t framebuffer_ui[FB_WIDTH * FB_HEIGHT];
 
+extern float depthbuffer[FB_WIDTH * FB_HEIGHT];
+
 void render_init(void* platform_context);
 uint32_t* render_get_framebuffer(void);
 void render_clear(uint32_t* buffer, uint32_t color);

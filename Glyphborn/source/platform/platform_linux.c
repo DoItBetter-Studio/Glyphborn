@@ -1,12 +1,21 @@
 #ifdef __linux__
 
+#ifndef _POSIX_C_SOURCE
+#define _POSIX_C_SOURCE 200809L
+#endif
+#ifndef _GNU_SOURCE
+#define _GNU_SOURCE
+#endif
+
+#include <time.h>
+#include <unistd.h>
+
 #include "platform.h"
+#include "build_info.h"
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
 #include <stdint.h>
-#include <unistd.h>
 #include <stdio.h>
-#include <time.h>
 #include <sys/types.h>
 
 typedef struct
@@ -42,6 +51,10 @@ void platform_init(const PlatformWindowDesc* desc)
 		WhitePixel(display, screen));
 
 	XStoreName(display, window, desc->title);
+	char title[128];
+	snprintf(title, sizeof(title), "%s v%s", desc->title, BUILD_FULL_VERSION);
+	XStoreName(display, window, title);
+
 	XSelectInput(display, window, ExposureMask | KeyPress | KeyRelease | StructureNotifyMask);
 
 	wm_delete_window = XInternAtom(display, "WM_DELETE_WINDOW", False);

@@ -3,7 +3,6 @@
 
 UIContext g_ui = { 0 };
 
-
 void ui_draw_image(int x, int y, int width, int height, int depth, const unsigned char* image_data, const unsigned char* palette)
 {
 	int mask = (1 << depth) - 1;
@@ -255,9 +254,6 @@ bool ui_button(int x, int y, int width, int height, const char* label, uint32_t 
 	{
 		clicked = true;
 	}
-
-	bool is_hot = (g_ui.hot_item == id) || focused;
-	bool is_pressed = (g_ui.active_item == id && inside);
 
 	int label_w = ui_text_width(label);
 	int label_h = ui_text_height(label, width - 32);

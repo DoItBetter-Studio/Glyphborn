@@ -1,7 +1,7 @@
 #ifdef _WIN32
 
 #include "render.h"
-#include <Windows.h>
+#include <windows.h>
 
 static BITMAPINFO bmi;
 static HDC hdcWindow;
@@ -9,6 +9,8 @@ static HDC hdcWindow;
 uint32_t framebuffer[FB_WIDTH * FB_HEIGHT];
 uint32_t framebuffer_game[FB_WIDTH * FB_HEIGHT];
 uint32_t framebuffer_ui[FB_WIDTH * FB_HEIGHT];
+
+float depthbuffer[FB_WIDTH * FB_HEIGHT]; // <-- actual definition lives here
 
 void render_init(void* platform_context)
 {
@@ -26,7 +28,7 @@ void render_init(void* platform_context)
 	HBITMAP hBitmap = CreateDIBSection(hdcWindow, &bmi, DIB_RGB_COLORS, (void**) & framebuffer, NULL, 0);
 	if (!hBitmap)
 	{
-		MessageBox(NULL, L"Failed to create framebuffer.", L"Error", MB_OK | MB_ICONERROR);
+		MessageBox(NULL, "Failed to create framebuffer.", "Error", MB_OK | MB_ICONERROR);
 		return;
 	}
 	else

@@ -1,9 +1,8 @@
 #ifdef _WIN32
 
 #include "input.h"
-#include <Windows.h>
-#include <Xinput.h>
-#pragma comment(lib, "Xinput.lib")
+#include <windows.h>
+#include <xinput.h>
 
 static InputMapping button_mappings[BUTTON_COUNT] = {
 	[BUTTON_UP]				= { 'W', XINPUT_GAMEPAD_DPAD_UP },

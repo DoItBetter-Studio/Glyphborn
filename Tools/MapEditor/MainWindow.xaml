@@ -1,0 +1,56 @@
+﻿<Window x:Class="MapEditor.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:MapEditor"
+		xmlns:views="clr-namespace:MapEditor.Views"
+		xmlns:vm="clr-namespace:MapEditor.ViewModels"
+		mc:Ignorable="d"
+        Title="Map Editor" Height="900" Width="1400">
+	
+	<Window.DataContext>
+		<vm:MainWindowViewModel />
+	</Window.DataContext>
+	
+	<DockPanel LastChildFill="True">
+		
+		<!-- Menu -->
+		<Menu DockPanel.Dock="Top">
+			<MenuItem Header="_File">
+				<MenuItem Header="New Map" />
+				<MenuItem Header="Open..." />
+				<MenuItem Header="Save" />
+				<MenuItem Header="Save As..." />
+				<Separator />
+				<MenuItem Header="Export Binaries" />
+				<Separator />
+				<MenuItem Header="Exit" />
+			</MenuItem>
+
+			<MenuItem Header="_View">
+				<MenuItem Header="Toggle Grid" />
+				<MenuItem Header="Toggle Collision" />
+				<MenuItem Header="Toggle Camera North" />
+				<MenuItem Header="Toggle Camera East" />
+				<MenuItem Header="Toggle Camera South" />
+				<MenuItem Header="Toggle Camera West" />
+			</MenuItem>
+
+			<MenuItem Header="_Tools">
+				<MenuItem Header="Tile Definition Editor..." />
+			</MenuItem>
+		</Menu>
+
+		<!-- Status Bar -->
+		<StatusBar DockPanel.Dock="Bottom">
+			<StatusBarItem Content="{Binding StatusText}" />
+		</StatusBar>
+
+		<!-- Tile Palette -->
+		<views:TilePalette DockPanel.Dock="Left" Width="250" DataContext="{Binding TilePalette}"/>
+
+		<!-- Main Render Canvas -->
+		<views:MapCanvas x:Name="MapCanvas" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" />
+	</DockPanel>
+</Window>

@@ -23,6 +23,8 @@ uint32_t framebuffer[FB_WIDTH * FB_HEIGHT];
 uint32_t framebuffer_game[FB_WIDTH * FB_HEIGHT];
 uint32_t framebuffer_ui[FB_WIDTH * FB_HEIGHT];
 
+float depthbuffer[FB_WIDTH * FB_HEIGHT]; // <-- actual definition lives here
+
 void render_init(void* platform_context)
 {
 	X11Context* context = (X11Context*)platform_context;

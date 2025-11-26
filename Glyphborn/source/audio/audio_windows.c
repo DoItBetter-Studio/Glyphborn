@@ -1,7 +1,8 @@
+#ifdef _WIN32
+
 #include "audio.h"
-#include <Windows.h>
+#include <windows.h>
 #include <mmsystem.h>
-#pragma comment(lib, "winmm.lib")
 
 typedef struct
 {
@@ -85,7 +86,7 @@ void audio_init(void)
 
 		if (waveOutOpen(&channel->hWaveOut, WAVE_MAPPER, &fmt, 0, 0, CALLBACK_NULL) != MMSYSERR_NOERROR)
 		{
-			MessageBox(NULL, L"Failed to open audio device.", L"Error", MB_OK | MB_ICONERROR);
+			MessageBox(NULL, "Failed to open audio device.", "Error", MB_OK | MB_ICONERROR);
 			return;
 		}
 		else
@@ -205,3 +206,5 @@ void audio_play_sound(const unsigned char* sound_data, int length)
 {
 	audio_play_sample_channel(1, sound_data, length);
 }
+
+#endif

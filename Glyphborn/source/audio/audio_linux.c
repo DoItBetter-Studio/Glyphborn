@@ -1,7 +1,17 @@
 #ifdef __linux__
 
-#include "audio.h"
+#ifndef _POSIX_C_SOURCE
+#define _POSIX_C_SOURCE 200809L
+#endif
+#ifndef _GNU_SOURCE
+#define _GNU_SOURCE
+#endif
+
+#include <time.h>
+#include <unistd.h>
 #include <alsa/asoundlib.h>
+
+#include "audio.h"
 #include <stdlib.h>
 #include <stdint.h>
 #include <stdio.h>

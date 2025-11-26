@@ -7,6 +7,7 @@
 #include "ui_skin.h"
 #include "ui.h"
 #include "sketch.h"
+#include "achievements.h"
 
 Camera main_camera = { 0 };
 Mat4 view;
@@ -28,6 +29,8 @@ static void draw_test_pattern_ui(void)
 void game_init(void)
 {
 	input_init();
+	achievements_init();
+
 	ui_set_skin(SKIN_GLYPHBORN);
 
 	main_camera.position = (Vec3){ 0.0f, 0.0f, -5.0f };
@@ -45,6 +48,7 @@ static bool showUI = false;
 void game_update(float delta_time)
 {
 	input_update();
+	achievements_update();
 
 	// These come from your input layer
 	nav_dx = 0;
@@ -66,19 +70,8 @@ void game_update(float delta_time)
 	view = camera_get_view_matrix(&main_camera);
 }
 
-RenderMesh cube_mesh = {
-	.vertices = cube_vertices,
-	.vertex_count = sizeof(cube_vertices) / sizeof(Vec3),
-	.edges = cube_edges,
-	.edge_count = sizeof(cube_edges) / (2 * sizeof(int))
-};
-
 void game_render(void)
-{
-	Mat4 model = mat4_identity();
-
-	sketch_draw_wireframe(&cube_mesh, model, view, projection, 0xFF000000);
-}
+{ }
 
 void game_render_ui(void)
 {
@@ -106,5 +99,5 @@ void game_render_ui(void)
 
 void game_shutdown(void)
 {
-
+	achievements_shutdown();
 }

@@ -1,14 +1,14 @@
 #ifdef _WIN32
 
 #include "platform.h"
-#include <Windows.h>
+#include "build_info.h"
+#include <windows.h>
 #include <mmsystem.h>
 #include <stdint.h>
-#pragma comment(lib, "winmm.lib")
+#include <stdio.h>
 
 static bool running = false;
 static HWND hwnd;
-static uint64_t last_time = 0;
 
 LRESULT CALLBACK window_proc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
@@ -36,7 +36,9 @@ void platform_init(const PlatformWindowDesc* desc)
 {
 	timeBeginPeriod(1);
 
-	LPCWSTR className = L"GameWindow";
+	const char *className = "GameWindow";
+	char title[128];
+	snprintf(title, sizeof(title), "%s v%s", desc->title, BUILD_FULL_VERSION);
 
 	WNDCLASS wc = { 0 };
 	wc.lpfnWndProc = window_proc;
@@ -45,10 +47,10 @@ void platform_init(const PlatformWindowDesc* desc)
 
 	RegisterClass(&wc);
 
-	LPCWSTR windowName = convert_char_to_lpcwstr(desc->title);
+	// LPCWSTR windowName = convert_char_to_lpcwstr(desc->title);
 
 	hwnd = CreateWindow(
-		className, windowName,
+		className, title,
 		WS_OVERLAPPEDWINDOW | WS_VISIBLE,
 		CW_USEDEFAULT, CW_USEDEFAULT,
 		desc->width, desc->height,
@@ -57,7 +59,7 @@ void platform_init(const PlatformWindowDesc* desc)
 
 	if (!hwnd)
 	{
-		MessageBox(NULL, L"Failed to create window.", L"Error", MB_OK | MB_ICONERROR);
+		MessageBox(NULL, "Failed to create window.", "Error", MB_OK | MB_ICONERROR);
 		return;
 	}
 
