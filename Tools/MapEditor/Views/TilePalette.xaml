@@ -3,21 +3,69 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+			 xmlns:conv="clr-namespace:MapEditor.Converters"
+			 mc:Ignorable="d"
              xmlns:local="clr-namespace:MapEditor.Views">
+	<UserControl.Resources>
+		<conv:BoolToBrushConverter x:Key="BoolToBrushConverter" />
+
+		<Style x:Key="PaletteItemContainer" TargetType="ListBoxItem">
+			<Setter Property="Padding" Value="0" />
+			<Setter Property="Margin" Value="0" />
+			<Setter Property="BorderThickness" Value="0" />
+			<Setter Property="HorizontalContentAlignment" Value="Center" />
+			<Setter Property="VerticalContentAlignment" Value="Center" />
+			<Setter Property="Background" Value="Transparent" />
+			<Setter Property="FocusVisualStyle" Value="{x:Null}" />
+			
+			<!-- Fixed call size: adjust CellSize to taste -->
+			<Setter Property="Width" Value="36" />
+			<Setter Property="Height" Value="36" />
+
+			<!-- Ensure the container itself is placed top-left inside the panel -->
+			<Setter Property="HorizontalAlignment" Value="Left" />
+			<Setter Property="VerticalAlignment" Value="Top" />
+		</Style>
+	</UserControl.Resources>
+	
 	<Border BorderBrush="#333" BorderThickness="1" Background="#1E1E1E">
-		<ScrollViewer>
-			<ItemsControl ItemsSource="{Binding Tiles}">
-				<ItemsControl.ItemTemplate>
+		<!-- Remove any ScrollViewer padding that could introduce gaps -->
+		<ScrollViewer Padding="0" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+			<ListBox ItemsSource="{Binding Tiles}"
+					 SelectedItem="{Binding SelectedTile, Mode=TwoWay}"
+					 Background="Transparent"
+					 BorderThickness="0"
+					 Padding="0"
+					 ItemContainerStyle="{StaticResource PaletteItemContainer}"
+					 HorizontalContentAlignment="Left"
+					 VerticalContentAlignment="Top"
+					 ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+				
+				<ListBox.ItemsPanel>
+					<ItemsPanelTemplate>
+						<!-- Anchor the panel itself top-left -->
+						<UniformGrid Columns="8" HorizontalAlignment="Left" VerticalAlignment="Top" />
+					</ItemsPanelTemplate>
+				</ListBox.ItemsPanel>
+				
+				<ListBox.ItemTemplate>
 					<DataTemplate>
-						<Border Padding="4" Margin="2"
-                                Background="{Binding IsSelected, Converter={StaticResource BoolToBrushConverter}}">
-							<TextBlock Text="{Binding Name}"
-                                       Foreground="White"/>
+						<!-- No margin/padding here so cells are contiguous -->
+						<Border Margin="0" Padding="0"
+								Background="{Binding IsSelected, Converter={StaticResource BoolToBrushConverter}}"
+								HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+								Width="36" Height="36">
+							<!-- Fixed-size image so tiles align; adjust width/height as needed -->
+							<Image Source="{Binding Thumbnail}"
+								   Width="32" Height="32"
+								   Stretch="UniformToFill"
+								   Margin="0"
+								   HorizontalAlignment="Center"
+								   VerticalAlignment="Center"/>
 						</Border>
 					</DataTemplate>
-				</ItemsControl.ItemTemplate>
-
-			</ItemsControl>
+				</ListBox.ItemTemplate>
+			</ListBox>
 		</ScrollViewer>
 	</Border>
 </UserControl>

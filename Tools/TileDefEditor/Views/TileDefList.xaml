@@ -8,10 +8,15 @@
 			 Width="Auto">
 	<DockPanel Background="#222">
 
-		<TextBlock Text="Tile Types" 
-				   Foreground="White" 
-				   FontWeight="Bold" 
-				   Margin="10" />
+		<StackPanel Orientation="Horizontal" Margin="10" DockPanel.Dock="Top">
+			<TextBlock Text="Tile Types"
+					   Foreground="White"
+					   FontWeight="Bold"
+					   VerticalAlignment="Center" />
+			
+			<!-- Add button bound to MainViewModel.AddTileCommand -->
+			<Button Content="Add" Margin="10,0,0,0" Width="60" Command="{Binding AddTileCommand}" />
+		</StackPanel>
 
 		<ListBox ItemsSource="{Binding TileList.Tiles}"
 				 SelectedItem="{Binding TileList.SelectedTile}"

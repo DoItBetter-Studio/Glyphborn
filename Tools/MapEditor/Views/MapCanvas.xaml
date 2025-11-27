@@ -6,6 +6,6 @@
 			 MouseLeftButtonDown="OnMouseLeftButtonDown"
 			 MouseMove="OnMouseMove">
     <Grid Background="Black">
-		<Image x:Name="Surface" Stretch="None" />
+		<Image x:Name="Surface" Stretch="None" HorizontalAlignment="Center" VerticalAlignment="Center" />
 	</Grid>
 </UserControl>

@@ -27,7 +27,8 @@ namespace MapEditor
 				MapCanvas.SetContext(
 					VM.CurrentMap.Model,
 					VM.CurrentMap.CurrentFloor,
-					VM.CurrentMap.CameraDirection);
+					VM.CurrentMap.CameraDirection,
+					VM.TileDatabase);
 			}
 		}
 	}

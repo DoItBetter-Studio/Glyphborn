@@ -50,17 +50,17 @@ namespace TileDefEditor.ViewModels
 			set { Def.IsRoof = value; OnPropertyChanged(); }
 		}
 
-		public string Category
+		public TileCategory Category
 		{
-			get => Def.Category.ToString();
+			get => Def.Category;
 			set
 			{
-				if (Enum.TryParse<TileCategory>(value, out var c))
-					Def.Category = c;
-
+				Def.Category = value;
 				OnPropertyChanged();
 			}
 		}
+
+		public Array CategoryValues => Enum.GetValues(typeof(TileCategory));
 
 		public int RenderHeight
 		{

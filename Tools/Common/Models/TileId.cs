@@ -16,6 +16,6 @@
 		public byte Rotation => (byte)((Value >> 3) & 0x7);
 		public byte Variant => (byte) (Value & 0x7);
 
-		public override string ToString() => $"TileId(Type={Type}, Rot={Rotation}, Var={Variant}";
+		public override string ToString() => $"TileId(Type={Type}, Rot={Rotation}, Var={Variant})";
 	}
 }

@@ -46,9 +46,14 @@
 		<StatusBar DockPanel.Dock="Bottom">
 			<StatusBarItem Content="{Binding StatusText}" />
 		</StatusBar>
-
+		
 		<!-- Tile Palette -->
-		<views:TilePalette DockPanel.Dock="Left" Width="250" DataContext="{Binding TilePalette}"/>
+		<views:TilePalette DockPanel.Dock="Right" Width="260" DataContext="{Binding TilePalette}"/>
+
+		<!-- 3D preview placeholder; create Map3DPreview UserControl later and wire SetContext -->
+		<Border Width="400" Margin="4" Background="#111" BorderBrush="#111" >
+			<TextBlock Text="3D Preview (placeholder)" Foreground="#DDD" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+		</Border>
 
 		<!-- Main Render Canvas -->
 		<views:MapCanvas x:Name="MapCanvas" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" />

@@ -19,6 +19,8 @@ namespace MapEditor.Views
 		private int _floor;
 		private int _cameraDir;
 
+		private TileDatabase? _tileDb;
+
 		private bool _isPainting;
 
 		public MapCanvas()
@@ -41,27 +43,80 @@ namespace MapEditor.Views
 
 		private void InitSurface()
 		{
-			int width = (int) ActualWidth;
-			int height = (int) ActualHeight;
-
-			if (width < 1 || height < 1)
+			// If we don't have a size yet, bail out.
+			int viewW = (int) ActualWidth;
+			int viewH = (int) ActualHeight;
+			if (viewW < 1 || viewH < 1)
 				return;
 
+			// Map tile counts (constants, but use MapModel layout semantics)
+			int tilesX = MapModel.SizeX;
+			int tilesZ = MapModel.SizeZ;
+
+			// Compute tile size so the entire map fits inside the view.
+			// If we have a real map, use the view size directly; otherwise fallback to a default scale.
+			int tileSize = 32;
+			if (_map != null)
+			{
+				// integer tile size; ensure at least 1
+				tileSize = Math.Max(1, Math.Min(viewW / tilesX, viewH / tilesZ));
+			}
+			else
+			{
+				// If no map yet, still create a reasonably sized surface based on view
+				tileSize = Math.Max(1, Math.Min(viewW / tilesX, viewH / tilesZ));
+			}
+
+			int bmpW = tileSize * tilesX;
+			int bmpH = tileSize * tilesZ;
+
 			_bitmap = new WriteableBitmap(
-				width, height, 96, 96,
+				bmpW, bmpH, 96, 96,
 				System.Windows.Media.PixelFormats.Bgra32,
 				null);
 
 			Surface.Source = _bitmap;
+			Surface.Width = bmpW;
+			Surface.Height = bmpH;
+
 			_surface = new SoftwareRenderSurface(_bitmap);
-			_renderer = new MapRenderer(_surface);
+
+			// create or recreate renderer when we have a tile DB
+			if (_surface != null && _tileDb != null)
+			{
+				_renderer = new MapRenderer(_surface, _tileDb)
+				{
+					TileSize = tileSize,
+				};
+			}
+			else if (_surface != null)
+			{
+				_renderer = new MapRenderer(_surface, new TileDatabase())
+				{
+					TileSize = tileSize,
+				};
+			}
 		}
 
-		public void SetContext(MapModel map, int floor, int cameraDir)
+		public void SetContext(MapModel map, int floor, int cameraDir, TileDatabase tileDb)
 		{
 			_map = map;
 			_floor = floor;
 			_cameraDir = cameraDir;
+			_tileDb = tileDb;
+
+			// Recreate surface/renderer now that we have a map and DB available.
+			InitSurface();
+
+			// If InitSurface didn't set renderer (surface existed earlier), ensure tile size sync
+			if (_renderer != null && _surface != null)
+			{
+				_renderer = new MapRenderer(_surface, _tileDb)
+				{
+					TileSize = _renderer.TileSize // preserve computed tile size if any
+				};
+			}
+
 			Redraw();
 		}
 
@@ -81,8 +136,7 @@ namespace MapEditor.Views
 			Focus(); // ensure we get move events
 
 			_isPainting = true;
-			PaintAt(e.GetPosition(this));
-			Console.WriteLine("Painting?");
+			PaintAt(e.GetPosition(Surface));
 		}
 
 		private void OnMouseMove(object sender, MouseEventArgs e)
@@ -92,7 +146,7 @@ namespace MapEditor.Views
 
 			if (e.LeftButton == MouseButtonState.Pressed)
 			{
-				PaintAt(e.GetPosition(this));
+				PaintAt(e.GetPosition(Surface));
 			}
 			else
 			{
@@ -102,7 +156,11 @@ namespace MapEditor.Views
 
 		private void PaintAt(Point p)
 		{
-			if (_map == null || _renderer == null)
+			if (_map == null || _renderer == null || Surface == null)
+				return;
+
+			// p is relative to the Image (Surface). If pointer is outside image, ignore.
+			if (p.X < 0 || p.Y < 0 || p.X >= Surface.ActualWidth || p.Y >= Surface.ActualHeight)
 				return;
 
 			var tileDef = EditorState.SelectedTile;
@@ -119,7 +177,7 @@ namespace MapEditor.Views
 				return;
 
 			// For now, always paint on current floor (_floor)
-			_map.Tiles[x, _floor, z] = new TileId(tileDef.Id);
+			_map.Tiles[x, _floor, z] = TileId.From(tileDef.Id, EditorState.SelectedRotation, EditorState.SelectedVariant);
 
 			Redraw();
 		}

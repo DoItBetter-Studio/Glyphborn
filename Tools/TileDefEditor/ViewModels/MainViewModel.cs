@@ -31,6 +31,8 @@ namespace TileDefEditor.ViewModels
 		public ICommand SaveAsCommand { get; }
 		public ICommand ExitCommand { get; }
 
+		public ICommand AddTileCommand { get; }
+
 		public MainViewModel()
 		{
 			_docService = new TileDefDocumentService();
@@ -42,6 +44,8 @@ namespace TileDefEditor.ViewModels
 			SaveCommand = new RelayCommand(_ => SaveFile());
 			SaveAsCommand = new RelayCommand(_ => SaveFileAs());
 			ExitCommand = new RelayCommand(_ => Application.Current.Shutdown());
+
+			AddTileCommand = new RelayCommand(_ => AddTile());
 		}
 
 		private void NewFile()
@@ -78,6 +82,30 @@ namespace TileDefEditor.ViewModels
 
 			_docService.CurrentPath = file;
 			Database.Save(file);
+		}
+
+		// Creates a new TileDef, adds it to Database and the list VM, and selects it.
+		private void AddTile()
+		{
+			// Determine a new unique id (simple incremental strategy)
+			ushort newId = 1;
+			if (Database.Tiles.Count > 0)
+			{
+				newId = (ushort) (Database.Tiles.Max(t => (int) t.Id) + 1);
+				if (newId == 0) newId = 1; // guard against overflow
+			}
+
+			var def = new TileDef
+			{
+				Id = newId,
+				Name = $"Tile {newId}"
+			};
+
+			Database.Tiles.Add(def);
+
+			var vm = new TileDefViewModel(def);
+			TileList.Tiles.Add(vm);
+			TileList.SelectedTile = vm;
 		}
 	}
 }
