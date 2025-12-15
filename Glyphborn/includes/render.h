@@ -4,8 +4,8 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-#define FB_WIDTH		480
-#define FB_HEIGHT		320
+#define FB_WIDTH		640
+#define FB_HEIGHT		360
 #define MAX_VERTICES	4096
 
 extern uint32_t framebuffer[FB_WIDTH * FB_HEIGHT];

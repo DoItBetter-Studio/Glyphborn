@@ -90,6 +90,7 @@ coverage.xml
 
 # IDEs and editors
 .vscode/
+.buildmeta/
 .idea/
 *.swp
 *.swo

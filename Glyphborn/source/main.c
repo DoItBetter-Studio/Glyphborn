@@ -18,7 +18,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 int main()
 {
 #endif
-
 	PlatformWindowDesc window = { 0 };
 	window.width = 1280;
 	window.height = 720;

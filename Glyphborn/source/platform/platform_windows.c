@@ -1,7 +1,7 @@
 #ifdef _WIN32
 
 #include "platform.h"
-#include "build_info.h"
+#include "version.h"
 #include <windows.h>
 #include <mmsystem.h>
 #include <stdint.h>
@@ -38,7 +38,7 @@ void platform_init(const PlatformWindowDesc* desc)
 
 	const char *className = "GameWindow";
 	char title[128];
-	snprintf(title, sizeof(title), "%s v%s", desc->title, BUILD_FULL_VERSION);
+	snprintf(title, sizeof(title), "%s v%s", desc->title, gb_version);
 
 	WNDCLASS wc = { 0 };
 	wc.lpfnWndProc = window_proc;

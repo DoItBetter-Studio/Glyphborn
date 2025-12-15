@@ -93,7 +93,9 @@ void render_blend_ui_over_game()
 void render_present(void)
 {
 	RECT rect;
-	GetClientRect(WindowFromDC(hdcWindow), &rect);
+	HWND hwnd = WindowFromDC(hdcWindow);
+	GetClientRect(hwnd, &rect);
+
 	int window_width = rect.right - rect.left;
 	int window_height = rect.bottom - rect.top;
 

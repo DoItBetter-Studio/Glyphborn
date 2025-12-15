@@ -11,7 +11,7 @@
 #include <unistd.h>
 
 #include "platform.h"
-#include "build_info.h"
+#include "version.h"
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
 #include <stdint.h>
@@ -52,7 +52,7 @@ void platform_init(const PlatformWindowDesc* desc)
 
 	XStoreName(display, window, desc->title);
 	char title[128];
-	snprintf(title, sizeof(title), "%s v%s", desc->title, BUILD_FULL_VERSION);
+	snprintf(title, sizeof(title), "%s v%s", desc->title, gb_version);
 	XStoreName(display, window, title);
 
 	XSelectInput(display, window, ExposureMask | KeyPress | KeyRelease | StructureNotifyMask);
