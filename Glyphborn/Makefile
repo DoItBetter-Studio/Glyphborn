@@ -56,7 +56,7 @@ META_REV_FILE   := $(META_DIR)/build_revision
 META_NEXT_REV   := $(META_DIR)/next_revision
 META_VER_TRACK  := $(META_DIR)/last_version
 META_CHECK_FILE := $(META_DIR)/last_source_hash
-META_LAST_FILE  := $(META_DIR)/last_success.txt
+BUILD_STATE		:= $(META_DIR)/build_state.stamp
 
 $(shell mkdir -p $(META_DIR) >/dev/null 2>&1)
 
@@ -222,7 +222,7 @@ ALL_TARGETS := $(foreach D,$(DISTROS), \
 # ==========================================================
 # 🏗 Default Rule
 # ==========================================================
-all: preload_revision precheck banner
+all: preload_revision $(BUILD_STATE) banner
 	@$(VERBOSE_MSG)
 	@$(DEBUG_MSG)
 	@$(MAKE) $(ALL_TARGETS)
@@ -242,21 +242,6 @@ preload_revision:
 	@if [ -f $(META_NEXT_REV) ]; then \
 		mv $(META_NEXT_REV) $(META_REV_FILE); \
 	fi
-
-
-# ==========================================================
-# 🛑 Pre-Build Skip Check
-# ==========================================================
-precheck:
-	@if [ -f $(META_CHECK_FILE) ]; then \
-		old="$$(cat $(META_CHECK_FILE))"; \
-	else \
-		old="none"; \
-	fi; \
-	if [ "$$old" = "$(SOURCE_HASH)" ]; then \
-		echo "🟡 ${YELLOW}No source changes detected — skipping build.${RESET}"; \
-		exit 1; \
-	fi; exit 0
 
 
 # ==========================================================
@@ -312,20 +297,25 @@ $(BUILD_BASE)/%/win64/glyphborn_win64.exe: $(OBJ_WIN64)
 	@echo "   ${GREEN}✔ Built → $@${RESET}"
 
 
+$(BUILD_STATE):
+	@echo "VERSION=$(VERSION)"			> $@
+	@echo "Revision=$(BUILD_REV)"		>> $@
+	@echo "HASH=$(SOURCE_HASH)"			>> $@
+
 # ==========================================================
 # 🧱 Compilation Rules
 # ==========================================================
-$(OBJDIR_LINUX)/%.o: source/%.c
+$(OBJDIR_LINUX)/%.o: source/%.c $(BUILD_STATE)
 	@mkdir -p $(dir $@)
 	@printf "🔧 ${GRAY}Compiling (Linux): %s${RESET}\n" $<
 	@$(CC_LINUX) $(CFLAGS_LIN) $(CFLAGS_DEBUG) $(CFLAGS_VERSION) -c $< -o $@
 
-$(OBJDIR_WIN32)/%.o: source/%.c
+$(OBJDIR_WIN32)/%.o: source/%.c $(BUILD_STATE)
 	@mkdir -p $(dir $@)
 	@printf "🔧 ${GRAY}Compiling (Win32): %s${RESET}\n" $<
 	@$(CC_WIN32) $(CFLAGS_BASE) $(CFLAGS_DEBUG) $(CFLAGS_VERSION) -D_WIN32 -c $< -o $@
 
-$(OBJDIR_WIN64)/%.o: source/%.c
+$(OBJDIR_WIN64)/%.o: source/%.c $(BUILD_STATE)
 	@mkdir -p $(dir $@)
 	@printf "🔧 ${GRAY}Compiling (Win64): %s${RESET}\n" $<
 	@$(CC_WIN64) $(CFLAGS_BASE) $(CFLAGS_DEBUG) $(CFLAGS_VERSION) -D_WIN32 -D_WIN64 -c $< -o $@
