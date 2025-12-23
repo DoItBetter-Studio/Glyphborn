@@ -16,7 +16,7 @@ namespace Glyphborn.Mapper
 		private EditorState _editorState = new();
 		private Panel _canvasHost;
 		private MapCanvasControl _mapCanvasControl;
-		private TableLayoutPanel _tilesetColumn;
+		private TableLayoutPanel? _tilesetColumn;
 
 		public MapperForm()
 		{
@@ -181,7 +181,7 @@ namespace Glyphborn.Mapper
 
 		void BindMap(MapDocument map)
 		{
-			_tilesetColumn.SuspendLayout();
+			_tilesetColumn!.SuspendLayout();
 			_tilesetColumn.Controls.Clear();
 			_tilesetColumn.RowStyles.Clear();
 
@@ -196,7 +196,7 @@ namespace Glyphborn.Mapper
 			{
 				var ts = map.Tilesets[i];
 
-				var pane = new TilesetPane(ts.Name, i, ts.Tiles.ToArray(), _editorState);
+				var pane = new TilesetPane(ts.Name, i, ts, _editorState);
 
 				_tilesetColumn.Controls.Add(pane, 0, i);
 			}

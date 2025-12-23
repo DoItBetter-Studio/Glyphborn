@@ -216,7 +216,8 @@ namespace Glyphborn.Mapper
 			AutoScaleDimensions = new SizeF(7F, 15F);
 			AutoScaleMode = AutoScaleMode.Font;
 			BackColor = SystemColors.ControlDarkDark;
-			ClientSize = new Size(800, 450);
+			ClientSize = new Size(1280, 720);
+			StartPosition = FormStartPosition.CenterScreen;
 			Controls.Add(menuStrip);
 			Icon = (Icon) resources.GetObject("$this.Icon");
 			MainMenuStrip = menuStrip;

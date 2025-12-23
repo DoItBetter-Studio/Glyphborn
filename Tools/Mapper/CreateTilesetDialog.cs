@@ -7,7 +7,7 @@ namespace Glyphborn.Mapper
 {
 	sealed class CreateTilesetDialog : Form
 	{
-		public string TilesetName { get; private set; }
+		public string? TilesetName { get; private set; }
 		public TilesetType TilesetType { get; private set; }
 
 		TextBox _nameBox;

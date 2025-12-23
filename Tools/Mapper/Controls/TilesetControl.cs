@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Windows.Forms;
 
+using Glyphborn.Mapper.Editor;
 using Glyphborn.Mapper.Tiles;
 
 namespace Glyphborn.Mapper.Controls
@@ -81,9 +82,10 @@ namespace Glyphborn.Mapper.Controls
 		{
 			var rect = new Rectangle(x, y, TilePreviewSize, TilePreviewSize);
 
-			if (tile.TopTexture != null)
+			if (tile.Primitive != null)
 			{
-				g.DrawImage(tile.TopTexture, rect);
+				var thumb = TilePreviewer.GetThumbnail(tile.Primitive.Texture, TilePreviewSize, TilePreviewSize);
+				g.DrawImage(thumb, rect);
 			}
 			else
 			{

@@ -77,13 +77,14 @@ namespace Glyphborn.Mapper.Controls
 
 			var def = tileset.Tiles[tileRef.TileId];
 
-			if (def.TopTexture == null)
+			if (def.Primitive == null)
 				return;
 
 			int px = ox + x * tileSize;
 			int py = oy + y * tileSize;
 
-			g.DrawImage(def.TopTexture, new Rectangle(px, py, tileSize, tileSize));
+			var preview = TilePreviewer.GetPreview(def.Primitive.Texture);
+			g.DrawImage(preview, new Rectangle(px, py, tileSize, tileSize));
 		}
 
 		private void DrawGrid(Graphics g, int tileSize, int ox, int oy)

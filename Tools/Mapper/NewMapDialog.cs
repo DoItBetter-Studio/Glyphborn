@@ -185,12 +185,12 @@ namespace Glyphborn.Mapper
 				return;
 			}
 
-			Regional = Tileset.LoadBinary((string) _regionalList.SelectedItems[0].Tag);
-			Local = Tileset.LoadBinary((string) _localList.SelectedItems[0].Tag);
+			Regional = TilesetSerializer.LoadBinary((string) _regionalList.SelectedItems[0].Tag!);
+			Local = TilesetSerializer.LoadBinary((string) _localList.SelectedItems[0].Tag!);
 
-			if (_enableInterior.Checked && _interiorList.SelectedItems.Count == 0)
+			if (_enableInterior.Checked && _interiorList.SelectedItems.Count != 0)
 			{
-				Interior = Tileset.LoadBinary((string)_interiorList.SelectedItems[0].Tag);
+				Interior = TilesetSerializer.LoadBinary((string)_interiorList.SelectedItems[0].Tag!);
 			}
 
 			DialogResult = DialogResult.OK;
@@ -212,7 +212,7 @@ namespace Glyphborn.Mapper
 
 			var tileset = new Tileset
 			{
-				Name = dlg.TilesetName,
+				Name = dlg.TilesetName!,
 				Type = dlg.TilesetType
 			};
 
@@ -224,7 +224,7 @@ namespace Glyphborn.Mapper
 				Category = "System"
 			});
 
-			tileset.SaveBinary(path);
+			TilesetSerializer.SaveBinary(tileset);
 			LoadTilesets();
 		}
 	}

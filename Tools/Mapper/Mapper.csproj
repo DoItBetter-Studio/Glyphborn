@@ -11,16 +11,4 @@
     <BaseOutputPath>$(SolutionDir)..\Glyphborn\tools\mapper</BaseOutputPath>
   </PropertyGroup>
 
-  <ItemGroup>
-    <None Update="Assets\Tiles\grass.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="Assets\Tiles\dirt.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="Assets\Tiles\path.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-  </ItemGroup>
-
 </Project>

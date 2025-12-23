@@ -16,9 +16,9 @@ namespace Glyphborn.Mapper.Tiles
 		// Rendering
 		public RenderPrimitive Primitive;
 
-		// Editor-only
-		public Bitmap? TopTexture;
-		public Bitmap? Thumbnail;
+		// Editor-only metadata
+		public string? MeshSourcePath;
+		public string? TextureSourcePath;
 	}
 
 	public sealed class Mesh
