@@ -8,6 +8,7 @@ namespace Glyphborn.Mapper.Editor
 	public sealed class MapDocument
 	{
 		public List<Tileset> Tilesets { get; } = new();
+		public string Name { get; set; }
 
 		public const int WIDTH = 32;
 		public const int HEIGHT = 32;
@@ -102,7 +103,7 @@ namespace Glyphborn.Mapper.Editor
 			return true;
 		}
 
-		public void SaveBinary(string path) => MapSerializer.SaveBinary(this, path);
+		public void SaveBinary() => MapSerializer.SaveBinary(this);
 
 		public static MapDocument LoadBinary(string path) => MapSerializer.LoadBinary(path);
 

@@ -1,6 +1,4 @@
-﻿using System;
-using System.IO;
-using System.Linq;
+﻿using System.IO;
 using System.Text;
 
 using Glyphborn.Mapper.Tiles;
@@ -9,13 +7,28 @@ namespace Glyphborn.Mapper.Editor
 {
 	internal static class MapSerializer
 	{
-		public static void SaveBinary(MapDocument doc, string path)
+		private const uint MAGIC = 0x204D4247;  // "GBM "
+		private const ushort VERSION = 1;
+
+		public static void SaveBinary(MapDocument doc)
 		{
+			string path = Path.Combine(EditorPaths.Maps, $"{doc.Name}.gbm");
+
+			// Ensure maps folder exists
+			var dir = Path.GetDirectoryName(path) ?? EditorPaths.Maps;
+			if (!Directory.Exists(dir))
+				Directory.CreateDirectory(dir);
+
 			using (var fs = new FileStream(path, FileMode.Create))
 			using (var bw = new BinaryWriter(fs))
 			{
-				// Write tileset count
-				bw.Write((byte) doc.Tilesets.Count);
+				bw.Write(MAGIC);
+				bw.Write(VERSION);
+				//bw.Write((byte) doc.Tilesets.Count);
+
+				byte[] nameBytes = Encoding.UTF8.GetBytes(doc.Name);
+				bw.Write((ushort)  nameBytes.Length);
+				bw.Write(nameBytes);
 
 				// Write tileset paths (relative to Assets/)
 				foreach (var tileset in doc.Tilesets)
@@ -63,7 +76,22 @@ namespace Glyphborn.Mapper.Editor
 			{
 				var doc = new MapDocument();
 
+				// Verify header
+				uint magic = br.ReadUInt32();
+
+				if (magic != MAGIC)
+					throw new InvalidDataException("Invalid tileset file");
+
+				ushort version = br.ReadUInt16();
+				if (version != VERSION)
+					throw new InvalidDataException($"Unsupported version: {version}");
+
 				byte tilesetCount = br.ReadByte();
+
+				byte[] nameBytes = br.ReadBytes(br.ReadUInt16());
+				string mapName = Encoding.UTF8.GetString(nameBytes).Trim('\0');
+
+				doc.Name = mapName;
 
 				for (byte i = 0; i < tilesetCount; i++)
 				{

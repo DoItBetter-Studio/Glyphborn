@@ -29,5 +29,7 @@ namespace Glyphborn.Mapper.Colors
 		// Makes the horizontal separator lines dark
 		public override Color SeparatorDark => Color.Black;
 		public override Color SeparatorLight => Color.Transparent;
+
+		public override Color ToolStripBorder => Color.Black;
 	}
 }

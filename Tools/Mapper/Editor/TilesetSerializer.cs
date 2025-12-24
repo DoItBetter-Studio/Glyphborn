@@ -44,7 +44,7 @@ namespace Glyphborn.Mapper.Editor
 				_ => throw new ArgumentOutOfRangeException()
 			};
 
-			return Path.Combine(TilesetPaths.Root, folder, $"{tileset.Name}.gbts");
+			return Path.Combine(EditorPaths.Tilesets, folder, $"{tileset.Name}.gbts");
 		}
 
 		private static void WriteTile(BinaryWriter bw, TileDefinition tile)
@@ -98,7 +98,7 @@ namespace Glyphborn.Mapper.Editor
 		{
 			string fullPath = Path.IsPathRooted(path)
 				? path
-				: Path.Combine(TilesetPaths.Root, path);
+				: Path.Combine(EditorPaths.Tilesets, path);
 
 			using (var fs = new FileStream(fullPath, FileMode.Open))
 			using (var br = new BinaryReader(fs))

@@ -1,0 +1,32 @@
+# Blender 5.0.1 MTL File: 'None'
+# www.blender.org
+
+newmtl grass01
+Ns 0.000000
+Ka 1.000000 1.000000 1.000000
+Ks 0.000000 0.000000 0.000000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+illum 1
+map_Kd C:/Users/Anthony/OneDrive/Documents/grass01.png
+map_d C:/Users/Anthony/OneDrive/Documents/grass01.png
+
+newmtl wall01_d
+Ns 0.000000
+Ka 1.000000 1.000000 1.000000
+Ks 0.000000 0.000000 0.000000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+illum 1
+map_Kd C:/Users/Anthony/OneDrive/Documents/wall01_d.png
+map_d C:/Users/Anthony/OneDrive/Documents/wall01_d.png
+
+newmtl wall01_g
+Ns 0.000000
+Ka 1.000000 1.000000 1.000000
+Ks 0.000000 0.000000 0.000000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+illum 1
+map_Kd C:/Users/Anthony/OneDrive/Documents/wall01_g.png
+map_d C:/Users/Anthony/OneDrive/Documents/wall01_g.png

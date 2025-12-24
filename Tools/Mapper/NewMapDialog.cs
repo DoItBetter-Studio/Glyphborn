@@ -13,11 +13,13 @@ namespace Glyphborn.Mapper
 		public Tileset? Regional { get; private set; }
 		public Tileset? Local { get; private set; }
 		public Tileset? Interior { get; private set; }
+		public string? MapName { get; private set; }
 
 		private ListView _regionalList;
 		private ListView _localList;
 		private ListView _interiorList;
 		private CheckBox _enableInterior;
+		private TextBox _mapNameTextBox;
 
 		public NewMapDialog()
 		{
@@ -59,9 +61,10 @@ namespace Glyphborn.Mapper
 			{
 				Dock = DockStyle.Fill,
 				ColumnCount = 3,
-				RowCount = 2
+				RowCount = 3
 			};
 
+			root.RowStyles.Add(new RowStyle(SizeType.AutoSize));
 			root.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
 			root.RowStyles.Add(new RowStyle(SizeType.Absolute, 50));
 
@@ -69,13 +72,41 @@ namespace Glyphborn.Mapper
 			root.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 33));
 			root.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 34));
 
+			var mapNameContainer = new FlowLayoutPanel
+			{
+				Dock = DockStyle.Fill,
+				FlowDirection = FlowDirection.LeftToRight,
+				Height = 30,
+			};
+
+			var mapLabel = new Label
+			{
+				Text = "Name:",
+				ForeColor = Color.White,
+				Margin = new Padding(10),
+				Width = 50
+			};
+
+			_mapNameTextBox = new TextBox
+			{
+				Width = 200
+			};
+
+			mapNameContainer.Controls.Add(mapLabel);
+			mapNameContainer.Controls.Add(_mapNameTextBox);
+
+
+
+			root.Controls.Add(mapNameContainer, 0, 0);
+			root.SetColumnSpan(mapNameContainer, 3);
+
 			_regionalList = CreateTilesetList();
 			_localList = CreateTilesetList();
 			_interiorList = CreateTilesetList();
 
-			root.Controls.Add(Wrap("Regional", _regionalList), 0, 0);
-			root.Controls.Add(Wrap("Local", _localList), 1, 0);
-			root.Controls.Add(Wrap("Interior", _interiorList), 2, 0);
+			root.Controls.Add(Wrap("Regional", _regionalList), 0, 1);
+			root.Controls.Add(Wrap("Local", _localList), 1, 1);
+			root.Controls.Add(Wrap("Interior", _interiorList), 2, 1);
 
 			_enableInterior = new CheckBox
 			{
@@ -123,12 +154,16 @@ namespace Glyphborn.Mapper
 			createBtn.FlatAppearance.BorderSize = 1;
 			createBtn.Click += OnCreateMap;
 
+			// EDIT!
+
 			var bottom = new Panel { Dock = DockStyle.Fill };
 			bottom.Controls.Add(_enableInterior);
 			bottom.Controls.Add(createTilesetBtn);
 			bottom.Controls.Add(createBtn);
 
-			root.Controls.Add(bottom, 0, 1);
+			// END EDIT!
+
+			root.Controls.Add(bottom, 0, 2);
 			root.SetColumnSpan(bottom, 3);
 
 			Controls.Add(root);
@@ -155,9 +190,9 @@ namespace Glyphborn.Mapper
 
 		private void LoadTilesets()
 		{
-			Populate(_regionalList, TilesetPaths.Regional);
-			Populate(_localList, TilesetPaths.Local);
-			Populate(_interiorList, TilesetPaths.Interior);
+			Populate(_regionalList, EditorPaths.Regional);
+			Populate(_localList, EditorPaths.Local);
+			Populate(_interiorList, EditorPaths.Interior);
 		}
 
 		private void Populate(ListView lv, string path)
@@ -185,6 +220,12 @@ namespace Glyphborn.Mapper
 				return;
 			}
 
+			if (string.IsNullOrEmpty(_mapNameTextBox.Text))
+			{
+				MessageBox.Show("Map Name is required.");
+				return;
+			}
+
 			Regional = TilesetSerializer.LoadBinary((string) _regionalList.SelectedItems[0].Tag!);
 			Local = TilesetSerializer.LoadBinary((string) _localList.SelectedItems[0].Tag!);
 
@@ -192,6 +233,8 @@ namespace Glyphborn.Mapper
 			{
 				Interior = TilesetSerializer.LoadBinary((string)_interiorList.SelectedItems[0].Tag!);
 			}
+
+			MapName = _mapNameTextBox.Text.Trim();
 
 			DialogResult = DialogResult.OK;
 			Close();
@@ -204,9 +247,9 @@ namespace Glyphborn.Mapper
 			if (dlg.ShowDialog(this) != DialogResult.OK)
 				return;
 
-			string basePath = dlg.TilesetType == TilesetType.Regional ? TilesetPaths.Regional :
-							  dlg.TilesetType == TilesetType.Local ? TilesetPaths.Local :
-																	TilesetPaths.Interior;
+			string basePath = dlg.TilesetType == TilesetType.Regional ? EditorPaths.Regional :
+							  dlg.TilesetType == TilesetType.Local ? EditorPaths.Local :
+																	EditorPaths.Interior;
 
 			string path = Path.Combine(basePath, $"{dlg.TilesetName}.gbts");
 

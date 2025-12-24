@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Drawing;
+using System.Drawing.Imaging;
 using System.Windows.Forms;
 
 using Glyphborn.Mapper.Editor;
@@ -52,7 +53,29 @@ namespace Glyphborn.Mapper.Controls
 			{
 				for (int x = 0; x < MapDocument.WIDTH; x++)
 				{
-					DrawTile(g, x, y, tileSize, ox, oy);
+					// Draw underlying layer faintly
+					for (byte layer = 0; layer < State.CurrentLayer; layer++)
+					{
+						float distance = State.CurrentLayer - layer;
+						float fadeStart = 0.0f;   // layers within 2 stay fully visible
+						float fadeRange = 8.0f;   // fade over the next 6 layers
+
+						float alpha;
+
+						if (distance <= fadeStart)
+						{
+							alpha = 1.0f; // fully visible
+						}
+						else
+						{
+							float t = (distance - fadeStart) / fadeRange;
+							alpha = 1.0f - Math.Clamp(t, 0.25f, 1f);
+						}
+
+						DrawTile(g, x, y, tileSize, ox, oy, layer, alpha);
+					}
+
+					DrawTile(g, x, y, tileSize, ox, oy, State.CurrentLayer);
 				}
 			}
 
@@ -60,9 +83,9 @@ namespace Glyphborn.Mapper.Controls
 				DrawGrid(g, tileSize, ox, oy);
 		}
 
-		private void DrawTile(Graphics g, int x, int y, int tileSize, int ox, int oy)
+		private void DrawTile(Graphics g, int x, int y, int tileSize, int ox, int oy, int layer, float alpha = 1.0f)
 		{
-			var tileRef = Document!.Tiles[State!.CurrentLayer][y][x];
+			var tileRef = Document!.Tiles[layer][y][x];
 
 			if (tileRef.TileId == 0)
 				return;
@@ -84,7 +107,29 @@ namespace Glyphborn.Mapper.Controls
 			int py = oy + y * tileSize;
 
 			var preview = TilePreviewer.GetPreview(def.Primitive.Texture);
-			g.DrawImage(preview, new Rectangle(px, py, tileSize, tileSize));
+
+			if (alpha < 1.0f)
+			{
+				ColorMatrix cm = new ColorMatrix
+				{
+					Matrix33 = alpha
+				};
+
+				using var ia = new ImageAttributes();
+				ia.SetColorMatrix(cm);
+
+				g.DrawImage(
+					preview,
+					new Rectangle(px, py, tileSize, tileSize),
+					0, 0, preview.Width, preview.Height,
+					GraphicsUnit.Pixel,
+					ia
+				);
+			}
+			else
+			{
+				g.DrawImage(preview, new Rectangle(px, py, tileSize, tileSize));
+			}
 		}
 
 		private void DrawGrid(Graphics g, int tileSize, int ox, int oy)

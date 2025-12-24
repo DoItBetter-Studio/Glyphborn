@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Drawing;
 using System.Numerics;
 
 namespace Glyphborn.Mapper.Tiles
@@ -11,7 +10,7 @@ namespace Glyphborn.Mapper.Tiles
 		public string Name = "";
 		public string Category = "Default";
 
-		public CollisionType Collision;
+		public CollisionType Collision = CollisionType.None;
 
 		// Rendering
 		public RenderPrimitive Primitive;

@@ -9,6 +9,7 @@
     <AssemblyName>$(MSBuildProjectName)</AssemblyName>
     <RootNamespace>Glyphborn.Mapper</RootNamespace>
     <BaseOutputPath>$(SolutionDir)..\Glyphborn\tools\mapper</BaseOutputPath>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
 
 </Project>

@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Drawing;
 using System.Windows.Forms;
 
@@ -14,7 +13,7 @@ namespace Glyphborn.Mapper
 	{
 		private MapDocument? _mapDocument;
 		private EditorState _editorState = new();
-		private Panel _canvasHost;
+		private Panel _clientHost;
 		private MapCanvasControl _mapCanvasControl;
 		private TableLayoutPanel? _tilesetColumn;
 
@@ -30,30 +29,33 @@ namespace Glyphborn.Mapper
 
 			ApplyDarkThemeToMenu(menuStrip.Items);
 
-			this.BackColor = Color.FromArgb(45, 45, 48);
+			this.BackColor = Color.Black;
 			this.ForeColor = Color.White;
 		}
 
 		private void MapperForm_Load(object sender, EventArgs e)
 		{
-			_canvasHost = new Panel
+			_clientHost = new Panel
 			{
 				Dock = DockStyle.Fill,
 				AutoScroll = true,
-				BackColor = Color.FromArgb(30, 30, 30)
+				BackColor = Color.FromArgb(30, 30, 30),
+				BorderStyle = BorderStyle.None,
+				Padding = new Padding(0, 2, 0, 0)
 			};
 
 			var root = new TableLayoutPanel
 			{
 				Dock = DockStyle.Fill,
-				ColumnCount = 3,
+				ColumnCount = 4,
 				RowCount = 1,
 				BackColor = Color.FromArgb(45, 45, 48)
 			};
 
-			root.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 266));
-			root.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 120));
+			root.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 276));
+			root.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 134));
 			root.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
+			root.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 400));
 
 			_mapCanvasControl = new MapCanvasControl
 			{
@@ -84,7 +86,7 @@ namespace Glyphborn.Mapper
 
 			layersFlow.Controls.Clear();
 
-			for (int i = 0; i < 32; i++)
+			for (int i = 0; i < MapDocument.LAYERS; i++)
 			{
 				int layerIndex = i;
 
@@ -112,6 +114,8 @@ namespace Glyphborn.Mapper
 				layersFlow.Controls.Add(btn);
 			}
 
+			layersFlow.Controls[0].BackColor = Color.DodgerBlue;
+
 			_tilesetColumn = new TableLayoutPanel
 			{
 				Dock = DockStyle.Fill,
@@ -120,10 +124,9 @@ namespace Glyphborn.Mapper
 
 			root.Controls.Add(_tilesetColumn, 0, 0);
 
-			_canvasHost.Controls.Add(root);
-			Controls.Add(_canvasHost);
-			_canvasHost.BringToFront();
-
+			_clientHost.Controls.Add(root);
+			Controls.Add(_clientHost);
+			_clientHost.BringToFront();
 
 			_mapDocument = CreateStartupMap();
 			SetMap(_mapDocument);
@@ -213,34 +216,17 @@ namespace Glyphborn.Mapper
 				var map = new MapDocument();
 				map.Tilesets.Add(dlg.Regional!);
 				map.Tilesets.Add(dlg.Local!);
+				map.Name = dlg.MapName!;
 
 				if (dlg.Interior != null)
 					map.Tilesets.Add(dlg.Interior);
 
 				SetMap(map);
+				_mapDocument!.IsPreview = false;
 
 				saveMapToolStripMenuItem.Enabled = true;
 				saveMapAsToolStripMenuItem.Enabled = true;
 				exportMapToolStripMenuItem.Enabled = true;
-			}
-		}
-
-
-		private void SaveMap_Click(Object sender, EventArgs e)
-		{
-			if (_mapDocument!.IsPreview || _mapDocument == null)
-				return;
-
-			var sfd = new SaveFileDialog
-			{
-				Filter = "Map Binary|*.gbm",
-				FileName = "chunk_0000_0000.gbm"
-			};
-
-			if (sfd.ShowDialog() == DialogResult.OK)
-			{
-				_mapDocument.SaveBinary(sfd.FileName);
-				MessageBox.Show("Map Saved!", "Success");
 			}
 		}
 
@@ -252,13 +238,111 @@ namespace Glyphborn.Mapper
 			{
 				_mapDocument = MapDocument.LoadBinary(ofd.FileName);
 				SetMap(_mapDocument);
+
+				saveMapToolStripMenuItem.Enabled = true;
+				saveMapAsToolStripMenuItem.Enabled = true;
+				exportMapToolStripMenuItem.Enabled = true;
 			}
+		}
+
+		private void SaveMap_Click(object sender, EventArgs e)
+		{
+			if (_mapDocument == null || _mapDocument.IsPreview)
+				return;
+
+			_mapDocument.SaveBinary();
+			MessageBox.Show("Map Saved!", "Success");
+		}
+
+		private void SaveMapAs_Click(object sender, EventArgs e)
+		{
+			var sad = new SaveAsDialog();
+
+			if (sad.ShowDialog() == DialogResult.OK)
+			{
+				_mapDocument!.Name = sad.MapName!;
+				MapSerializer.SaveBinary(_mapDocument);
+			}
+		}
+
+		private void Export_Click(object sender, EventArgs e)
+		{
+			MessageBox.Show("Export is not currently setup.\nThis will be apart of a future update.", "Export", MessageBoxButtons.OK, MessageBoxIcon.Question);
+		}
+
+		private void Exit_Click(object sender, EventArgs e)
+		{
+			Application.Exit();
 		}
 
 		private void ShowGrid_Click(object sender, EventArgs e)
 		{
 			_editorState.ShowGrid = !_editorState.ShowGrid;
 			_mapCanvasControl.Refresh();
+		}
+
+		private void _3DView_Click(object sender, EventArgs e)
+		{
+			if (_mapDocument == null)
+				return;
+
+			var dlg = new _3DViewDialog(_mapDocument);
+			dlg.Show();
+		}
+
+		// Prompt to save when closing. Cancelable.
+		protected override void OnFormClosing(FormClosingEventArgs e)
+		{
+			base.OnFormClosing(e);
+
+			// If no document or it's preview, nothing to do
+			if (_mapDocument == null || _mapDocument.IsPreview)
+				return;
+
+			if (!_mapDocument.IsDirty)
+				return;
+
+			var result = MessageBox.Show(
+				"You have unsaved changes. Save before exit?",
+				"Unsaved Changes",
+				MessageBoxButtons.YesNoCancel,
+				MessageBoxIcon.Warning,
+				MessageBoxDefaultButton.Button1
+			);
+
+			if (result == DialogResult.Cancel)
+			{
+				// Cancel the close
+				e.Cancel = true;
+				return;
+			}
+
+			if (result == DialogResult.Yes)
+			{
+				try
+				{
+					_mapDocument.SaveBinary();
+				}
+				catch (Exception ex)
+				{
+					MessageBox.Show($"Failed to save map: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+				}
+			}
+
+			// if DialogResult.No we proceed and close
+		}
+
+		// Final cleanup after form closes
+		protected override void OnFormClosed(FormClosedEventArgs e)
+		{
+			// Clear editor-only caches and dispose resources
+			try
+			{
+				TilePreviewer.ClearCache();
+			}
+			catch { }
+
+			base.OnFormClosed(e);
 		}
 	}
 }

@@ -55,6 +55,26 @@ namespace Glyphborn.Mapper
 			_tilesetPath = tilesetPath;
 		}
 
+		protected override void OnFormClosing(FormClosingEventArgs e)
+		{
+			base.OnFormClosing(e);
+
+			if (_isDirty && DialogResult != DialogResult.OK)
+			{
+				var result = MessageBox.Show(
+					"You have unsaved changes. Discard them?",
+					"Unsaved Changes",
+					MessageBoxButtons.YesNo,
+					MessageBoxIcon.Warning
+				);
+
+				if (result == DialogResult.No)
+				{
+					e.Cancel = true;
+				}
+			}
+		}
+
 		private void BuildUI()
 		{
 			var mainLayout = new TableLayoutPanel

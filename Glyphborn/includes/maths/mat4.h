@@ -2,6 +2,7 @@
 #define MAT4_H
 
 #include "vec3.h"
+#include "quat.h"
 
 typedef struct
 {

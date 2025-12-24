@@ -56,6 +56,7 @@ namespace Glyphborn.Mapper
 			helpToolStripMenuItem = new ToolStripMenuItem();
 			shortcutsToolStripMenuItem = new ToolStripMenuItem();
 			aboutToolStripMenuItem = new ToolStripMenuItem();
+			dViewToolStripMenuItem = new ToolStripMenuItem();
 			menuStrip.SuspendLayout();
 			SuspendLayout();
 			// 
@@ -65,7 +66,7 @@ namespace Glyphborn.Mapper
 			menuStrip.Items.AddRange(new ToolStripItem[] { fileToolStripMenuItem, editToolStripMenuItem, viewToolStripMenuItem, helpToolStripMenuItem });
 			menuStrip.Location = new Point(0, 0);
 			menuStrip.Name = "menuStrip";
-			menuStrip.Size = new Size(800, 24);
+			menuStrip.Size = new Size(1280, 24);
 			menuStrip.TabIndex = 0;
 			menuStrip.Text = "menuStrip1";
 			// 
@@ -73,7 +74,7 @@ namespace Glyphborn.Mapper
 			// 
 			fileToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { newMapToolStripMenuItem, openMapToolStripMenuItem, saveMapToolStripMenuItem, saveMapAsToolStripMenuItem, exportMapToolStripMenuItem, toolStripSeparator1, exitToolStripMenuItem });
 			fileToolStripMenuItem.Name = "fileToolStripMenuItem";
-			fileToolStripMenuItem.Size = new Size(menuItemSize, 20);
+			fileToolStripMenuItem.Size = new Size(37, 20);
 			fileToolStripMenuItem.Text = "File";
 			// 
 			// newMapToolStripMenuItem
@@ -109,6 +110,7 @@ namespace Glyphborn.Mapper
 			saveMapAsToolStripMenuItem.ShortcutKeys =  Keys.Control | Keys.Shift | Keys.S;
 			saveMapAsToolStripMenuItem.Size = new Size(222, 22);
 			saveMapAsToolStripMenuItem.Text = "Save Map As...";
+			saveMapAsToolStripMenuItem.Click += SaveMapAs_Click;
 			// 
 			// exportMapToolStripMenuItem
 			// 
@@ -117,6 +119,7 @@ namespace Glyphborn.Mapper
 			exportMapToolStripMenuItem.ShortcutKeys =  Keys.Control | Keys.Shift | Keys.E;
 			exportMapToolStripMenuItem.Size = new Size(222, 22);
 			exportMapToolStripMenuItem.Text = "Export Map...";
+			exportMapToolStripMenuItem.Click += Export_Click;
 			// 
 			// toolStripSeparator1
 			// 
@@ -128,12 +131,13 @@ namespace Glyphborn.Mapper
 			exitToolStripMenuItem.Name = "exitToolStripMenuItem";
 			exitToolStripMenuItem.Size = new Size(222, 22);
 			exitToolStripMenuItem.Text = "Exit";
+			exitToolStripMenuItem.Click += Exit_Click;
 			// 
 			// editToolStripMenuItem
 			// 
 			editToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { undoToolStripMenuItem, redoToolStripMenuItem, fillLayerToolStripMenuItem, clearLayerToolStripMenuItem });
 			editToolStripMenuItem.Name = "editToolStripMenuItem";
-			editToolStripMenuItem.Size = new Size(menuItemSize, 20);
+			editToolStripMenuItem.Size = new Size(39, 20);
 			editToolStripMenuItem.Text = "Edit";
 			// 
 			// undoToolStripMenuItem
@@ -164,9 +168,9 @@ namespace Glyphborn.Mapper
 			// 
 			// viewToolStripMenuItem
 			// 
-			viewToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { showGridToolStripMenuItem, showTilePropertiesToolStripMenuItem, layerOverlayToolStripMenuItem });
+			viewToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { showGridToolStripMenuItem, showTilePropertiesToolStripMenuItem, layerOverlayToolStripMenuItem, dViewToolStripMenuItem });
 			viewToolStripMenuItem.Name = "viewToolStripMenuItem";
-			viewToolStripMenuItem.Size = new Size(menuItemSize, 20);
+			viewToolStripMenuItem.Size = new Size(44, 20);
 			viewToolStripMenuItem.Text = "View";
 			// 
 			// showGridToolStripMenuItem
@@ -176,7 +180,6 @@ namespace Glyphborn.Mapper
 			showGridToolStripMenuItem.Size = new Size(181, 22);
 			showGridToolStripMenuItem.Text = "Show Grid";
 			showGridToolStripMenuItem.Click += ShowGrid_Click;
-			showGridToolStripMenuItem.Checked = _editorState.ShowGrid;
 			// 
 			// showTilePropertiesToolStripMenuItem
 			// 
@@ -192,11 +195,18 @@ namespace Glyphborn.Mapper
 			layerOverlayToolStripMenuItem.Size = new Size(181, 22);
 			layerOverlayToolStripMenuItem.Text = "Layer Overlay";
 			// 
+			// dViewToolStripMenuItem
+			// 
+			dViewToolStripMenuItem.Name = "dViewToolStripMenuItem";
+			dViewToolStripMenuItem.Size = new Size(181, 22);
+			dViewToolStripMenuItem.Text = "3D View";
+			dViewToolStripMenuItem.Click += _3DView_Click;
+			// 
 			// helpToolStripMenuItem
 			// 
 			helpToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { shortcutsToolStripMenuItem, aboutToolStripMenuItem });
 			helpToolStripMenuItem.Name = "helpToolStripMenuItem";
-			helpToolStripMenuItem.Size = new Size(menuItemSize, 20);
+			helpToolStripMenuItem.Size = new Size(44, 20);
 			helpToolStripMenuItem.Text = "Help";
 			// 
 			// shortcutsToolStripMenuItem
@@ -217,11 +227,11 @@ namespace Glyphborn.Mapper
 			AutoScaleMode = AutoScaleMode.Font;
 			BackColor = SystemColors.ControlDarkDark;
 			ClientSize = new Size(1280, 720);
-			StartPosition = FormStartPosition.CenterScreen;
 			Controls.Add(menuStrip);
 			Icon = (Icon) resources.GetObject("$this.Icon");
 			MainMenuStrip = menuStrip;
 			Name = "MapperForm";
+			StartPosition = FormStartPosition.CenterScreen;
 			Text = "Mapper";
 			Load += MapperForm_Load;
 			menuStrip.ResumeLayout(false);
@@ -252,5 +262,6 @@ namespace Glyphborn.Mapper
 		private ToolStripMenuItem helpToolStripMenuItem;
 		private ToolStripMenuItem shortcutsToolStripMenuItem;
 		private ToolStripMenuItem aboutToolStripMenuItem;
+		private ToolStripMenuItem dViewToolStripMenuItem;
 	}
 }

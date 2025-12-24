@@ -13,11 +13,6 @@ namespace Glyphborn.Mapper
 		TextBox _nameBox;
 		RadioButton _regional, _local, _interior;
 
-		private void InitializeComponent()
-		{
-
-		}
-
 		public CreateTilesetDialog()
 		{
 			Text = "Create Tileset";
