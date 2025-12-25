@@ -67,6 +67,7 @@ ENV/
 # Distribution / packaging
 build/
 dist/
+Glyphborn/tools/
 *.egg-info/
 *.egg
 .eggs/

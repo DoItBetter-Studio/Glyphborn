@@ -9,7 +9,8 @@ namespace Glyphborn.Mapper.Controls
 {
 	public sealed class MapCanvasControl : Control
 	{
-		public MapDocument? Document;
+		public AreaDocument? AreaDocument;
+		public MapDocument? MapDocument;
 		public EditorState? State;
 
 		private bool _isPainting;
@@ -23,7 +24,7 @@ namespace Glyphborn.Mapper.Controls
 
 		private int ComputeTileSize()
 		{
-			if (Document == null)
+			if (MapDocument == null)
 				return 1;
 
 			int sizeX = ClientSize.Width / MapDocument.WIDTH;
@@ -36,7 +37,7 @@ namespace Glyphborn.Mapper.Controls
 		{
 			base.OnPaint(e);
 
-			if (Document == null || State == null)
+			if (MapDocument == null || State == null)
 				return;
 
 			var g = e.Graphics;
@@ -85,15 +86,15 @@ namespace Glyphborn.Mapper.Controls
 
 		private void DrawTile(Graphics g, int x, int y, int tileSize, int ox, int oy, int layer, float alpha = 1.0f)
 		{
-			var tileRef = Document!.Tiles[layer][y][x];
+			var tileRef = MapDocument!.Tiles[layer][y][x];
 
 			if (tileRef.TileId == 0)
 				return;
 
-			if (tileRef.Tileset >= Document.Tilesets.Count)
+			if (tileRef.Tileset >= AreaDocument.Tilesets.Count)
 				return;
 
-			var tileset = Document.Tilesets[tileRef.Tileset];
+			var tileset = AreaDocument.Tilesets[tileRef.Tileset];
 
 			if (tileRef.TileId >= tileset.Tiles.Count)
 				return;
@@ -154,7 +155,7 @@ namespace Glyphborn.Mapper.Controls
 
 		protected override void OnMouseDown(MouseEventArgs e)
 		{
-			Document?.BeginBatch();
+			MapDocument?.BeginBatch();
 			base.OnMouseDown(e);
 
 			if (e.Button == MouseButtons.Left)
@@ -183,14 +184,14 @@ namespace Glyphborn.Mapper.Controls
 
 		protected override void OnMouseUp(MouseEventArgs e)
 		{
-			Document?.EndBatch();
+			MapDocument?.EndBatch();
 			base.OnMouseUp(e);
 			_isPainting = false;
 		}
 
 		private void PaintTileAtMouse(int mouseX, int mouseY, bool erase = false)
 		{
-			if (Document == null || State == null || State.SelectedTile == null)
+			if (MapDocument == null || State == null || State.SelectedTile == null)
 				return;
 
 			int tileSize = ComputeTileSize();
@@ -207,7 +208,7 @@ namespace Glyphborn.Mapper.Controls
 
 			if (erase)
 			{
-				Document.SetTile(State.CurrentLayer, x, y, new TileRef
+				MapDocument.SetTile(State.CurrentLayer, x, y, new TileRef
 				{
 					Tileset = 0,
 					TileId = 0
@@ -217,7 +218,7 @@ namespace Glyphborn.Mapper.Controls
 			{
 				var sel = State.SelectedTile.Value;
 
-				Document.SetTile(State.CurrentLayer, x, y, new TileRef
+				MapDocument.SetTile(State.CurrentLayer, x, y, new TileRef
 				{
 					Tileset = sel.TilesetIndex,
 					TileId = sel.TileIndex

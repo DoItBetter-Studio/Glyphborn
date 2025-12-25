@@ -7,8 +7,8 @@ namespace Glyphborn.Mapper.Editor
 {
 	public sealed class MapDocument
 	{
-		public List<Tileset> Tilesets { get; } = new();
-		public string Name { get; set; }
+		//public List<Tileset> Tilesets { get; } = new();
+		//public string Name { get; set; }
 
 		public const int WIDTH = 32;
 		public const int HEIGHT = 32;
@@ -102,10 +102,6 @@ namespace Glyphborn.Mapper.Editor
 			cmd.Redo(this);
 			return true;
 		}
-
-		public void SaveBinary() => MapSerializer.SaveBinary(this);
-
-		public static MapDocument LoadBinary(string path) => MapSerializer.LoadBinary(path);
 
 		public void FloodFill(int layer, int startX, int startY, TileRef fillTile)
 		{

@@ -11,7 +11,8 @@ namespace Glyphborn.Mapper
 {
 	public partial class MapperForm : Form
 	{
-		private MapDocument? _mapDocument;
+		private AreaDocument _areaDocument;
+		private MapDocument? _activeMap;
 		private EditorState _editorState = new();
 		private Panel _clientHost;
 		private MapCanvasControl _mapCanvasControl;
@@ -128,24 +129,32 @@ namespace Glyphborn.Mapper
 			Controls.Add(_clientHost);
 			_clientHost.BringToFront();
 
-			_mapDocument = CreateStartupMap();
-			SetMap(_mapDocument);
+			_areaDocument = CreateStartupArea();
+			SetActiveMap(_areaDocument.Maps[0, 0]!);
 
-			undoToolStripMenuItem.Click += (s, e) => { _mapDocument.Undo(); _mapCanvasControl.Invalidate(); };
-			redoToolStripMenuItem.Click += (s, e) => { _mapDocument.Redo(); _mapCanvasControl.Invalidate(); };
+			undoToolStripMenuItem.Click += (s, e) => { _activeMap.Undo(); _mapCanvasControl.Invalidate(); };
+			redoToolStripMenuItem.Click += (s, e) => { _activeMap.Redo(); _mapCanvasControl.Invalidate(); };
 		}
 
-		private MapDocument CreateStartupMap()
+		private AreaDocument CreateStartupArea()
 		{
-			var map = new MapDocument();
+			var area = new AreaDocument(1, 1)
+			{
+				Name = "New Area"
+			};
 
-			map.Tilesets.Add(new Tileset { Name = "Regional" });
-			map.Tilesets.Add(new Tileset { Name = "Local" });
-			map.Tilesets.Add(new Tileset { Name = "Interior" });
+			area.Tilesets.Add(new Tileset { Name = "Regional" });
+			area.Tilesets.Add(new Tileset { Name = "Local" });
+			area.Tilesets.Add(new Tileset { Name = "Interior" });
 
-			map.IsPreview = true;
+			var map = new MapDocument
+			{
+				IsPreview = true
+			};
 
-			return map;
+			area.Maps[0, 0] = map;
+
+			return area;
 		}
 
 		private void UpdateLayerButtons(FlowLayoutPanel layersFlow, int layerIndex)
@@ -170,15 +179,12 @@ namespace Glyphborn.Mapper
 			}
 		}
 
-		void SetMap(MapDocument map)
+		void SetActiveMap(MapDocument map)
 		{
-			_mapDocument = map;
-			_mapCanvasControl.Document = map;
+			_activeMap = map;
+			_mapCanvasControl.MapDocument = map;
+			_mapCanvasControl.AreaDocument = _areaDocument;
 			BindMap(map);
-
-			// Canvas fills available space
-			_mapCanvasControl.Dock = DockStyle.Fill;
-
 			_mapCanvasControl.Invalidate();
 		}
 
@@ -188,19 +194,19 @@ namespace Glyphborn.Mapper
 			_tilesetColumn.Controls.Clear();
 			_tilesetColumn.RowStyles.Clear();
 
-			_tilesetColumn.RowCount = map.Tilesets.Count;
+			var tilesets = _areaDocument!.Tilesets;
 
-			for (int i = 0; i < map.Tilesets.Count; i++)
+			_tilesetColumn.RowCount = tilesets.Count;
+
+			for (int i = 0; i < tilesets.Count; i++)
 			{
-				_tilesetColumn.RowStyles.Add(new RowStyle(SizeType.Percent, 100f / map.Tilesets.Count));
+				_tilesetColumn.RowStyles.Add(new RowStyle(SizeType.Percent, 100f / tilesets.Count));
 			}
 
-			for (byte i = 0; i < map.Tilesets.Count; i++)
+			for (byte i = 0; i < tilesets.Count; i++)
 			{
-				var ts = map.Tilesets[i];
-
+				var ts = tilesets[i];
 				var pane = new TilesetPane(ts.Name, i, ts, _editorState);
-
 				_tilesetColumn.Controls.Add(pane, 0, i);
 			}
 
@@ -211,23 +217,29 @@ namespace Glyphborn.Mapper
 		{
 			using var dlg = new NewMapDialog();
 
-			if (dlg.ShowDialog(this) == DialogResult.OK)
+			if (dlg.ShowDialog(this) != DialogResult.OK)
+				return;
+
+			var area = new AreaDocument(1, 1);
+
+			area.Tilesets.Add(dlg.Regional!);
+			area.Tilesets.Add(dlg.Local!);
+			if (dlg.Interior != null)
+				area.Tilesets.Add(dlg.Interior);
+
+			var map = new MapDocument
 			{
-				var map = new MapDocument();
-				map.Tilesets.Add(dlg.Regional!);
-				map.Tilesets.Add(dlg.Local!);
-				map.Name = dlg.MapName!;
+				IsPreview = false
+			};
 
-				if (dlg.Interior != null)
-					map.Tilesets.Add(dlg.Interior);
+			area.Maps[0, 0] = map;
 
-				SetMap(map);
-				_mapDocument!.IsPreview = false;
+			_areaDocument = area;
+			SetActiveMap(map);
 
-				saveMapToolStripMenuItem.Enabled = true;
-				saveMapAsToolStripMenuItem.Enabled = true;
-				exportMapToolStripMenuItem.Enabled = true;
-			}
+			saveMapToolStripMenuItem.Enabled = true;
+			saveMapAsToolStripMenuItem.Enabled = true;
+			exportMapToolStripMenuItem.Enabled = true;
 		}
 
 		private void LoadMap_Click(object sender, EventArgs e)
@@ -236,8 +248,8 @@ namespace Glyphborn.Mapper
 
 			if (ofd.ShowDialog() == DialogResult.OK)
 			{
-				_mapDocument = MapDocument.LoadBinary(ofd.FileName);
-				SetMap(_mapDocument);
+				_areaDocument = AreaSerializer.LoadBinary(ofd.FileName);
+				SetActiveMap(_areaDocument.GetMap(0, 0)!);
 
 				saveMapToolStripMenuItem.Enabled = true;
 				saveMapAsToolStripMenuItem.Enabled = true;
@@ -247,10 +259,10 @@ namespace Glyphborn.Mapper
 
 		private void SaveMap_Click(object sender, EventArgs e)
 		{
-			if (_mapDocument == null || _mapDocument.IsPreview)
+			if (_activeMap == null || _activeMap.IsPreview)
 				return;
 
-			_mapDocument.SaveBinary();
+			AreaSerializer.SaveBinary(_areaDocument);
 			MessageBox.Show("Map Saved!", "Success");
 		}
 
@@ -260,8 +272,8 @@ namespace Glyphborn.Mapper
 
 			if (sad.ShowDialog() == DialogResult.OK)
 			{
-				_mapDocument!.Name = sad.MapName!;
-				MapSerializer.SaveBinary(_mapDocument);
+				_areaDocument.Name = sad.MapName!;
+				AreaSerializer.SaveBinary(_areaDocument);
 			}
 		}
 
@@ -283,10 +295,10 @@ namespace Glyphborn.Mapper
 
 		private void _3DView_Click(object sender, EventArgs e)
 		{
-			if (_mapDocument == null)
+			if (_activeMap == null)
 				return;
 
-			var dlg = new _3DViewDialog(_mapDocument);
+			var dlg = new _3DViewDialog(_activeMap, _areaDocument);
 			dlg.Show();
 		}
 
@@ -296,10 +308,10 @@ namespace Glyphborn.Mapper
 			base.OnFormClosing(e);
 
 			// If no document or it's preview, nothing to do
-			if (_mapDocument == null || _mapDocument.IsPreview)
+			if (_activeMap == null || _activeMap.IsPreview)
 				return;
 
-			if (!_mapDocument.IsDirty)
+			if (!_activeMap.IsDirty)
 				return;
 
 			var result = MessageBox.Show(
@@ -321,7 +333,7 @@ namespace Glyphborn.Mapper
 			{
 				try
 				{
-					_mapDocument.SaveBinary();
+					AreaSerializer.SaveBinary(_areaDocument);
 				}
 				catch (Exception ex)
 				{

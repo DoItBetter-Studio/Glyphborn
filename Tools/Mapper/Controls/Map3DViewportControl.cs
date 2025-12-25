@@ -12,6 +12,7 @@ namespace Glyphborn.Mapper.Controls
 {
 	public class Map3DViewportControl : UserControl
 	{
+		public AreaDocument? Area { get; set; }
 		public MapDocument? Map { get; set; }
 
 		private float _yaw = -0.8f;
@@ -212,7 +213,7 @@ namespace Glyphborn.Mapper.Controls
 						if (tileRef.TileId == 0)
 							continue;
 
-						TileDefinition def = Map.Tilesets[tileRef.Tileset].Tiles[tileRef.TileId];
+						TileDefinition def = Area.Tilesets[tileRef.Tileset].Tiles[tileRef.TileId];
 
 
 						DrawMesh(def.Primitive, new Vector3(x, layer, y), ptr, stride);

@@ -10,7 +10,7 @@ namespace Glyphborn.Mapper
 	{
 		private readonly Map3DViewportControl _view;
 
-		public _3DViewDialog(MapDocument map)
+		public _3DViewDialog(MapDocument map, AreaDocument area)
 		{
 			Text = "3D Map Preview";
 			Width = 900;
@@ -22,7 +22,8 @@ namespace Glyphborn.Mapper
 			_view = new Map3DViewportControl
 			{
 				Dock = DockStyle.Fill,
-				Map = map
+				Map = map,
+				Area = area
 			};
 
 			Controls.Add( _view );
