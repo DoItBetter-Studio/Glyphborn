@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Numerics;
 
+using Glyphborn.Mapper.Maths;
+
 namespace Glyphborn.Mapper.Tiles
 {
 	public sealed class TileDefinition
@@ -8,8 +10,6 @@ namespace Glyphborn.Mapper.Tiles
 		// Identity
 		public ushort Id;
 		public string Name = "";
-		public string Category = "Default";
-
 		public CollisionType Collision = CollisionType.None;
 
 		// Rendering
@@ -25,34 +25,17 @@ namespace Glyphborn.Mapper.Tiles
 		public readonly Vertex[] Vertices;
 		public readonly ushort[] Indices;
 
-		public readonly Vector3 BoundsMin;
-		public readonly Vector3 BoundsMax;
-
 		public Mesh(Vertex[] vertices, ushort[] indices)
 		{
 			Vertices = vertices;
 			Indices = indices;
-
-			ComputeBounds(out BoundsMin, out BoundsMax);
-		}
-
-		private void ComputeBounds(out Vector3 min, out Vector3 max)
-		{
-			min = new Vector3(float.MaxValue);
-			max = new Vector3(float.MinValue);
-
-			foreach (var v in Vertices)
-			{
-				min = Vector3.Min(min, v.Position);
-				max = Vector3.Max(max, v.Position);
-			}
 		}
 	}
 
 	public struct Vertex
 	{
-		public Vector3 Position;
-		public Vector2 UV;
+		public Vec3 Position;
+		public Vec2 UV;
 	}
 
 	public sealed class Texture

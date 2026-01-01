@@ -8,6 +8,7 @@ using System.Runtime.InteropServices;
 using System.Windows.Forms;
 
 using Glyphborn.Mapper.Editor;
+using Glyphborn.Mapper.Maths;
 using Glyphborn.Mapper.Tiles;
 
 namespace Glyphborn.Mapper
@@ -19,7 +20,7 @@ namespace Glyphborn.Mapper
 
 		// Right panel controls
 		private TextBox _nameTextBox;
-		private TextBox _categoryTextBox;
+		private ComboBox _collisionBox;
 		private Label _meshLabel;
 		private Button _importMeshButton;
 		private Label _textureLabel;
@@ -227,14 +228,15 @@ namespace Glyphborn.Mapper
 				ForeColor = Color.White
 			});
 
-			_categoryTextBox = new TextBox
+			_collisionBox = new ComboBox
 			{
 				Location = new Point(100, y),
-				Width = 250
+				Width = 250,
+				DataSource = Enum.GetValues(typeof(CollisionType))
 			};
 
-			_categoryTextBox.TextChanged += PropertyChanged;
-			panel.Controls.Add(_categoryTextBox);
+			_collisionBox.TextChanged += PropertyChanged;
+			panel.Controls.Add(_collisionBox);
 			y += 40;
 
 			// Mesh section
@@ -384,7 +386,7 @@ namespace Glyphborn.Mapper
 			);
 
 			e.Graphics.DrawString(
-				tile.Category,
+				tile.Collision.ToString(),
 				new Font(_tileListBox.Font.FontFamily, 8),
 				Brushes.Gray,
 				new PointF(textRect.X, textRect.Y + 20)
@@ -405,7 +407,7 @@ namespace Glyphborn.Mapper
 			_currentTile = tile;
 
 			_nameTextBox.Text = tile.Name;
-			_categoryTextBox.Text = tile.Category;
+			_collisionBox.SelectedItem = (int)tile.Collision;
 
 			bool hasMesh = tile.Primitive?.Mesh != null;
 			bool hasTexture = tile.Primitive?.Texture != null;
@@ -444,7 +446,7 @@ namespace Glyphborn.Mapper
 				return;
 
 			_currentTile.Name = _nameTextBox.Text;
-			_currentTile.Category = _categoryTextBox.Text;
+			_currentTile.Collision = (CollisionType)_collisionBox.SelectedIndex;
 			MarkDirty();
 
 			// Update list display
@@ -457,7 +459,7 @@ namespace Glyphborn.Mapper
 			{
 				Id = (ushort)_tileset.Tiles.Count,
 				Name = $"Tile {_tileset.Tiles.Count}",
-				Category = "Default",
+				Collision = CollisionType.None,
 				Primitive = null
 			};
 
@@ -634,8 +636,8 @@ namespace Glyphborn.Mapper
 	{
 		internal static Mesh LoadOBJ(string path)
 		{
-			var positions = new List<Vector3>();
-			var uvs = new List<Vector2>();
+			var positions = new List<Vec3>();
+			var uvs = new List<Vec2>();
 			var vertices = new List<Vertex>();
 			var indices = new List<ushort>();
 
@@ -646,7 +648,7 @@ namespace Glyphborn.Mapper
 				if (line.StartsWith("v "))
 				{
 					var parts = line.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-					positions.Add(new Vector3(
+					positions.Add(new Vec3(
 						float.Parse(parts[1]),
 						float.Parse(parts[2]),
 						float.Parse(parts[3])
@@ -655,7 +657,7 @@ namespace Glyphborn.Mapper
 				else if (line.StartsWith("vt "))
 				{
 					var parts = line.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-					uvs.Add(new Vector2(
+					uvs.Add(new Vec2(
 						float.Parse(parts[1]),
 						1.0f - float.Parse(parts[2])
 					));
@@ -677,7 +679,7 @@ namespace Glyphborn.Mapper
 			return new Mesh(vertices.ToArray(), indices.ToArray());
 		}
 
-		private static void AddFaceVertex(string token, List<Vector3> positions, List<Vector2> uvs, List<Vertex> vertices, List<ushort> indices, Dictionary<(int post, int uv), ushort> vertexMap)
+		private static void AddFaceVertex(string token, List<Vec3> positions, List<Vec2> uvs, List<Vertex> vertices, List<ushort> indices, Dictionary<(int post, int uv), ushort> vertexMap)
 		{
 			var parts = token.Split('/');
 			int posIndex = int.Parse(parts[0]) - 1;
@@ -690,7 +692,7 @@ namespace Glyphborn.Mapper
 				var v = new Vertex
 				{
 					Position = positions[posIndex],
-					UV = uvIndex >= 0 ? uvs[uvIndex] : Vector2.Zero
+					UV = uvIndex >= 0 ? uvs[uvIndex] : Vec2.Zero
 				};
 
 				index = (ushort) vertices.Count;

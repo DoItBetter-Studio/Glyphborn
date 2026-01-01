@@ -1,8 +1,6 @@
 ﻿using System.IO;
 using System.Text;
 
-using Glyphborn.Mapper.Tiles;
-
 namespace Glyphborn.Mapper.Editor
 {
 	internal static class AreaSerializer
@@ -12,6 +10,12 @@ namespace Glyphborn.Mapper.Editor
 
 		public static void SaveBinary(AreaDocument doc)
 		{
+			// Validate format limits so we don't silently truncate values.
+			if (doc.Width > byte.MaxValue || doc.Height > byte.MaxValue)
+				throw new InvalidDataException("Area dimensions exceed storage limits (max 255).");
+			if (doc.Tilesets.Count > byte.MaxValue)
+				throw new InvalidDataException("Too many tilesets (max 255).");
+
 			string path = Path.Combine(EditorPaths.Maps, $"{doc.Name}.gbm");
 
 			// Ensure maps folder exists
@@ -26,26 +30,39 @@ namespace Glyphborn.Mapper.Editor
 				bw.Write(VERSION);
 
 				byte[] nameBytes = Encoding.UTF8.GetBytes(doc.Name);
-				bw.Write((ushort)  nameBytes.Length);
+				bw.Write((ushort)nameBytes.Length);
 				bw.Write(nameBytes);
 
-				bw.Write((byte) doc.Width);
-				bw.Write((byte) doc.Height);
+				bw.Write((byte)doc.Width);
+				bw.Write((byte)doc.Height);
 
-				bw.Write((byte) doc.Tilesets.Count);
+				bw.Write((byte)doc.Tilesets.Count);
 				// Write tileset paths (relative to Assets/)
 				foreach (var tileset in doc.Tilesets)
 				{
 					string relativePath = $"{tileset.Type.ToString().ToLower()}/{tileset.Name}.gbts";
 					byte[] pathBytes = Encoding.UTF8.GetBytes(relativePath);
-					bw.Write((ushort) pathBytes.Length);
+					bw.Write((ushort)pathBytes.Length);
 					bw.Write(pathBytes);
 				}
 
 				for (int areaY = 0; areaY < doc.Height; areaY++)
 				for (int areaX = 0; areaX < doc.Width; areaX++)
 				{
-					MapDocument map = doc.GetMap(areaX, areaY)!;
+					var map = doc.GetMap(areaX, areaY);
+
+					if (map == null)
+					{
+						// Write default / empty tiles for missing maps so layout matches LoadBinary.
+						for (int layers = 0; layers < MapDocument.LAYERS; layers++)
+						for (int y = 0; y < MapDocument.HEIGHT; y++)
+						for (int x = 0; x < MapDocument.WIDTH; x++)
+						{
+							bw.Write((ushort)0);
+						}
+
+						continue;
+					}
 
 					for (int layers = 0; layers < MapDocument.LAYERS; layers++)
 					for (int y = 0; y < MapDocument.HEIGHT; y++)
@@ -54,7 +71,7 @@ namespace Glyphborn.Mapper.Editor
 						var tile = map.Tiles[layers][y][x];
 
 						// Pack tileset (2 bits) + tileId (14 bits) into ushort
-						ushort packed = (ushort) ((tile.Tileset << 14) | tile.TileId);
+						ushort packed = (ushort)((tile.Tileset << 14) | tile.TileId);
 						bw.Write(packed);
 					}
 
@@ -112,8 +129,8 @@ namespace Glyphborn.Mapper.Editor
 					ushort packed = br.ReadUInt16();
 					map.Tiles[l][y][x] = new TileRef
 					{
-						Tileset = (byte) ((packed >> 14) & 0x3),
-						TileId = (ushort) (packed & 0x3FFF),
+						Tileset = (byte)((packed >> 14) & 0x3),
+						TileId = (ushort)(packed & 0x3FFF),
 					};
 				}
 

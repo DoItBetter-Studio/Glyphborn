@@ -264,7 +264,7 @@ namespace Glyphborn.Mapper
 			{
 				Id = 0,
 				Name = "Air",
-				Category = "System"
+				Collision = CollisionType.None
 			});
 
 			TilesetSerializer.SaveBinary(tileset);

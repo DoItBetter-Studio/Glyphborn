@@ -1,22 +1,25 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Drawing;
 
 using Glyphborn.Mapper.Editor.Undo;
-using Glyphborn.Mapper.Tiles;
 
 namespace Glyphborn.Mapper.Editor
 {
 	public sealed class MapDocument
 	{
-		//public List<Tileset> Tilesets { get; } = new();
-		//public string Name { get; set; }
-
 		public const int WIDTH = 32;
 		public const int HEIGHT = 32;
 		public const int LAYERS = 32;
 
 		public TileRef[][][] Tiles;
 
+		public Bitmap? MiniPreview;
+
+		public event Action? Update;
+
 		public bool IsDirty { get; set; }
+		public bool MiniPreviewDirty { get; set; }
 		public bool IsPreview { get; set; } = false;
 
 		private Stack<ICommand> _undoStack = new();
@@ -79,6 +82,8 @@ namespace Glyphborn.Mapper.Editor
 
 			current = tile;
 			IsDirty = true;
+			MiniPreviewDirty = true;
+			Update?.Invoke();
 		}
 
 		public bool Undo()

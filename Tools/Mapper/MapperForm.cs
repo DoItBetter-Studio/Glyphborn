@@ -17,6 +17,7 @@ namespace Glyphborn.Mapper
 		private Panel _clientHost;
 		private MapCanvasControl _mapCanvasControl;
 		private TableLayoutPanel? _tilesetColumn;
+		private AreaControl _areaControl;
 
 		public MapperForm()
 		{
@@ -125,12 +126,44 @@ namespace Glyphborn.Mapper
 
 			root.Controls.Add(_tilesetColumn, 0, 0);
 
+			var areaPanel = new Panel
+			{
+				Dock = DockStyle.Fill,
+				AutoScroll = true,
+				BackColor = Color.FromArgb(30, 30, 30)
+			};
+
+			_areaControl = new AreaControl();
+			_areaControl.State = _editorState;
+
+			_areaControl.MapSelected += map =>
+			{
+				if (map == null) return;
+
+				_editorState.Area = _areaDocument;
+
+				SetActiveMap(map);
+			};
+
+			areaPanel.Controls.Add(_areaControl);
+			root.Controls.Add(areaPanel, 3, 0);
+
 			_clientHost.Controls.Add(root);
 			Controls.Add(_clientHost);
 			_clientHost.BringToFront();
 
 			_areaDocument = CreateStartupArea();
+
+			_editorState.Area = _areaDocument;
+			_editorState.ActiveMapX = 0;
+			_editorState.ActiveMapY = 0;
+
 			SetActiveMap(_areaDocument.Maps[0, 0]!);
+
+			_areaDocument.Changed += () =>
+			{
+				_areaControl.Invalidate();
+			};
 
 			undoToolStripMenuItem.Click += (s, e) => { _activeMap.Undo(); _mapCanvasControl.Invalidate(); };
 			redoToolStripMenuItem.Click += (s, e) => { _activeMap.Redo(); _mapCanvasControl.Invalidate(); };
@@ -182,6 +215,11 @@ namespace Glyphborn.Mapper
 		void SetActiveMap(MapDocument map)
 		{
 			_activeMap = map;
+
+			// Ensure editor state and canvas know the active area / map indices
+			_mapCanvasControl.State = _editorState;
+			_editorState.Area = _areaDocument;
+
 			_mapCanvasControl.MapDocument = map;
 			_mapCanvasControl.AreaDocument = _areaDocument;
 			BindMap(map);
@@ -211,6 +249,9 @@ namespace Glyphborn.Mapper
 			}
 
 			_tilesetColumn.ResumeLayout();
+			_areaControl.SetArea(_areaDocument);
+
+			map.Update += () => _areaControl.Invalidate();
 		}
 
 		private void NewMap_Click(object sender, EventArgs e)
@@ -298,7 +339,7 @@ namespace Glyphborn.Mapper
 			if (_activeMap == null)
 				return;
 
-			var dlg = new _3DViewDialog(_activeMap, _areaDocument);
+			var dlg = new ViewportDialog(_areaDocument);
 			dlg.Show();
 		}
 

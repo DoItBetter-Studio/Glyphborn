@@ -2,18 +2,21 @@
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.Numerics;
-using System.Runtime.InteropServices.Marshalling;
 using System.Windows.Forms;
 
 using Glyphborn.Mapper.Editor;
 using Glyphborn.Mapper.Tiles;
+using System.ComponentModel;
 
 namespace Glyphborn.Mapper.Controls
 {
-	public class Map3DViewportControl : UserControl
+	public class Viewport3D : UserControl
 	{
+		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
 		public AreaDocument? Area { get; set; }
-		public MapDocument? Map { get; set; }
+
+		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+		public Vector3 LightDirection { get; set; } = Vector3.Normalize(new Vector3(0.5f, -1.0f, 0.3f));
 
 		private float _yaw = -0.8f;
 		private float _pitch = 0.6f;
@@ -30,7 +33,7 @@ namespace Glyphborn.Mapper.Controls
 
 		private SolidBrush _brush;
 
-		public Map3DViewportControl()
+		public Viewport3D()
 		{
 			DoubleBuffered = true;
 			BackColor = Color.Black;
@@ -109,7 +112,7 @@ namespace Glyphborn.Mapper.Controls
 			var g = e.Graphics;
 			g.Clear(Color.Black);
 
-			if (Map == null)
+			if (Area == null)
 				return;
 
 			var target = new Vector3(
@@ -152,13 +155,13 @@ namespace Glyphborn.Mapper.Controls
 				// Clear raw pixel buffer
 				for (int y = 0; y < Height; y++)
 				{
-					uint* row = (uint*)(ptr + y * stride);
+					uint* row = (uint*) (ptr + y * stride);
 					for (int x = 0; x < Width; x++)
 						row[x] = 0xFF000000; // black
 				}
 
 				for (int i = 0; i < _depthBuffer.Length; i++)
-					_depthBuffer[i] = float.PositiveInfinity;
+					_depthBuffer[i] = 1.0f;
 
 				DrawMap(ptr, stride);
 			}
@@ -167,6 +170,8 @@ namespace Glyphborn.Mapper.Controls
 
 			// Blit final image once
 			e.Graphics.DrawImage(_backbuffer, 0, 0);
+
+			//DrawMap(g);
 
 			// Draw debug info
 			g.DrawString($"Eye: {eye.X:F1}, {eye.Y:F1}, {eye.Z:F1}", Font, Brushes.White, 10, 10);
@@ -185,6 +190,8 @@ namespace Glyphborn.Mapper.Controls
 				pos.X /= pos.W;
 				pos.Y /= pos.W;
 				pos.Z /= pos.W;
+
+				pos.Z = pos.Z * 0.5f + 0.5f;
 			}
 
 			return new Vector3(pos.X, pos.Y, pos.Z);
@@ -201,22 +208,67 @@ namespace Glyphborn.Mapper.Controls
 
 		private unsafe void DrawMap(byte* ptr, int stride)
 		{
-			// Draw each tile as a wireframe cube
-			for (int layer = 0; layer < MapDocument.LAYERS; layer++)
+			for (int ay = 0; ay < Area!.Height; ay++)
 			{
-				for (int y = 0; y < MapDocument.HEIGHT; y++)
+				for (int ax = 0; ax < Area.Width; ax++)
 				{
-					for (int x = 0; x < MapDocument.WIDTH; x++)
+					var map = Area.GetMap(ax, ay);
+					int offsetX = ax * MapDocument.WIDTH;
+					int offsetY = ay * MapDocument.HEIGHT;
+
+					if (map == null)
+						return;
+
+					// Draw each tile as a wireframe cube
+					for (int layer = 0; layer < MapDocument.LAYERS; layer++)
 					{
-						var tileRef = Map.Tiles[layer][y][x];
+						for (int y = 0; y < MapDocument.HEIGHT; y++)
+						{
+							for (int x = 0; x < MapDocument.WIDTH; x++)
+							{
+								var tileRef = map.Tiles[layer][y][x];
 
-						if (tileRef.TileId == 0)
-							continue;
+								if (tileRef.TileId == 0)
+									continue;
 
-						TileDefinition def = Area.Tilesets[tileRef.Tileset].Tiles[tileRef.TileId];
+								TileDefinition def = Area.Tilesets[tileRef.Tileset].Tiles[tileRef.TileId];
 
+								DrawMesh(def.Primitive, new Vector3(x + offsetX, layer, y + offsetY), ptr, stride);
+							}
+						}
+					}
+				}
+			}
+		}
 
-						DrawMesh(def.Primitive, new Vector3(x, layer, y), ptr, stride);
+		private unsafe void DrawMap(Graphics g)
+		{
+			for (int ay = 0; ay < Area!.Height; ay++)
+			{
+				for (int ax = 0; ax < Area.Width; ax++)
+				{
+					var map = Area.GetMap(ax, ay);
+					int offsetX = ax * MapDocument.WIDTH;
+					int offsetY = ay * MapDocument.HEIGHT;
+
+					if (map == null)
+						return;
+
+					// Draw each tile as a wireframe cube
+					for (int layer = 0; layer < MapDocument.LAYERS; layer++)
+					{
+						for (int y = 0; y < MapDocument.HEIGHT; y++)
+						{
+							for (int x = 0; x < MapDocument.WIDTH; x++)
+							{
+								var tileRef = map.Tiles[layer][y][x];
+
+								if (tileRef.TileId == 0)
+									continue;
+
+								DrawCube(g, new Vector3(x + offsetX, layer, y + offsetY), 1.0f);
+							}
+						}
 					}
 				}
 			}
@@ -240,26 +292,27 @@ namespace Glyphborn.Mapper.Controls
 				corners[i] += center;
 			}
 
-			// Transform to clip space
+			// Transform to NDC (clip space after perspective divide)
 			Vector3[] clipSpace = new Vector3[8];
 			for (int i = 0; i < 8; i++)
 			{
 				clipSpace[i] = Transform(corners[i]);
 			}
 
-			// Check if behind camera (clip space Z < 0)
-			bool allBehind = true;
+			// Cull if all points are outside the [0,1] depth range
+			bool allOutside = true;
 			for (int i = 0; i < 8; i++)
 			{
-				if (clipSpace[i].Z >= 0)
+				float z = clipSpace[i].Z;
+				if (z >= 0.0f && z <= 1.0f)
 				{
-					allBehind = false;
+					allOutside = false;
 					break;
 				}
 			}
 
-			if (allBehind)
-				return;  // Don't draw cubes behind camera
+			if (allOutside)
+				return;
 
 			// Project to screen space
 			PointF[] screen = new PointF[8];
@@ -273,8 +326,12 @@ namespace Glyphborn.Mapper.Controls
 			{
 				void DrawEdge(int a, int b)
 				{
-					// Only draw if both points are in front of camera
-					if (clipSpace[a].Z >= 0 && clipSpace[b].Z >= 0)
+					float za = clipSpace[a].Z;
+					float zb = clipSpace[b].Z;
+
+					// Only draw if both endpoints are within the visible depth range
+					if (za >= 0.0f && za <= 1.0f &&
+						zb >= 0.0f && zb <= 1.0f)
 					{
 						g.DrawLine(pen, screen[a], screen[b]);
 					}
@@ -300,7 +357,7 @@ namespace Glyphborn.Mapper.Controls
 
 			for (int i = 0; i < mesh.Vertices.Length; i++)
 			{
-				world[i] = mesh.Vertices[i].Position + worldPos;
+				world[i] = new Vector3(mesh.Vertices[i].Position.x, mesh.Vertices[i].Position.y, mesh.Vertices[i].Position.z) + worldPos;
 				clip[i] = Transform(world[i]);
 				screen[i] = Project(clip[i]);
 			}
@@ -312,16 +369,32 @@ namespace Glyphborn.Mapper.Controls
 				int b = mesh.Indices[i + 1];
 				int c = mesh.Indices[i + 2];
 
-				if (clip[a].Z <= -1 && clip[b].Z <= -1 && clip[c].Z <= -1)
+				float za = clip[a].Z;
+				float zb = clip[b].Z;
+				float zc = clip[c].Z;
+
+				// Require all vertices to be in the visible depth range
+				if (za < 0.0f || za > 1.0f ||
+					zb < 0.0f || zb > 1.0f ||
+					zc < 0.0f || zc > 1.0f)
 					continue;
 
+				Vector3 wa = world[a];
+				Vector3 wb = world[b];
+				Vector3 wc = world[c];
+
+				Vector3 faceNormal = Vector3.Normalize(Vector3.Cross(wb - wa, wc - wa));
+
 				DrawTriangle(
-					new Vector3(screen[a].X, screen[a].Y, clip[a].Z),
-					new Vector3(screen[b].X, screen[b].Y, clip[b].Z),
-					new Vector3(screen[c].X, screen[c].Y, clip[c].Z),
-					mesh.Vertices[a].UV,
-					mesh.Vertices[b].UV,
-					mesh.Vertices[c].UV,
+					new Vector3(screen[a].X, screen[a].Y, za),
+					new Vector3(screen[b].X, screen[b].Y, zb),
+					new Vector3(screen[c].X, screen[c].Y, zc),
+
+					faceNormal,
+
+					new Vector2(mesh.Vertices[a].UV.x, mesh.Vertices[a].UV.y),
+					new Vector2(mesh.Vertices[b].UV.x, mesh.Vertices[b].UV.y),
+					new Vector2(mesh.Vertices[c].UV.x, mesh.Vertices[c].UV.y),
 					prim.Texture,
 					ptr, stride
 				);
@@ -330,18 +403,21 @@ namespace Glyphborn.Mapper.Controls
 
 		unsafe void DrawTriangle(
 			Vector3 p0, Vector3 p1, Vector3 p2,
+			Vector3 faceNormal,
 			Vector2 uv0, Vector2 uv1, Vector2 uv2,
 			Texture texture,
 			byte* ptr, int stride)
 		{
+			// 2D backface culling
 			Vector2 a = new(p1.X - p0.X, p1.Y - p0.Y);
 			Vector2 b = new(p2.X - p0.X, p2.Y - p0.Y);
 
-			float cross = a.X * b.Y - a.Y * b.X;
-			if (cross >= 0)
-				return;
+			// TEMP: disable backface culling to debug artifacts
+			// float cross = a.X * b.Y - a.Y * b.X;
+			// if (cross >= 0)
+			//     return;
 
-			// Compute bounding box
+			// Bounding box
 			int minX = (int) MathF.Floor(MathF.Min(p0.X, MathF.Min(p1.X, p2.X)));
 			int maxX = (int) MathF.Ceiling(MathF.Max(p0.X, MathF.Max(p1.X, p2.X)));
 			int minY = (int) MathF.Floor(MathF.Min(p0.Y, MathF.Min(p1.Y, p2.Y)));
@@ -353,23 +429,13 @@ namespace Glyphborn.Mapper.Controls
 			minY = Math.Clamp(minY, 0, Height - 1);
 			maxY = Math.Clamp(maxY, 0, Height - 1);
 
-			// Precompute edge function denominators
+			// Edge function denominator (area * 2)
 			float denom = Edge(p0, p1, p2);
-
-			if (p0.Z <= -1 && p1.Z <= -1 && p2.Z <= -1)
+			if (MathF.Abs(denom) < 1e-6f)
 				return;
 
-			float z0 = MathF.Max(p0.Z, 0.0001f);
-			float z1 = MathF.Max(p1.Z, 0.0001f);
-			float z2 = MathF.Max(p2.Z, 0.0001f);
-
-			float iz0 = 1.0f / z0;
-			float iz1 = 1.0f / z1;
-			float iz2 = 1.0f / z2;
-
-			Vector2 uv0z = uv0 * iz0;
-			Vector2 uv1z = uv1 * iz1;
-			Vector2 uv2z = uv2 * iz2;
+			// Initialize depth buffer elsewhere each frame:
+			// for (int i = 0; i < _depthBuffer.Length; i++) _depthBuffer[i] = 1.0f;
 
 			for (int y = minY; y <= maxY; y++)
 			{
@@ -381,30 +447,53 @@ namespace Glyphborn.Mapper.Controls
 					float w1 = Edge(p2, p0, p);
 					float w2 = Edge(p0, p1, p);
 
-					if (w0 >= 0 && w1 >= 0 && w2 >= 0)
-					{
-						w0 /= denom;
-						w1 /= denom;
-						w2 /= denom;
+					// Accept either all non‑negative or all non‑positive
+					bool hasPos = (w0 > 0) || (w1 > 0) || (w2 > 0);
+					bool hasNeg = (w0 < 0) || (w1 < 0) || (w2 < 0);
+					
+					if (hasPos && hasNeg)
+						continue; // outside
 
-						// Interpolate UV
-						float iz = iz0 * w0 + iz1 * w1 + iz2 * w2;
+					// Normalize barycentrics
+					w0 /= denom;
+					w1 /= denom;
+					w2 /= denom;
 
-						float u = (uv0z.X * w0 + uv1z.X * w1 + uv2z.X * w2) / iz;
-						float v = (uv0z.Y * w0 + uv1z.Y * w1 + uv2z.Y * w2) / iz;
+					// Interpolate NDC depth (0 = near, 1 = far)
+					float z = p0.Z * w0 + p1.Z * w1 + p2.Z * w2;
 
-						uint color = texture.Sample(u, v);
+					// Depth test: smaller z is closer
+					int idx = y * Width + x;
+					if (z >= _depthBuffer[idx])
+						continue;
 
-						float z = 1.0f / iz;
+					_depthBuffer[idx] = z;
 
-						int idx = y * Width + x;
-						if (z >= _depthBuffer[idx])
-							continue;
+					Vector3 lightDir = -LightDirection;
 
-						_depthBuffer[idx] = z;
+					float ndotl = MathF.Max(0.0f, Vector3.Dot(faceNormal, lightDir));
 
-						PutPixel(x, y, color, ptr, stride);
-					}
+					const float ambient = 0.25f;
+					float light = ambient + ndotl * (1.0f - ambient);
+
+					// Simple (non‑perspective‑correct) UV interpolation
+					float u = uv0.X * w0 + uv1.X * w1 + uv2.X * w2;
+					float v = uv0.Y * w0 + uv1.Y * w1 + uv2.Y * w2;
+
+					uint color = texture.Sample(u, v);
+
+					uint al = (color >> 24) & 0xFF;
+					uint r = (color >> 16) & 0xFF;
+					uint g = (color >> 8) & 0xFF;
+					uint bl = color  & 0xFF;
+
+					r = (uint) Math.Clamp(r * light, 0, 255);
+					g = (uint) Math.Clamp(g * light, 0, 255);
+					bl = (uint) Math.Clamp(bl * light, 0, 255);
+
+					uint litColor = (al << 24) | (r << 16) | (g << 8) | bl;
+
+					PutPixel(x, y, litColor, ptr, stride);
 				}
 			}
 		}

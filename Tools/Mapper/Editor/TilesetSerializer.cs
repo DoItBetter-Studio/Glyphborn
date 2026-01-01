@@ -3,6 +3,7 @@ using System.IO;
 using System.Numerics;
 using System.Text;
 
+using Glyphborn.Mapper.Maths;
 using Glyphborn.Mapper.Tiles;
 
 namespace Glyphborn.Mapper.Editor
@@ -51,7 +52,6 @@ namespace Glyphborn.Mapper.Editor
 		{
 			bw.Write(tile.Id);
 			WriteFixedString(bw, tile.Name, 64);
-			WriteFixedString(bw, tile.Category, 32);
 			bw.Write((byte) tile.Collision);
 
 			if (tile.Primitive != null)
@@ -61,11 +61,11 @@ namespace Glyphborn.Mapper.Editor
 
 				foreach (var v in tile.Primitive.Mesh.Vertices)
 				{
-					bw.Write(v.Position.X);
-					bw.Write(v.Position.Y);
-					bw.Write(v.Position.Z);
-					bw.Write(v.UV.X);
-					bw.Write(v.UV.Y);
+					bw.Write(v.Position.x);
+					bw.Write(v.Position.y);
+					bw.Write(v.Position.z);
+					bw.Write(v.UV.x);
+					bw.Write(v.UV.y);
 				}
 
 				bw.Write((uint) tile.Primitive.Mesh.Indices.Length);
@@ -134,7 +134,6 @@ namespace Glyphborn.Mapper.Editor
 			{
 				Id = br.ReadUInt16(),
 				Name = ReadFixedString(br, 64),
-				Category = ReadFixedString(br, 32),
 				Collision = (CollisionType) br.ReadByte(),
 			};
 
@@ -149,8 +148,8 @@ namespace Glyphborn.Mapper.Editor
 				{
 					vertices[i] = new Vertex
 					{
-						Position = new Vector3(br.ReadSingle(), br.ReadSingle(), br.ReadSingle()),
-						UV = new Vector2(br.ReadSingle(), br.ReadSingle())
+						Position = new Vec3(br.ReadSingle(), br.ReadSingle(), br.ReadSingle()),
+						UV = new Vec2(br.ReadSingle(), br.ReadSingle())
 					};
 				}
 

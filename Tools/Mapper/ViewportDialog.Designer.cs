@@ -1,6 +1,6 @@
 ﻿namespace Glyphborn.Mapper
 {
-	partial class _3DViewDialog
+	partial class ViewportDialog
 	{
 		/// <summary>
 		/// Required designer variable.
@@ -28,16 +28,16 @@
 		/// </summary>
 		private void InitializeComponent()
 		{
-			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(_3DViewDialog));
+			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(ViewportDialog));
 			SuspendLayout();
 			// 
-			// _3DViewDialog
+			// ViewportDialog
 			// 
 			AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
 			AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			ClientSize = new System.Drawing.Size(800, 450);
 			Icon = (System.Drawing.Icon) resources.GetObject("$this.Icon");
-			Name = "_3DViewDialog";
+			Name = "ViewportDialog";
 			Text = "Map View";
 			ResumeLayout(false);
 		}

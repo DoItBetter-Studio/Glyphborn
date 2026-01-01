@@ -48,55 +48,33 @@ ifeq ($(OS),Windows_NT)
 endif
 
 
-# ==========================================================
-# 📁 Build Metadata Files
-# ==========================================================
-META_DIR        := .buildmeta
-META_REV_FILE   := $(META_DIR)/build_revision
-META_NEXT_REV   := $(META_DIR)/next_revision
-META_VER_TRACK  := $(META_DIR)/last_version
-META_CHECK_FILE := $(META_DIR)/last_source_hash
-BUILD_STATE		:= $(META_DIR)/build_state.stamp
-
-$(shell mkdir -p $(META_DIR) >/dev/null 2>&1)
-
-
-# ==========================================================
-# 🏷 Semantic Versioning
-# ==========================================================
-VERSION := $(shell cat VERSION.txt)
-
-ifeq ($(wildcard $(META_REV_FILE)),)
-  $(shell echo 1 > $(META_REV_FILE))
+# Skip versioning for non-build targets
+ifeq ($(MAKECMDGOALS),clean)
+    SKIP_VERSIONING := true
 endif
-ifeq ($(wildcard $(META_VER_TRACK)),)
-  $(shell echo $(VERSION) > $(META_VER_TRACK))
+ifeq ($(MAKECMDGOALS),distclean)
+    SKIP_VERSIONING := true
 endif
-ifeq ($(wildcard $(META_CHECK_FILE)),)
-  $(shell echo "none" > $(META_CHECK_FILE))
+ifeq ($(MAKECMDGOALS),buildver)
+    SKIP_VERSIONING := true
 endif
 
-CUR_REV := $(shell cat $(META_REV_FILE) 2>/dev/null || echo 1)
+ifeq ($(SKIP_VERSIONING),)
+FORCE ?= false
 
-ifeq ($(VERSION),$(shell cat $(META_VER_TRACK)))
-else
-  $(shell echo $(VERSION) > $(META_VER_TRACK))
-  $(shell echo 1 > $(META_REV_FILE))
-  $(shell rm -f $(META_NEXT_REV))
-  CUR_REV := 1
+VERSION_META := $(shell tools/build/version.sh $(FORCE))
+
+ifeq ($(VERSION_META),SKIP)
+	$(info 🔁 No changes detected — skipping build)
+	@exit 0
 endif
 
-BUILD_REV := $(CUR_REV)
-FULL_VERSION := $(VERSION).$(BUILD_REV)
-BUILD_BASE   := build/$(FULL_VERSION)
-BUILD_TIME   := $(shell date +"%Y-%m-%d %H:%M:%S")
+include $(VERSION_META)
 
-
-# ==========================================================
-# 🔍 Source Hash
-# ==========================================================
-SOURCE_HASH := $(shell find source -type f -name '*.c' -exec sha256sum {} \; | sha256sum | cut -d' ' -f1)
-
+# Now that FULL_VERSION exists, define build paths
+BUILD_BASE := build/$(FULL_VERSION)
+BUILD_TIME := $(shell date +"%Y-%m-%d %H:%M:%S")
+endif
 
 # ==========================================================
 # 🔧 Compiler Version Flags
@@ -222,26 +200,17 @@ ALL_TARGETS := $(foreach D,$(DISTROS), \
 # ==========================================================
 # 🏗 Default Rule
 # ==========================================================
-all: preload_revision $(BUILD_STATE) banner
+all: banner
 	@$(VERBOSE_MSG)
 	@$(DEBUG_MSG)
 	@$(MAKE) $(ALL_TARGETS)
 	@$(MAKE) --no-print-directory checksums
-	@$(MAKE) --no-print-directory finalize_success
+	@$(MAKE) --no-print-directory postbuild
 	@echo ""
 	@echo "────────────────────────────────────────────"
 	@echo "✅ ${GREEN}All builds complete for Glyphborn $(FULL_VERSION)${RESET}"
 	@echo "📦 Output: ${BLUE}$(BUILD_BASE)${RESET}"
 	@echo "────────────────────────────────────────────"
-
-
-# ==========================================================
-# 🔄 Preload Revision
-# ==========================================================
-preload_revision:
-	@if [ -f $(META_NEXT_REV) ]; then \
-		mv $(META_NEXT_REV) $(META_REV_FILE); \
-	fi
 
 
 # ==========================================================
@@ -296,26 +265,20 @@ $(BUILD_BASE)/%/win64/glyphborn_win64.exe: $(OBJ_WIN64)
 	$(STRIP_WIN64) --strip-unneeded $@
 	@echo "   ${GREEN}✔ Built → $@${RESET}"
 
-
-$(BUILD_STATE):
-	@echo "VERSION=$(VERSION)"			> $@
-	@echo "Revision=$(BUILD_REV)"		>> $@
-	@echo "HASH=$(SOURCE_HASH)"			>> $@
-
 # ==========================================================
 # 🧱 Compilation Rules
 # ==========================================================
-$(OBJDIR_LINUX)/%.o: source/%.c $(BUILD_STATE)
+$(OBJDIR_LINUX)/%.o: source/%.c
 	@mkdir -p $(dir $@)
 	@printf "🔧 ${GRAY}Compiling (Linux): %s${RESET}\n" $<
 	@$(CC_LINUX) $(CFLAGS_LIN) $(CFLAGS_DEBUG) $(CFLAGS_VERSION) -c $< -o $@
 
-$(OBJDIR_WIN32)/%.o: source/%.c $(BUILD_STATE)
+$(OBJDIR_WIN32)/%.o: source/%.c
 	@mkdir -p $(dir $@)
 	@printf "🔧 ${GRAY}Compiling (Win32): %s${RESET}\n" $<
 	@$(CC_WIN32) $(CFLAGS_BASE) $(CFLAGS_DEBUG) $(CFLAGS_VERSION) -D_WIN32 -c $< -o $@
 
-$(OBJDIR_WIN64)/%.o: source/%.c $(BUILD_STATE)
+$(OBJDIR_WIN64)/%.o: source/%.c
 	@mkdir -p $(dir $@)
 	@printf "🔧 ${GRAY}Compiling (Win64): %s${RESET}\n" $<
 	@$(CC_WIN64) $(CFLAGS_BASE) $(CFLAGS_DEBUG) $(CFLAGS_VERSION) -D_WIN32 -D_WIN64 -c $< -o $@
@@ -332,15 +295,6 @@ checksums:
 
 
 # ==========================================================
-# 🔁 finalize_success — update hash + stage next revision
-# ==========================================================
-finalize_success:
-	@echo "$(SOURCE_HASH)" > $(META_CHECK_FILE)
-	@newrev=$$(( $(BUILD_REV) + 1 )); \
-	 echo $$newrev > $(META_NEXT_REV)
-
-
-# ==========================================================
 # 🧹 Cleaning
 # ==========================================================
 clean:
@@ -348,7 +302,6 @@ clean:
 	@echo "🧽 ${YELLOW}Cleaned all object files.${RESET}"
 
 distclean: clean
-	rm -rf $(META_DIR)
 	rm -rf build
 	@echo "🧽 ${YELLOW}Removed metadata and all builds.${RESET}"
 
@@ -361,21 +314,15 @@ buildver:
 	@echo "────────────────────────────────────────────"
 	@echo "📦 ${BLUE}Glyphborn Build Version Info${RESET}"
 	@echo "────────────────────────────────────────────"
-	@echo "🔢 Version.txt:       ${YELLOW}$(VERSION)${RESET}"
-	@echo "🔧 Build Revision:    ${GREEN}$(BUILD_REV)${RESET}"
-	@echo "🏷  Full Version:      ${BLUE}$(FULL_VERSION)${RESET}"
-	@if [ -f $(META_CHECK_FILE) ]; then \
-		old="$$(cat $(META_CHECK_FILE))"; \
-		if [ "$(SOURCE_HASH)" = "$$old" ]; then \
-			echo "📁 Source State:       ${GREEN}clean (no changes)${RESET}"; \
-		else \
-			echo "📁 Source State:       ${YELLOW}dirty (changes detected)${RESET}"; \
-		fi; \
-	else \
-		echo "📁 Source State:       ${RED}unknown (first build)${RESET}"; \
-	fi
+	@tools/build/printver.sh
 	@echo "────────────────────────────────────────────"
 	@echo ""
+
+
+postbuild:
+	@echo "$(VERSION)" > tools/build/state/last_version
+	@echo "$(CURRENT_HASH)" > tools/build/state/last_source_hash
+	@echo "$(REVISION)" > tools/build/state/build_revision
 
 
 # ==========================================================
