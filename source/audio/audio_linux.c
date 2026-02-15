@@ -135,7 +135,7 @@ void audio_update(void)
 		AudioChannel* channel = &audio_channels[ch];
 		if (!channel->handle) continue;
 
-		if (!channel->is_playing)
+		if (channel->is_playing)
 		{
 			int16_t* buffer = channel->buffers[channel->buffer_index];
 			fill_buffer(channel, buffer, BUFFER_SAMPLES);
@@ -144,7 +144,7 @@ void audio_update(void)
 			if (wrote < 0)
 				snd_pcm_recover(channel->handle, wrote, 0);
 
-			channel->buffer_index = (channel->buffer_index + 1) & NUM_BUFFERS;
+			channel->buffer_index = (channel->buffer_index + 1) % NUM_BUFFERS;
 		}
 	}
 }
@@ -202,6 +202,6 @@ void audio_play_music(const unsigned char* music_data, int length, bool interrup
 
 void audio_play_sound(const unsigned char* sound_data, int length)
 {
-	audio_play_sample_channel(0, sound_data, length);
+	audio_play_sample_channel(1, sound_data, length);
 }
 #endif 

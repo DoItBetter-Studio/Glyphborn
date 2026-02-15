@@ -1,0 +1,11 @@
+{
+  "Type": "Local_Tileset",
+  "Version": 1,
+  "Entries": [
+    {
+      "Index": 0,
+      "Label": "test_local_tileset",
+      "Valid": true
+    }
+  ]
+}

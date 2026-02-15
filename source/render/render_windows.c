@@ -3,15 +3,22 @@
 #include "render.h"
 #include <windows.h>
 
+/* Win32 renderer implementation: provides framebuffer storage and presents via GDI */
 static BITMAPINFO bmi;
 static HDC hdcWindow;
 
+/* Actual framebuffer storage (defined here for the platform) */
 uint32_t framebuffer[FB_WIDTH * FB_HEIGHT];
 uint32_t framebuffer_game[FB_WIDTH * FB_HEIGHT];
 uint32_t framebuffer_ui[FB_WIDTH * FB_HEIGHT];
 
+/* Depth buffer used by the rasterizer (defined here) */
 float depthbuffer[FB_WIDTH * FB_HEIGHT]; // <-- actual definition lives here
 
+/**
+ * render_init - Initialize the Win32 rendering backend and create a DIB section
+ * @platform_context: HWND pointer cast to void*
+ */
 void render_init(void* platform_context)
 {
 	HWND hwnd = (HWND)platform_context;
@@ -37,11 +44,17 @@ void render_init(void* platform_context)
 	}
 }
 
+/**
+ * render_get_framebuffer - Return pointer to platform framebuffer storage
+ */
 uint32_t* render_get_framebuffer(void)
 {
 	return framebuffer;
 }
 
+/**
+ * render_clear - Fill a buffer with a color
+ */
 void render_clear(uint32_t* buffer, uint32_t color)
 {
 	if (buffer)
@@ -54,6 +67,9 @@ void render_clear(uint32_t* buffer, uint32_t color)
 	}
 }
 
+/**
+ * render_blend_ui_over_game - Blend UI layer over the game layer
+ */
 void render_blend_ui_over_game()
 {
 	for (int i = 0; i < FB_WIDTH * FB_HEIGHT; ++i)
@@ -90,6 +106,9 @@ void render_blend_ui_over_game()
 	}
 }
 
+/**
+ * render_present - Present framebuffer to the window, performing scaling and letterbox bars.
+ */
 void render_present(void)
 {
 	RECT rect;
@@ -140,6 +159,9 @@ void render_present(void)
 	);
 }
 
+/**
+ * render_shutdown - Release platform resources
+ */
 void render_shutdown(void)
 {
 	if (hdcWindow)

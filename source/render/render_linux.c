@@ -19,12 +19,17 @@ static Window window;
 static GC gc;
 static XImage* ximage = NULL;
 
+/* Actual framebuffer storage (defined in this file) */
 uint32_t framebuffer[FB_WIDTH * FB_HEIGHT];
 uint32_t framebuffer_game[FB_WIDTH * FB_HEIGHT];
 uint32_t framebuffer_ui[FB_WIDTH * FB_HEIGHT];
 
+/* Depth buffer for the rasterizer */
 float depthbuffer[FB_WIDTH * FB_HEIGHT]; // <-- actual definition lives here
 
+/**
+ * render_init - Initialize X11 rendering resources and attach framebuffer
+ */
 void render_init(void* platform_context)
 {
 	X11Context* context = (X11Context*)platform_context;
@@ -41,11 +46,17 @@ void render_init(void* platform_context)
 	ximage->f.destroy_image = NULL;
 }
 
+/**
+ * render_get_framebuffer - Return platform framebuffer pointer
+ */
 uint32_t* render_get_framebuffer(void)
 {
 	return framebuffer;
 }
 
+/**
+ * render_clear - Clear a buffer with a color value
+ */
 void render_clear(uint32_t* buffer, uint32_t color)
 {
 	for (int i = 0; i < FB_WIDTH * FB_HEIGHT; ++i)
@@ -54,6 +65,9 @@ void render_clear(uint32_t* buffer, uint32_t color)
 	}
 }
 
+/**
+ * render_blend_ui_over_game - Composite UI over game into final framebuffer
+ */
 void render_blend_ui_over_game()
 {
 	for (int i = 0; i < FB_WIDTH * FB_HEIGHT; ++i)
@@ -86,6 +100,9 @@ void render_blend_ui_over_game()
 	}
 }
 
+/**
+ * render_present - Present the framebuffer, scaling to window and letterboxing as necessary
+ */
 void render_present(void)
 {
 	if (!display || !ximage) return;
@@ -146,7 +163,9 @@ void render_present(void)
 	XDestroyImage(scaled_image);
 }
 
-
+/**
+ * render_shutdown - Release X11 rendering resources
+ */
 void render_shutdown(void)
 {
 	if (ximage)

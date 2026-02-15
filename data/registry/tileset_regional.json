@@ -1,0 +1,11 @@
+{
+  "Type": "Regional_Tileset",
+  "Version": 1,
+  "Entries": [
+    {
+      "Index": 0,
+      "Label": "test_regional_tileset",
+      "Valid": true
+    }
+  ]
+}

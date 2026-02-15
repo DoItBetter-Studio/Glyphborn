@@ -1,134 +1,354 @@
-#include "sketch.h"
-#include "maths/vec4.h"
+/*
+ * sketch.c - Software rasterizer and simple debugging drawing utilities
+ *
+ * Provides triangle rasterization, wireframe drawing, grid drawing and helpers
+ * used by the render pipeline. Operates on `framebuffer_game` and uses the
+ * shared `depthbuffer` for per-pixel depth tests.
+ */
 
+#include "sketch.h"
+#include "render.h"
+#include "maths/vec4.h"
+#include "lighting/directional_light.h"
+#include <string.h>
+#include <math.h>
+
+#include <stdio.h>
+
+/* External depth buffer used for depth testing (defined in platform renderer)
+ * Each pixel holds the current minimum depth; lower values are closer.
+ */
+extern uint32_t framebuffer_game[FB_WIDTH * FB_HEIGHT];
 extern float depthbuffer[FB_WIDTH * FB_HEIGHT];
 
-static void sketch_draw_pixel(int x, int y, float z, uint32_t color)
-{
-	int index = y * FB_WIDTH + x;
+extern DirectionalLight sun;
 
-	if (z < depthbuffer[index])
+static FILE* debug_log = NULL;
+
+static bool show_uvs = false;
+
+/* =================================
+ * Internal raster vertex
+  ================================== */
+typedef struct {
+	float x, y;
+	float z_over_w;
+	float u_over_w;
+	float v_over_w;
+	float inv_w;
+} RasterVert;
+
+/* =================================
+ * Utility
+  ================================== */
+static inline float edge(float ax, float ay, float bx, float by, float cx, float cy)
+{
+	return (bx - ax) * (cy - ay) - (by - ay) * (cx - ax);
+}
+
+void sketch_show_uvs(bool showUVs)
+{
+	show_uvs = showUVs;
+}
+
+void sketch_clear(uint32_t clear_color)
+{
+	for (int i = 0; i < FB_WIDTH * FB_HEIGHT; i++)
 	{
-		depthbuffer[index] = z;
-		framebuffer_game[index] = color;
+		framebuffer_game[i] = clear_color;
+		depthbuffer[i] = 1.0f;
 	}
 }
 
-static void sketch_draw_line(int x0, int y0, float z0, int x1, int y1, float z1, uint32_t color)
+typedef struct {
+    Vec4 p;   // clip-space position
+    float u;
+    float v;
+} ClipVert;
+
+typedef struct {
+    ClipVert v[3];
+} ClipTri;
+
+static ClipVert clip_lerp(const ClipVert* a, const ClipVert* b, float t)
 {
-	int dx = abs(x1 - x0), sx = x0 < x1 ? 1 : -1;
-	int dy = -abs(y1 - y0), sy = y0 < y1 ? 1 : -1;
-	int err = dx + dy;
+    ClipVert r;
 
-	int steps = dx > -dy ? dx : -dy;
-	float dz = steps > 0 ? (z1 - z0) / (float)steps : 0.0f;
-	float z = z0;
+    r.p.x = a->p.x + t * (b->p.x - a->p.x);
+    r.p.y = a->p.y + t * (b->p.y - a->p.y);
+    r.p.z = a->p.z + t * (b->p.z - a->p.z);
+    r.p.w = a->p.w + t * (b->p.w - a->p.w);
 
-	while (true)
+    r.u = a->u + t * (b->u - a->u);
+    r.v = a->v + t * (b->v - a->v);
+
+    return r;
+}
+
+// Clip a single triangle against the near plane z = -w in clip space.
+// Returns 0, 1, or 2 output triangles in 'out'.
+static int clip_triangle_near(const ClipVert in[3], ClipTri out[2])
+{
+    float d[3];
+    int inside[3];
+    int inside_count = 0;
+
+    for (int i = 0; i < 3; i++) {
+        d[i] = in[i].p.z + in[i].p.w;   // >0 = inside
+        inside[i] = d[i] > 0.0f;
+        if (inside[i]) inside_count++;
+    }
+
+    if (inside_count == 0)
+        return 0;
+
+    if (inside_count == 3) {
+        out[0].v[0] = in[0];
+        out[0].v[1] = in[1];
+        out[0].v[2] = in[2];
+        return 1;
+    }
+
+    // helper function for interpolation
+    ClipVert (*interp)(const ClipVert*, const ClipVert*, float) = clip_lerp;
+
+    if (inside_count == 1) {
+        int i0 = inside[0] ? 0 : (inside[1] ? 1 : 2);
+        int i1 = (i0 + 1) % 3;
+        int i2 = (i0 + 2) % 3;
+
+        float t1 = d[i0] / (d[i0] - d[i1]);
+        float t2 = d[i0] / (d[i0] - d[i2]);
+
+        out[0].v[0] = in[i0];
+        out[0].v[1] = interp(&in[i0], &in[i1], t1);
+        out[0].v[2] = interp(&in[i0], &in[i2], t2);
+
+        return 1;
+    }
+
+    if (inside_count == 2) {
+        int o  = inside[0] ? (inside[1] ? 2 : 1) : 0;
+        int i0 = (o + 1) % 3;
+        int i1 = (o + 2) % 3;
+
+        float t0 = d[i0] / (d[i0] - d[o]);
+        float t1 = d[i1] / (d[i1] - d[o]);
+
+        ClipVert v0 = in[i0];
+        ClipVert v1 = in[i1];
+        ClipVert v2 = interp(&in[i0], &in[o], t0);
+        ClipVert v3 = interp(&in[i1], &in[o], t1);
+
+        // First triangle
+        out[0].v[0] = v0;
+        out[0].v[1] = v1;
+        out[0].v[2] = v2;
+
+        // Second triangle
+        out[1].v[0] = v1;
+        out[1].v[1] = v3;
+        out[1].v[2] = v2;
+
+        return 2;
+    }
+
+    return 0;
+}
+
+static void draw_triangle(RasterVert a, RasterVert b, RasterVert c, const RasterMesh* mesh, float light)
+{
+	float area = edge(a.x, a.y, b.x, b.y, c.x, c.y);
+	if (fabsf(area) < 1e-6f) return;
+
+	int minX = (int)fmaxf(0.0f, floorf(fminf(a.x, fminf(b.x, c.x))));
+	int maxX = (int)fminf(FB_WIDTH - 1.0f, ceilf(fmaxf(a.x, fmaxf(b.x, c.x))));
+	int minY = (int)fmaxf(0.0f, floorf(fminf(a.y, fminf(b.y, c.y))));
+	int maxY = (int)fminf(FB_HEIGHT - 1.0f, ceilf(fmaxf(a.y, fmaxf(b.y, c.y))));
+
+	if (!mesh->pixels || mesh->tex_width == 0 || mesh->tex_height == 0) {
+		if (debug_log) {
+			fprintf(debug_log, "Invalid texture! Skipping mesh\n");
+			fflush(debug_log);
+		}
+		return;
+	}
+
+	for (int y = minY; y <= maxY; y++)
+	for (int x = minX; x <= maxX; x++)
 	{
-		sketch_draw_pixel(x0, y0, z, color);
+		float px = x + 0.5f;
+		float py = y + 0.5f;
 
-		if (x0 == x1 && y0 == y1) break;
+		float w0 = edge(b.x, b.y, c.x, c.y, px, py) / area;
+		float w1 = edge(c.x, c.y, a.x, a.y, px, py) / area;
+		float w2 = 1.0f - w0 - w1;
 
-		int e2 = 2 * err;
-		if (e2 >= dy) { err += dy; x0 += sx; }
-		if (e2 <= dx) { err += dx; y0 += sy; }
+		if (w0 < 0 || w1 < 0 || w2 < 0)
+			continue;
 
-		z += dz;
+		// Interpolate depth (already perspective-corrected)
+		float z = a.z_over_w * w0 + b.z_over_w * w1 + c.z_over_w * w2;
+
+		// Map from [-1, 1] to [0, 1] for depth buffer
+		z = 0.5f * z + 0.5f;
+
+		int idx = y * FB_WIDTH + x;
+		if (z >= depthbuffer[idx]) continue;
+		depthbuffer[idx] = z;
+
+		// Perspective-correct interpolation for UVs
+		float inv_w = 
+			a.inv_w * w0 +
+			b.inv_w * w1 +
+			c.inv_w * w2;
+
+		if (inv_w <= 0.0f) continue;
+
+		float u =
+			(a.u_over_w * w0 +
+			 b.u_over_w * w1 +
+			 c.u_over_w * w2) / inv_w;
+
+		float v =
+			(a.v_over_w * w0 +
+			 b.v_over_w * w1 +
+			 c.v_over_w * w2) / inv_w;
+
+		u = fminf(fmaxf(u, 0.0f), 1.0f);
+		v = fminf(fmaxf(v, 0.0f), 1.0f);
+
+		int tx = (int)(u * (mesh->tex_width  - 1));
+		int ty = (int)(v * (mesh->tex_height - 1));
+
+		if (!show_uvs)
+		{
+			uint32_t tex = mesh->pixels[ty * mesh->tex_width + tx];
+
+			uint8_t r = (tex >> 16) & 0xFF;
+			uint8_t g = (tex >> 8) & 0xFF;
+			uint8_t b = tex & 0xFF;
+
+			r = (uint8_t)(r * light);
+			g = (uint8_t)(g * light);
+			b = (uint8_t)(b * light);
+
+			framebuffer_game[idx] = (0xFF << 24) | (r << 16) | (g << 8) | b;
+		}
+		else
+		{
+			uint8_t ru = (uint8_t)(u * 255);
+			uint8_t gv = (uint8_t)(v * 255);
+			uint32_t color = (ru << 16) | (gv << 8) | 0xFF;
+			framebuffer_game[idx] = color;
+		}
 	}
 }
 
-void sketch_draw_wireframe(RenderMesh* mesh, Mat4 model, Mat4 view, Mat4 projection, uint32_t color)
+static RasterVert clipvert_to_rastervert(const ClipVert* cv)
 {
-	Vec3* projected = malloc(sizeof(Vec3) * mesh->vertex_count);
-	if (!projected) return;
+    RasterVert r;
 
-	for (uint32_t i = 0; i < mesh->vertex_count; i++)
-	{
-		Vec4 v = { mesh->vertices[i].x, mesh->vertices[i].y, mesh->vertices[i].z, 1.0f };
-		v = mat4_mul_vec4(model, v);
-		v = mat4_mul_vec4(view, v);
-		v = mat4_mul_vec4(projection, v);
+    Vec4 p = cv->p;
+    float inv_w = 1.0f / p.w;
 
-		v.x /= v.w;
-		v.y /= v.w;
-		v.z /= v.w;
+    float x_ndc = p.x * inv_w;
+    float y_ndc = p.y * inv_w;
+    float z_ndc = p.z * inv_w;
 
-		projected[i].x = (v.x + 1.0f) * 0.5f * (float)FB_WIDTH;
-		projected[i].y = (1.0f - (v.y + 1.0f) * 0.5f) * (float)FB_HEIGHT; // Invert Y for top-down
-		projected[i].z = v.z;
-	}
+    r.x = (x_ndc + 1.0f) * 0.5f * FB_WIDTH;
+    r.y = (1.0f - (y_ndc + 1.0f) * 0.5f) * FB_HEIGHT;
 
-	for (uint32_t i = 0; i < mesh->index_count; i += 3)
-	{
-		int i0 = mesh->indices[i + 0];
-		int i1 = mesh->indices[i + 1];
-		int i2 = mesh->indices[i + 2];
+    r.inv_w    = inv_w;
+    r.z_over_w = z_ndc;                // already perspective-correct
+    r.u_over_w = cv->u * inv_w;
+    r.v_over_w = cv->v * inv_w;
 
-		sketch_draw_line((int)projected[i0].x, (int)projected[i0].y, projected[i0].z,
-			(int)projected[i1].x, (int)projected[i1].y, projected[i1].z, color);
-		sketch_draw_line((int)projected[i1].x, (int)projected[i1].y, projected[i1].z,
-			(int)projected[i2].x, (int)projected[i2].y, projected[i2].z, color);
-		sketch_draw_line((int)projected[i2].x, (int)projected[i2].y, projected[i2].z,
-			(int)projected[i0].x, (int)projected[i0].y, projected[i0].z, color);
-	}
-
-	free(projected);
+    return r;
 }
 
-void sketch_draw_grid(int size_x, int y_index, int size_z, Mat4 view, Mat4 projection)
+static bool once = false;
+
+void sketch_draw_mesh(const RasterMesh* mesh, Mat4 model, Mat4 view, Mat4 projection)
 {
-	Vec3* projected = malloc(sizeof(Vec3) * (size_x * size_z));
-	if (!projected) return;
+    if (!debug_log) {
+        debug_log = fopen("sketch_debug.txt", "w");
+        if (debug_log) {
+            fprintf(debug_log, "=== Glyphborn Debug Log ===\n");
+            fflush(debug_log);
+        }
+    }
 
-	int half_x = size_x / 2;
-	int half_z = size_z / 2;
+    if (!once) {
+        once = true;
+        if (debug_log) {
+            fprintf(debug_log, "sketch_draw_mesh called\n");
+            fflush(debug_log);
+        }
+    }
 
-	for (int x = -half_x; x <= half_x; ++x)
-	{
-		Vec4 a = { (float)x, y_index, (float)-half_z, 1.0f };
-		Vec4 b = { (float)x, y_index, (float)half_z, 1.0f };
-		a = mat4_mul_vec4(view, a);
-		b = mat4_mul_vec4(view, b);
-		a = mat4_mul_vec4(projection, a);
-		b = mat4_mul_vec4(projection, b);
+    for (uint32_t i = 0; i < mesh->index_count; i += 3)
+    {
+		Vec3 wp[3];
+		for (int k = 0; k < 3; ++k)
+		{
+			const RasterVertex* rv = &mesh->vertices[mesh->indices[i + k]];
 
-		a.x /= a.w;	a.y /= a.w; a.z /= a.w;
-		b.x /= b.w;	b.y /= b.w; b.z /= b.w;
+			Vec4 p = { rv->x, rv->y, rv->z, 1.0f };
+			p = mat4_mul_vec4(model, p);
 
-		int x0 = (int)((a.x + 1.0f) * 0.5f * FB_WIDTH);
-		int y0 = (int)((1.0f - (a.y + 1.0f) * 0.5f) * FB_HEIGHT);
-		float z0 = a.z;
+			wp[k] = (Vec3){ p.x, p.y, p.z };
+		}
 
-		int x1 = (int)((b.x + 1.0f) * 0.5f * FB_WIDTH);
-		int y1 = (int)((1.0f - (b.y + 1.0f) * 0.5f) * FB_HEIGHT);
-		float z1 = b.z;
+		Vec3 e1 = vec3_sub(wp[1], wp[0]);
+		Vec3 e2 = vec3_sub(wp[2], wp[0]);
+		Vec3 normal = vec3_cross(e1, e2);
 
-		sketch_draw_line(x0, y0, z0, x1, y1, z1, 0xFFFF0000);
-	}
+		float light_factor;
 
-	for (int z = -half_z; z <= half_z; ++z)
-	{
-		Vec4 a = { (float)-half_x, y_index, (float)z, 1.0f };
-		Vec4 b = { (float)half_x, y_index, (float)z, 1.0f };
-		a = mat4_mul_vec4(view, a);
-		b = mat4_mul_vec4(view, b);
-		a = mat4_mul_vec4(projection, a);
-		b = mat4_mul_vec4(projection, b);
+		float len_sq = normal.x * normal.x + normal.y * normal.y + normal.z * normal.z;
+		if (len_sq < 1e-6f) {
+			light_factor = sun.ambient;
+		}
+		else
+		{
+			normal = vec3_normalize(normal);
 
-		a.x /= a.w;	a.y /= a.w; a.z /= a.w;
-		b.x /= b.w;	b.y /= b.w; b.z /= b.w;
+			float ndotl = vec3_dot(normal, vec3_neg(sun.dir));
+			float diffuse = fmaxf(0.0f, ndotl);
 
-		int x0 = (int)((a.x + 1.0f) * 0.5f * FB_WIDTH);
-		int y0 = (int)((1.0f - (a.y + 1.0f) * 0.5f) * FB_HEIGHT);
-		float z0 = a.z;
+			light_factor = sun.ambient + diffuse * sun.intensity;
+			light_factor = fminf(fmaxf(light_factor, 0.0f), 1.0f);
+		}
 
-		int x1 = (int)((b.x + 1.0f) * 0.5f * FB_WIDTH);
-		int y1 = (int)((1.0f - (b.y + 1.0f) * 0.5f) * FB_HEIGHT);
-		float z1 = b.z;
+        // 1) Build three ClipVerts in clip space
+        ClipVert in[3];
+        for (int k = 0; k < 3; ++k) {
+            const RasterVertex* rv = &mesh->vertices[mesh->indices[i + k]];
 
-		sketch_draw_line(x0, y0, z0, x1, y1, z1, 0xFF0000FF);
-	}
+            Vec4 p = { rv->x, rv->y, rv->z, 1.0f };
+            p = mat4_mul_vec4(model, p);
+            p = mat4_mul_vec4(view,  p);
+            p = mat4_mul_vec4(projection, p);  // clip space
 
-	free(projected);
+            in[k].p = p;
+            in[k].u = rv->u;
+            in[k].v = rv->v;
+        }
+
+        // 2) Clip against near plane
+        ClipTri clipped[2];
+        int tri_count = clip_triangle_near(in, clipped);
+        if (tri_count == 0)
+            continue;
+
+        // 3) For each resulting triangle, convert to RasterVert and draw
+        for (int t = 0; t < tri_count; ++t) {
+            RasterVert a = clipvert_to_rastervert(&clipped[t].v[0]);
+            RasterVert b = clipvert_to_rastervert(&clipped[t].v[1]);
+            RasterVert c = clipvert_to_rastervert(&clipped[t].v[2]);
+
+            draw_triangle(a, b, c, mesh, light_factor);
+        }
+    }
 }

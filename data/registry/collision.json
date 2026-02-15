@@ -1,0 +1,16 @@
+{
+  "Type": "Collision",
+  "Version": 1,
+  "Entries": [
+    {
+      "Index": 0,
+      "Label": "test_map_0_0",
+      "Valid": true
+    },
+    {
+      "Index": 1,
+      "Label": "zero_0_0",
+      "Valid": true
+    }
+  ]
+}
