@@ -4,7 +4,7 @@
 
 Glyphborn is an open-world adventure game written entirely in C with zero external dependencies, featuring a fully 3D environment with a cardinal-locked 2.5D camera perspective.
 
-Built on a custom modular runtime designed for clarity, determinism, and complete platform control, Glyphborn represents both a creative work and a technical foundation.
+Built on a custom modular runtime designed for clarity, determinism, and complete platform control, Glyphborn serves as both a creative work and a long-term technical foundation.
 
 Development began in August 2025 as part of DoItBetter Studio's long-term effort to build a fully embedded game alongside the tooling and engine architecture that will eventually become:
 
@@ -16,7 +16,7 @@ This repository is an active internal development branch and is not open source 
 
 ## 🎮 Game Overview
 
-Glyphborn is a seamless open-world adventure game inspired by the exploration and discovery of classic Pokémon titles, built on a continuous chunk-based world system.
+Glyphborn is a seamless open-world adventure game inspired by the exploration-driven design of classic creature-collection RPGs, built on a continuous chunk-based world system.
 
 **World Architecture**  
 The entire world exists as a seamless, streaming environment with **no map transitions**. Each chunk is a 32³ tile volume (32×32×32), and the world streams continuously as you explore. Indoor spaces, outdoor areas, and vertical exploration all exist in the same unified space—no loading screens, no fade-to-black, just pure continuity.
@@ -25,7 +25,7 @@ The entire world exists as a seamless, streaming environment with **no map trans
 Full 3D geometry with a cardinal-locked 2.5D camera perspective. The camera can rotate to face North, South, East, or West, providing strategic viewpoints while maintaining a consistent gameplay feel reminiscent of classic RPGs.
 
 **Technical Foundation**  
-Built entirely in C with **zero external dependencies** beyond the operating system itself. No middleware, no frameworks, no game engines—every system from chunk streaming to rendering is handcrafted and embedded directly into the runtime.
+Built entirely in C with **zero external dependencies** beyond the operating system itself. No middleware. No third-party engines. Every system from chunk streaming to rendering is handcrafted and embedded directly into the runtime.
 
 **Design Philosophy**  
 Focused on handcrafted systemic worlds, emergent gameplay, and runtime storytelling, with an emphasis on clarity, determinism, and seamless exploration in every subsystem.
