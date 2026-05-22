@@ -135,3 +135,7 @@ ipch/
 bin/
 obj/
 Glyphborn/x64
+externals/yggdrasil
+*.zip
+*.img
+*.raw
