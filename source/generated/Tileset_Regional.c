@@ -7,7 +7,7 @@ extern const uint8_t _binary_data_tilesets_regional_test_regional_tileset_bin_st
 const Blob g_Tileset_Regional[] = {
     {
         _binary_data_tilesets_regional_test_regional_tileset_bin_start,
-        17284
+        30300
     },
 };
 

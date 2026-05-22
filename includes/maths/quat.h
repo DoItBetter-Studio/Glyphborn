@@ -15,5 +15,6 @@ Quat quat_identity(void);
 Quat quat_from_axis_angle(Vec3 axis, float angle);
 Quat quat_multiply(Quat a, Quat b);
 Quat quat_normalize(Quat q);
+Vec3 quat_rotate(Quat q, Vec3 v);
 
 #endif // !QUAT_H

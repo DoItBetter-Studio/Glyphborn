@@ -10,13 +10,20 @@
 #include "achievements.h"
 #include "world/world.h"
 #include "lighting/directional_light.h"
+#include "generated/Audio.h"
+
+#if __YGGDRASIL__
+#include <yggdrasil.h>
+#endif
 
 #include <stdio.h>
 #include <math.h>
 
-Camera main_camera = { 0 };
+Camera main_camera = {0};
 Mat4 view;
 Mat4 projection;
+
+static CameraFacing current_facing = CAM_FACE_NORTH;
 
 static void draw_test_pattern_ui(void)
 {
@@ -37,24 +44,24 @@ DirectionalLight sun;
 void game_init(void)
 {
 	input_init();
-	achievements_init();
+	//achievements_init();
 
 	ui_set_skin(SKIN_GLYPHBORN);
 
-	main_camera.position = (Vec3){ 16.0f, 1.0f, -16.0f };
-	main_camera.target   = (Vec3){ 16.0f, 0.0f,  16.0f };
-	main_camera.up = (Vec3){ 0.0f, 1.0f, 0.0f };
+	main_camera.position = (Vec3){0.0f, 10.0f, -10.0f};
+	main_camera.target = (Vec3){main_camera.position.x, 0, main_camera.position.z + 10.0f};
+	main_camera.up = (Vec3){0.0f, 1.0f, 0.0f};
 
 	view = camera_get_view_matrix(&main_camera);
+
 	projection = mat4_perspective(3.14159f / 4.0f, (float)FB_WIDTH / (float)FB_HEIGHT, 0.1f, 100.0f);
 
 	world_init(&world, main_camera.position.x, main_camera.position.z);
+	world_update(&world, main_camera.position.x, main_camera.position.z);
 
-	sun = (DirectionalLight){
-		.dir = vec3_normalize((Vec3){ -0.4f, -1.0f, 0.2f }),
-		.ambient = 0.35f,
-		.intensity = 0.75f
-	};
+	sun = (DirectionalLight){ .dir = vec3_normalize((Vec3){-0.4f, -1.0f, 0.2f}), .ambient = 0.35f, .intensity = 0.75f };
+
+	audio_play_music(MUSIC_MUSIC_THE_LONGEST_JOURNEY, true);
 }
 
 static bool activate = false;
@@ -67,42 +74,73 @@ static float season = 0.0f;
 void game_update(float delta_time)
 {
 	input_update();
-	achievements_update();
+	// achievements_update();
 
 	// These come from your input layer
 	nav_dx = 0;
 	nav_dy = 0;
-	if (input_button_down(BUTTON_UP))   nav_dy += -1;
-	if (input_button_down(BUTTON_DOWN)) nav_dy += 1;
+	if (input_button_down(BUTTON_UP))
+		nav_dy += -1;
+	if (input_button_down(BUTTON_DOWN))
+		nav_dy += 1;
 	activate = input_button_down(BUTTON_A);
-
-	if (input_button_down(BUTTON_B))
-	{
-		// audio_play_sound(player_jump, PLAYER_JUMP_LEN);
-	}
-
-	if (input_button_down(BUTTON_START))
-	{
-		showUI = !showUI;
-	}
-
-	if (input_get_button(BUTTON_UP)) main_camera.position.z += 1.0f * delta_time;
-	if (input_get_button(BUTTON_DOWN)) main_camera.position.z -= 1.0f * delta_time;
-	if (input_get_button(BUTTON_LEFT)) main_camera.position.x -= 1.0f * delta_time;
-	if (input_get_button(BUTTON_RIGHT)) main_camera.position.x += 1.0f * delta_time;
 
 	if (input_button_down(BUTTON_SELECT))
 	{
 		showUVs = !showUVs;
 	}
 
-	sketch_show_uvs(showUVs);
+	// 1. Handle snappy rotation switching (Example: SELECT button)
+    if (input_button_down(BUTTON_LEFT_BUMPER))
+    {
+        camera_cycle_facing(&current_facing, -1);
+    }
+	else if (input_button_down(BUTTON_RIGHT_BUMPER))
+	{
+		camera_cycle_facing(&current_facing, 1);
+	}
 
-	view = camera_get_view_matrix(&main_camera);
+    // 2. Track an anchor target point in the world instead of moving camera coordinates directly
+    static Vec3 camera_focus = {0.0f, 0.0f, 0.0f};
+    float move_speed = 5.0f;
+    Vec3 move_dir = {0};
+
+    if (input_get_button(BUTTON_UP))    move_dir.z -= 1.0f; // Screen Forward (-Z in view space)
+    if (input_get_button(BUTTON_DOWN))  move_dir.z += 1.0f; // Screen Backward (+Z in view space)
+    if (input_get_button(BUTTON_LEFT))  move_dir.x -= 1.0f; // Screen Left (-X)
+    if (input_get_button(BUTTON_RIGHT)) move_dir.x += 1.0f; // Screen Right (+X)
+
+    // Translate screen movement directly into world coordinates based on camera orientation
+    switch (current_facing)
+    {
+        case CAM_FACE_NORTH:
+            camera_focus.x += move_dir.x * move_speed * delta_time;
+            camera_focus.z += move_dir.z * move_speed * delta_time;
+            break;
+        case CAM_FACE_EAST:
+            camera_focus.z += move_dir.x * move_speed * delta_time;
+            camera_focus.x -= move_dir.z * move_speed * delta_time;
+            break;
+        case CAM_FACE_SOUTH:
+            camera_focus.x -= move_dir.x * move_speed * delta_time;
+            camera_focus.z -= move_dir.z * move_speed * delta_time;
+            break;
+        case CAM_FACE_WEST:
+            camera_focus.z -= move_dir.x * move_speed * delta_time;
+            camera_focus.x += move_dir.z * move_speed * delta_time;
+            break;
+    }
+
+    // 3. Recompute fixed positions and update the view matrix
+    camera_update(&main_camera, camera_focus, current_facing, delta_time);
+    view = camera_get_view_matrix(&main_camera);
+
+	sketch_show_uvs(showUVs);
 
 	// Day/night cycle
 	sun_angle += delta_time * 0.25f;
-	if (sun_angle > 6.28318f) sun_angle -= 6.28318f;
+	if (sun_angle > 6.28318f)
+		sun_angle -= 6.28318f;
 
 	// Season cycle (Will eventually become it's own system)
 	// This makes a full seasonal cycle every ~25 seconds at 0.25 speed
@@ -112,17 +150,17 @@ void game_update(float delta_time)
 	// Calculate sun direction with seasonal variation
 	float y = sinf(sun_angle);
 	float horizontal = cosf(sun_angle);
-	
+
 	// Season affects sun height (0 = winter/low, 1 = summer/high)
 	float season_height = 0.6f + season * 0.4f; // Range: 0.6 to 1.0
 	y *= season_height;
-	
+
 	// Optional: tilt the sun's path for more realistic seasons
 	float tilt = season * 0.3f;
-	float x = horizontal * sinf(tilt);
-	float z = horizontal * cosf(tilt);
+	float z = horizontal * sinf(tilt);
+	float x = horizontal * cosf(tilt);
 
-	sun.dir = vec3_normalize((Vec3) { x, y, z});
+	sun.dir = vec3_normalize((Vec3){x, y, z});
 
 	// Optional: adjust ambient based on season
 	sun.ambient = 0.25f + season * 0.15f; // Brighter in summer
@@ -130,13 +168,38 @@ void game_update(float delta_time)
 	world_update(&world, main_camera.position.x, main_camera.position.z);
 }
 
+static void draw_cross()
+{
+	Vec3 zero = {
+		0, 0, 0
+	};
+
+	Vec3 right = {
+		3, 0, 0
+	};
+
+	Vec3 up = {
+		0, 3, 0
+	};
+
+	Vec3 forward = {
+		0, 0, 3
+	};
+
+	sketch_draw_line_3d(zero, right, view, projection, 0xFFFF0000);
+	sketch_draw_line_3d(zero, up, view, projection, 0xFF00FF00);
+	sketch_draw_line_3d(zero, forward, view, projection, 0xFF0000FF);
+}
+
 void game_render(void)
-{    
+{
 	sketch_clear(0xFF000000);
 
-    view = camera_get_view_matrix(&main_camera);
+	view = camera_get_view_matrix(&main_camera);
 
 	world_render(&world, view, projection);
+
+	draw_cross();
 }
 
 void game_render_ui(void)
@@ -147,12 +210,13 @@ void game_render_ui(void)
 	{
 		g_ui.nav_mode = true;
 		g_ui.focused_id += nav_dy;
-		if (g_ui.focused_id < 1) g_ui.focused_id = 1;
+		if (g_ui.focused_id < 1)
+			g_ui.focused_id = 1;
 	}
 
 	if (ui_button(16, 16, 100, 30, "Jump", 0xFF000000))
 	{
-		audio_play_sound(player_jump, PLAYER_JUMP_LEN);
+		audio_play_sound(player_jump);
 	}
 
 	if (showUI)
@@ -163,12 +227,50 @@ void game_render_ui(void)
 	char buffer[32];
 	snprintf(buffer, sizeof(buffer), "%f, %f, %f", main_camera.position.x, main_camera.position.y, main_camera.position.z);
 
-	ui_draw_text_colored(200, 10, (const char*)buffer, 0xFFFFFFFF);
+	ui_draw_text_colored(200, 10, (const char *)buffer, 0xFFFFFFFF);
 
-	snprintf(buffer, sizeof(buffer), "sun angle: %f", sun_angle);
+	static char* facing_dir;
 
-	ui_draw_text_colored(500, 10, (const char*)buffer, 0xFFFFFFFF);
+	switch (current_facing)
+	{
+		case CAM_FACE_NORTH: facing_dir = "north"; break;
+		case CAM_FACE_SOUTH: facing_dir = "south"; break;
+		case CAM_FACE_EAST: facing_dir = "east"; break;
+		case CAM_FACE_WEST: facing_dir = "west"; break;
+	}
 
+	snprintf(buffer, sizeof(buffer), "facing: %s", facing_dir);
+
+	ui_draw_text_colored(500, 10, (const char *)buffer, 0xFFFFFFFF);
+
+	#if __YGGDRASIL__
+	uint64_t ms = pit_millis();
+	char tbuf[12];
+	int ti = 10;
+	tbuf[11] = '\0';
+	tbuf[10] = '\0';
+	if (ms == 0) {
+		tbuf[0] = '0';
+		tbuf[1] = '\0';
+		ui_draw_text_colored(300, 10, tbuf, 0xFFFFFF00);
+	} else {
+		tbuf[ti] = '\0';
+		while (ms > 0 && ti > 0) {
+			tbuf[--ti] = '0' + (ms % 10);
+			ms /= 10;
+		}
+		ui_draw_text_colored(300, 10, &tbuf[ti], 0xFFFFFF00);
+	}
+	#endif
+
+	char* dot = ".";
+	int dot_w = ui_text_width(dot);
+	int dot_h = ui_text_height(dot, 8);
+
+	int text_x = (FB_WIDTH - dot_w) / 2;
+	int text_y = (FB_HEIGHT - dot_h) / 2;
+
+	ui_draw_text_colored(text_x, text_y, dot, 0xFFFF00FF);
 	ui_end_frame();
 }
 

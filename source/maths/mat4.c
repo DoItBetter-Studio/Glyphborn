@@ -1,19 +1,19 @@
 #include "maths/mat4.h"
 #include <math.h>
 
-Mat4 mat4_identity(void)
+void mat4_identity(Mat4 *out)
 {
-	Mat4 result = { 0 };
-	result.m[0][0] = 1.0f;
-	result.m[1][1] = 1.0f;
-	result.m[2][2] = 1.0f;
-	result.m[3][3] = 1.0f;
-	return result;
+	*out = (Mat4){ 0 };
+	out->m[0][0] = 1.0f;
+	out->m[1][1] = 1.0f;
+	out->m[2][2] = 1.0f;
+	out->m[3][3] = 1.0f;
 }
 
 Mat4 mat4_translate(Vec3 v)
 {
-	Mat4 result = mat4_identity();
+	Mat4 result = { 0 };
+	mat4_identity(&result);
 	result.m[3][0] = v.x;
 	result.m[3][1] = v.y;
 	result.m[3][2] = v.z;
@@ -22,7 +22,8 @@ Mat4 mat4_translate(Vec3 v)
 
 Mat4 mat4_scale(Vec3 v)
 {
-	Mat4 result = mat4_identity();
+	Mat4 result = { 0 };
+	mat4_identity(&result);
 	result.m[0][0] = v.x;
 	result.m[1][1] = v.y;
 	result.m[2][2] = v.z;
@@ -31,7 +32,8 @@ Mat4 mat4_scale(Vec3 v)
 
 Mat4 mat4_rotate_x(float angle)
 {
-	Mat4 result = mat4_identity();
+	Mat4 result = { 0 };
+	mat4_identity(&result);
 	float c = cosf(angle);
 	float s = sinf(angle);
 	result.m[1][1] = c;
@@ -43,7 +45,8 @@ Mat4 mat4_rotate_x(float angle)
 
 Mat4 mat4_rotate_y(float angle)
 {
-	Mat4 result = mat4_identity();
+	Mat4 result = { 0 };
+	mat4_identity(&result);
 	float c = cosf(angle);
 	float s = sinf(angle);
 	result.m[0][0] = c;
@@ -55,7 +58,8 @@ Mat4 mat4_rotate_y(float angle)
 
 Mat4 mat4_rotate_z(float angle)
 {
-	Mat4 result = mat4_identity();
+	Mat4 result = { 0 };
+	mat4_identity(&result);
 	float c = cosf(angle);
 	float s = sinf(angle);
 	result.m[0][0] = c;
@@ -102,27 +106,32 @@ Mat4 mat4_look_at(Vec3 eye, Vec3 center, Vec3 up)
 	Vec3 s = vec3_normalize(vec3_cross(f, up));         // Right
 	Vec3 u = vec3_cross(s, f);                          // Up
 
-	Mat4 result = mat4_identity();
+	Mat4 result = { 0 };
+	mat4_identity(&result);
 
-	// Column-major layout: each axis is a column
+	// FIX: Explicitly loading columns down the first index (m[col][row])
+	// Right Vector Column
 	result.m[0][0] = s.x;
 	result.m[0][1] = s.y;
 	result.m[0][2] = s.z;
 	result.m[0][3] = 0.0f;
 
+	// Up Vector Column
 	result.m[1][0] = u.x;
 	result.m[1][1] = u.y;
 	result.m[1][2] = u.z;
 	result.m[1][3] = 0.0f;
 
+	// Forward Vector Column (-f)
 	result.m[2][0] = -f.x;
 	result.m[2][1] = -f.y;
 	result.m[2][2] = -f.z;
 	result.m[2][3] = 0.0f;
 
+	// Translation Column
 	result.m[3][0] = -vec3_dot(s, eye);
 	result.m[3][1] = -vec3_dot(u, eye);
-	result.m[3][2] = vec3_dot(f, eye); // OpenGL-style
+	result.m[3][2] = vec3_dot(f, eye); 
 	result.m[3][3] = 1.0f;
 
 	return result;

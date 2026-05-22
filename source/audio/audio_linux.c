@@ -12,6 +12,7 @@
 #include <alsa/asoundlib.h>
 
 #include "audio.h"
+#include "gbaud.h"
 #include <stdlib.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -24,14 +25,15 @@ typedef struct
 
 	int16_t buffers[NUM_BUFFERS][BUFFER_SAMPLES];
 	int buffer_index;
+	uint32_t loop_start;
+	uint32_t loop_end;
+	bool     has_loop;
 
-	// Currently playing (could be bgm, jingle, or sfx)
 	const unsigned char* playing_sample;
 	int sample_length;
 	int sample_position;
 	bool is_playing;
 
-	// Only used for channel 0 (music): saved state to resume after an interrupt/jingle
 	const unsigned char* saved_sample;
 	int saved_length;
 	int saved_position;
@@ -62,7 +64,10 @@ static void fill_buffer(AudioChannel* channel, int16_t* buffer, int samplesPerBu
 
 		if (channel->playing_sample && channel->sample_position < channel->sample_length)
 		{
-			sample = s8_to_s16(channel->playing_sample[channel->sample_position++]);
+			sample = s8_to_s16(channel->playing_sample[channel->sample_position]);
+
+			if (channel->has_loop && channel->sample_position >= (int)channel->loop_end)
+				channel->sample_position = (int)channel->loop_start;
 		}
 		else
 		{
@@ -71,13 +76,17 @@ static void fill_buffer(AudioChannel* channel, int16_t* buffer, int samplesPerBu
 			if (channel == &audio_channels[0] && channel->interrupted && channel->saved_sample)
 			{
 				channel->playing_sample = channel->saved_sample;
-				channel->sample_length = channel->saved_length;
+				channel->sample_length  = channel->saved_length;
 				channel->sample_position = channel->saved_position;
-				channel->interrupted = false;
+				channel->interrupted    = false;
 
 				if (channel->playing_sample && channel->sample_position < channel->sample_length)
 				{
-					sample = s8_to_s16(channel->playing_sample[channel->sample_position++]);
+					sample = s8_to_s16(channel->playing_sample[channel->sample_position]);
+					channel->sample_position++;
+
+					if (channel->has_loop && channel->sample_position >= (int)channel->loop_end)
+						channel->sample_position = (int)channel->loop_start;
 				}
 				else
 				{
@@ -98,17 +107,20 @@ void audio_init(void)
 	for (int ch = 0; ch < NUM_CHANNELS; ++ch)
 	{
 		AudioChannel* channel = &audio_channels[ch];
-		channel->handle = NULL;
-		channel->buffer_index = 0;
-		channel->playing_sample = NULL;
-		channel->sample_length = 0;
+		channel->handle          = NULL;
+		channel->buffer_index    = 0;
+		channel->playing_sample  = NULL;
+		channel->sample_length   = 0;
 		channel->sample_position = 0;
-		channel->is_playing = false;
+		channel->is_playing      = false;
+		channel->has_loop        = false;
+		channel->loop_start      = 0;
+		channel->loop_end        = 0;
 
-		channel->saved_sample = NULL;
-		channel->saved_length = 0;
-		channel->saved_position = 0;
-		channel->interrupted = false;
+		channel->saved_sample    = NULL;
+		channel->saved_length    = 0;
+		channel->saved_position  = 0;
+		channel->interrupted     = false;
 
 		int err = alsa_open_playback(&channel->handle, SAMPLE_RATE);
 		if (err < 0)
@@ -164,44 +176,50 @@ void audio_shutdown(void)
 	}
 }
 
-static void audio_play_sample_channel(int channelIndex, const unsigned char* sample_data, int length)
+static void audio_play_sample_channel(int channelIndex, const unsigned char* sample_data)
 {
 	if (channelIndex < 0 || channelIndex >= NUM_CHANNELS) return;
 
 	AudioChannel* channel = &audio_channels[channelIndex];
 	if (!channel->handle) return;
 
-	channel->playing_sample = sample_data;
-	channel->sample_length = length;
+	const GbaudHeader* hdr = (const GbaudHeader*)sample_data;
+	const unsigned char* pcm = sample_data + hdr->data_offset;
+
+	channel->has_loop        = (hdr->flags & GBAUD_FLAG_LOOP) != 0;
+	channel->loop_start      = hdr->loop_start;
+	channel->loop_end        = hdr->loop_end;
+	channel->playing_sample  = pcm;
+	channel->sample_length   = (int)hdr->sample_count;
 	channel->sample_position = 0;
-	channel->is_playing = true;
-	channel->buffer_index = 0;
+	channel->is_playing      = true;
+	channel->buffer_index    = 0;
 }
 
-void audio_play_music(const unsigned char* music_data, int length, bool interrupt)
+void audio_play_music(const unsigned char* music_data, bool interrupt)
 {
 	AudioChannel* bgm = &audio_channels[0];
 
 	if (interrupt && bgm->is_playing && bgm->playing_sample)
 	{
-		bgm->saved_sample = bgm->playing_sample;
-		bgm->saved_length = bgm->sample_length;
+		bgm->saved_sample   = bgm->playing_sample;
+		bgm->saved_length   = bgm->sample_length;
 		bgm->saved_position = bgm->sample_position;
-		bgm->interrupted = true;
+		bgm->interrupted    = true;
 	}
 	else
 	{
-		bgm->saved_sample = NULL;
-		bgm->saved_length = 0;
+		bgm->saved_sample   = NULL;
+		bgm->saved_length   = 0;
 		bgm->saved_position = 0;
-		bgm->interrupted = false;
+		bgm->interrupted    = false;
 	}
 
-	audio_play_sample_channel(0, music_data, length);
+	audio_play_sample_channel(0, music_data);
 }
 
-void audio_play_sound(const unsigned char* sound_data, int length)
+void audio_play_sound(const unsigned char* sound_data)
 {
-	audio_play_sample_channel(1, sound_data, length);
+	audio_play_sample_channel(1, sound_data);
 }
-#endif 
+#endif

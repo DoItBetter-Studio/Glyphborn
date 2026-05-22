@@ -7,7 +7,7 @@ extern const uint8_t _binary_data_tilesets_local_test_local_tileset_bin_start[] 
 const Blob g_Tileset_Local[] = {
     {
         _binary_data_tilesets_local_test_local_tileset_bin_start,
-        20
+        14
     },
 };
 

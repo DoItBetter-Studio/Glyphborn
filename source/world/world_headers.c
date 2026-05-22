@@ -36,6 +36,10 @@ void world_headers_load(WorldHeaders* headers)
 
     // Allocate headers
     headers->headers = malloc(headers->count * sizeof(WorldHeader));
+    if (!headers->headers) {
+        headers->count = 0;
+        return;
+    }
 
     // Read all headers
     for (int i = 0; i < headers->count; i++)

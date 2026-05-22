@@ -4,8 +4,8 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-#define TARGET_FPS			1000
-#define TARGET_FRAME_TIME	(1000 / TARGET_FPS)
+#define TARGET_FPS			60.0f
+#define TARGET_FRAME_TIME	(1000.0f / TARGET_FPS)
 
 typedef struct
 {

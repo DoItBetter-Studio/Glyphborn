@@ -2,170 +2,173 @@
 
 **Proprietary Software — DoItBetter Studio**
 
-Glyphborn is an open-world adventure game written entirely in C with zero external dependencies, featuring a fully 3D environment with a cardinal-locked 2.5D camera perspective.
+[![License: Proprietary](https://img.shields.io/badge/License-Proprietary-red.svg)](LICENSE)
 
-Built on a custom modular runtime designed for clarity, determinism, and complete platform control, Glyphborn serves as both a creative work and a long-term technical foundation.
+Glyphborn is a multiplayer, classless, historical Viking-Age sandbox game that blends grounded survival, deep skill-based progression, hand-crafted exploration, player-driven politics, and immersive roleplay systems. Set in the 10th–11th century, players inhabit a shared Viking world where they define their identity through skills, reputation, and choices—no classes, no predetermined roles.
 
-Development began in August 2025 as part of DoItBetter Studio's long-term effort to build a fully embedded game alongside the tooling and engine architecture that will eventually become:
-
-**Damascus — The Steel Editor Suite**
+Built entirely in C with zero external dependencies, Glyphborn features a fully 3D environment with a cardinal-locked 2.5D camera perspective. It's designed as both a creative work and a long-term technical foundation for the upcoming **Damascus — The Steel Editor Suite**.
 
 This repository is an active internal development branch and is not open source at this time.
 
 ---
 
-## 🎮 Game Overview
+## 📁 Project Structure
 
-Glyphborn is a seamless open-world adventure game inspired by the exploration-driven design of classic creature-collection RPGs, built on a continuous chunk-based world system.
-
-**World Architecture**  
-The entire world exists as a seamless, streaming environment with **no map transitions**. Each chunk is a 32³ tile volume (32×32×32), and the world streams continuously as you explore. Indoor spaces, outdoor areas, and vertical exploration all exist in the same unified space—no loading screens, no fade-to-black, just pure continuity.
-
-**Visual Style**  
-Full 3D geometry with a cardinal-locked 2.5D camera perspective. The camera can rotate to face North, South, East, or West, providing strategic viewpoints while maintaining a consistent gameplay feel reminiscent of classic RPGs.
-
-**Technical Foundation**  
-Built entirely in C with **zero external dependencies** beyond the operating system itself. No middleware. No third-party engines. Every system from chunk streaming to rendering is handcrafted and embedded directly into the runtime.
-
-**Design Philosophy**  
-Focused on handcrafted systemic worlds, emergent gameplay, and runtime storytelling, with an emphasis on clarity, determinism, and seamless exploration in every subsystem.
-
----
-
-## 🧠 Engineering Philosophy
-
-Glyphborn is built around disciplined systems design:
-
-**Transparency Over Abstraction**  
-No hidden middleware. No opaque frameworks. Every subsystem is readable and intentional.
-
-**Deterministic Modularity**  
-Each system (input, render, audio, UI, simulation) is isolated and replaceable.
-
-**Platform Symmetry**  
-Windows and Linux maintain mirrored behavior via Win32 and Xlib parity.
-
-**Tool-Driven Creation**  
-Runtime systems are paired with dedicated external authoring tools.
-
-**Creative Authorship**  
-Designed to support handcrafted systemic worlds and runtime storytelling.
+```
+Glyphborn/
+├── assets/           # Raw game assets (audio, images, models, tilesets, maps)
+├── build/            # Compiled binaries and distributions (versioned)
+├── data/             # Embedded game data (layouts, registry, skeletons, world files)
+├── docs/             # Technical documentation (render, world, sketch systems)
+├── externals/        # External dependencies (if any)
+├── includes/         # C header files (.h)
+│   ├── game/         # Game logic headers (difficulty, skills)
+│   ├── lighting/     # Lighting system headers
+│   ├── maths/        # Math utilities
+│   ├── skeleton/     # Animation skeleton system
+│   └── world/        # World system headers (geometry, collision, tilesets)
+├── obj/              # Object files from compilation
+├── resources/        # Processed resources (fonts, images, audio)
+├── source/           # C source files (.c)
+│   ├── achievements/ # Achievement system
+│   ├── audio/        # Audio system (platform-specific)
+│   ├── game/         # Main game logic
+│   ├── input/        # Input handling
+│   ├── platform/     # Platform abstraction (Windows/Linux)
+│   ├── render/       # Rendering system (software rasterizer)
+│   └── world/        # World management (chunk loading, streaming)
+├── tools/            # Development tools (Atlas, Mapper, etc.)
+├── GDD.md            # Game Design Document
+├── LICENSE           # Proprietary license
+├── Makefile          # Cross-platform build system
+└── README.md         # This file
+```
 
 ---
 
-## 🧩 Runtime Systems
+## 🎮 Game Features
 
-The game is built on a set of modular, handcrafted subsystems:
+### Core Pillars
+- **Exploration**: Handcrafted Viking world with fjords, forests, mountains, and multi-floor interiors. Travel by foot, horse, or longship with no fast travel.
+- **Survival**: Grounded mechanics including hunger, warmth, weather effects, injury, and fatigue.
+- **Skill Progression**: Classless system where skills grow through use, unlocking crafting recipes, bonuses, and techniques (e.g., combat, woodworking, trading).
+- **Combat**: Real-time, skill-based combat on a true 3D tile grid with verticality, stamina, and positioning.
+- **Multiplayer**: 1–10 player private/co-op worlds with RP-focused community servers. Supports emergent player factions and governance.
 
-| Subsystem | Description |
-|-----------|-------------|
-| **Platform Layer** | Unified window, context, and input management for Win32 and Xlib |
-| **Renderer** | Software/OpenGL hybrid rasterizer with structured 3D tile pipeline |
-| **Input System** | Unified keyboard/gamepad abstraction |
-| **Audio System** | Platform-specific backend (WinMM / ALSA) |
-| **UI System** | Modular layout and menu framework |
-| **Timing & Looping** | Frame-consistent delta timing and pacing |
-| **Achievements** | Platform-aware integration (local, Steam, GOG) |
-| **World Simulation** | Chunk-based streaming system (32³ volumes), seamless world continuity, experimental AI, events, and narrative systems |
-| **Build System** | Cross-platform Makefile with versioned output and distro separation |
+### World & Setting
+- Seamless open-world with continuous chunk-based streaming (32³ tile volumes).
+- Historical authenticity: Pagan beliefs, regional cultures, and political tensions between Norse paganism and Christianity.
+- Optional Seer path for symbolic visions and insights.
 
 ---
 
-## 🧰 Ecosystem Toolchain
+## 🧠 Technical Overview
 
-Development of Glyphborn is supported by a split-tool architecture.
+### Architecture
+- **Pure C Implementation**: No external libraries or frameworks beyond OS APIs.
+- **Modular Subsystems**: Isolated systems for platform, rendering, audio, input, UI, world simulation, etc.
+- **Software Rendering**: Custom rasterizer with depth buffering, supporting 3D geometry and textures.
+- **Chunk-Based World**: 3x3 cell grid around player, with deterministic loading/unloading.
+- **Platform Abstraction**: Unified APIs for Windows (Win32) and Linux (Xlib), with support for custom platforms (Yggdrasil).
 
-- The game runtime remains in **C**.
-- Authoring and pipeline tools are developed in **C#**.
+### Key Systems
+| Subsystem | Description | Key Files |
+|-----------|-------------|-----------|
+| **Platform** | Window management, event polling, timing | `platform.h/c`, platform-specific impls |
+| **Renderer** | Software rasterizer, framebuffers, depth testing | `render.h/c`, `sketch.h/c` |
+| **World** | Chunk streaming, geometry, collision, tilesets | `world/world.h`, geometry/collision systems |
+| **Game** | Main loop, camera, UI, achievements | `game.h/c`, `camera.h/c`, `ui.h/c` |
+| **Audio** | Sound playback, platform backends | `audio.h/c`, platform-specific impls |
+| **Input** | Keyboard/gamepad abstraction | `input.h/c` |
+| **Maths** | Vectors, matrices, transformations | `maths/` directory |
+| **Lighting** | Directional lighting, shadows | `lighting/directional_light.h` |
+| **Skeleton** | Animation system for 3D models | `skeleton/` directory |
 
-| Tool | Purpose |
-|------|---------|
-| **Atlas** | World and spatial data engine |
-| **Echo** | Audio system abstraction |
-| **Mapper** | Map and world authoring tool |
-| **Additional tools** | Planned under the Steel Editor Suite |
-
-Each tool exists as a standalone repository to support modular development and independent versioning.
+### Data Pipeline
+- **Embedded Binaries**: World data, tilesets, skeletons compiled into executable.
+- **Asset Processing**: Raw assets in `assets/` processed into `resources/` and `data/`.
+- **Versioning**: Build system generates versioned outputs with checksums.
 
 ---
 
-## 🧱 Build Pipeline
+## 🧰 Development Tools
 
-The game uses a cross-platform Makefile supporting:
+The project includes a toolchain for content creation:
+
+- **Atlas**: World and spatial data engine
+- **Mapper**: Map and world authoring tool
+- **Echo**: Audio system abstraction
+- **Build Tools**: Cross-platform compilation with dependency tracking
+
+Tools are developed in C# and stored in separate repositories.
+
+---
+
+## 🧱 Building & Running
+
+### Prerequisites
+- GCC (Linux) or MinGW-w64 (Windows cross-compile)
+- Make
 
 ### Supported Platforms
-
 - 🐧 **Linux** (native GCC)
-- 🪟 **Windows** x86 / x64 (MinGW cross-compile)
+- 🪟 **Windows** x86/x64 (MinGW-w64)
 
-### Supported Distribution Targets
+### Supported Distributions
+- Vanilla (standalone)
+- Steam (with Steamworks SDK)
+- GOG (future)
 
-- Vanilla
-- Steam
-- GOG
-
-### Usage
-
+### Build Commands
 ```bash
+# Navigate to project root
 cd ./Glyphborn/
 
 # Build all targets
 make
 
-# Disable verbose compiler output
-make verbose=false
+# Build with options
+make verbose=false  # Disable verbose output
+make debug=true     # Enable debug mode
 
-# Enable debug mode
-make debug=true
-
-# Clean build artifacts
-make clean
-
-# Remove versioning history and timestamps
-make distclean
+# Clean up
+make clean          # Remove build artifacts
+make distclean      # Remove versioning history
 ```
 
-Build output is automatically structured:
-
+### Output Structure
+Builds are organized as:
 ```
 build/<version>/<distro>/<platform>/
 ```
+Example: `build/1.0.0/Steam/win64/glyphborn_win64.exe`
 
-**Example:**
-
-```
-build/1.0.0/Steam/win64/glyphborn_win64.exe
-```
+### Running
+Execute the built binary. On Windows, a debug console is automatically allocated.
 
 ---
 
 ## 🚧 Project Status
 
-Glyphborn is in active development as both a game and a technical foundation.
+Glyphborn is in active development as both a game and a technical foundation. The repository is publicly visible for transparency and portfolio purposes but remains proprietary.
 
-This repository is publicly visible for transparency and portfolio purposes but is **not open source**.
+The underlying runtime and tools will be rebranded and open-sourced under **Damascus — The Steel Editor Suite** in the future. Timeline and licensing details will be announced upon release.
 
-The game's underlying runtime and associated tools are planned for future rebranding and open-source release under:
-
-**Damascus — The Steel Editor Suite**
-
-Timeline and licensing details will be announced upon official release.
+For updates, follow DoItBetter Studio.
 
 ---
 
-## 🧾 Ownership & License
+## 🧾 License & Ownership
 
 **Copyright © 2025–2026 DoItBetter Studio**
 
-All rights reserved.
+All rights reserved. This software and documentation are proprietary intellectual property of DoItBetter Studio.
 
-This software and associated documentation are proprietary intellectual property of DoItBetter Studio.
+No license is granted for use, copying, modification, distribution, or derivative works without prior written permission.
 
-No license is granted to use, copy, modify, distribute, sublicense, reverse engineer, or create derivative works without prior written permission.
-
-DoItBetter Studio reserves the right to relicense this software under an open-source license upon official release.
+DoItBetter Studio reserves the right to relicense under an open-source license upon official release.
 
 ---
 
-> *"Every line teaches. Every frame matters."*  
+> *"Strive for more than just Perfection"*  
 > — DoItBetter Studio

@@ -2,17 +2,13 @@
 #define WORLD_TILESET_H
 
 #include <stdint.h>
-
-typedef struct Vertex {
-    float x, y, z;
-    float u, v;
-} Vertex;
+#include "vertex.h"
 
 typedef struct TileMesh {
     Vertex* vertices;
-    uint32_t vertex_count;
+    uint8_t vertex_count;
     uint16_t* indices;
-    uint32_t index_count;
+    uint8_t index_count;
     uint32_t* pixels;
     uint16_t texture_width;
     uint16_t texture_height;

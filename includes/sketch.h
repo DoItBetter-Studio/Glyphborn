@@ -60,4 +60,7 @@ void sketch_clear(uint32_t clear_color);
  */
 void sketch_draw_mesh(const RasterMesh* mesh, Mat4 model, Mat4 view, Mat4 projection);
 
+void sketch_draw_line_3d(Vec3 start, Vec3 end, Mat4 view, Mat4 projection, uint32_t color);
+void sketch_draw_line_2d(int x0, int y0, int x1, int y1, uint32_t color);
+
 #endif // !SKETCH_H

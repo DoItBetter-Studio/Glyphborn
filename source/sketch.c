@@ -14,6 +14,7 @@
 #include <math.h>
 
 #include <stdio.h>
+#include <stdlib.h>
 
 /* External depth buffer used for depth testing (defined in platform renderer)
  * Each pixel holds the current minimum depth; lower values are closer.
@@ -267,26 +268,8 @@ static RasterVert clipvert_to_rastervert(const ClipVert* cv)
     return r;
 }
 
-static bool once = false;
-
 void sketch_draw_mesh(const RasterMesh* mesh, Mat4 model, Mat4 view, Mat4 projection)
 {
-    if (!debug_log) {
-        debug_log = fopen("sketch_debug.txt", "w");
-        if (debug_log) {
-            fprintf(debug_log, "=== Glyphborn Debug Log ===\n");
-            fflush(debug_log);
-        }
-    }
-
-    if (!once) {
-        once = true;
-        if (debug_log) {
-            fprintf(debug_log, "sketch_draw_mesh called\n");
-            fflush(debug_log);
-        }
-    }
-
     for (uint32_t i = 0; i < mesh->index_count; i += 3)
     {
 		Vec3 wp[3];
@@ -351,4 +334,48 @@ void sketch_draw_mesh(const RasterMesh* mesh, Mat4 model, Mat4 view, Mat4 projec
             draw_triangle(a, b, c, mesh, light_factor);
         }
     }
+}
+
+void sketch_draw_line_2d(int x0, int y0, int x1, int y1, uint32_t color)
+{
+    int dx = abs(x1 - x0);
+    int dy = abs(y1 - y0);
+    int sx = x0 < x1 ? 1 : -1;
+    int sy = y0 < y1 ? 1 : -1;
+    int err = dx - dy;
+    
+    while (1)
+    {
+        if (x0 >= 0 && x0 < FB_WIDTH && y0 >= 0 && y0 < FB_HEIGHT)
+            framebuffer_game[y0 * FB_WIDTH + x0] = color;
+        
+        if (x0 == x1 && y0 == y1) break;
+        
+        int e2 = 2 * err;
+        if (e2 > -dy) { err -= dy; x0 += sx; }
+        if (e2 <  dx) { err += dx; y0 += sy; }
+    }
+}
+
+void sketch_draw_line_3d(Vec3 start, Vec3 end, Mat4 view, Mat4 projection, uint32_t color)
+{
+    Vec4 p0 = {start.x, start.y, start.z, 1.0f};
+    Vec4 p1 = {end.x, end.y, end.z, 1.0f};
+    
+    p0 = mat4_mul_vec4(view, p0);
+    p0 = mat4_mul_vec4(projection, p0);
+    p1 = mat4_mul_vec4(view, p1);
+    p1 = mat4_mul_vec4(projection, p1);
+    
+    // Log first few lines only
+    
+    float inv_w0 = 1.0f / p0.w;
+    float inv_w1 = 1.0f / p1.w;
+    
+    int x0 = (int)((p0.x * inv_w0 + 1.0f) * 0.5f * FB_WIDTH);
+    int y0 = (int)((1.0f - (p0.y * inv_w0 + 1.0f) * 0.5f) * FB_HEIGHT);
+    int x1 = (int)((p1.x * inv_w1 + 1.0f) * 0.5f * FB_WIDTH);
+    int y1 = (int)((1.0f - (p1.y * inv_w1 + 1.0f) * 0.5f) * FB_HEIGHT);
+    
+    sketch_draw_line_2d(x0, y0, x1, y1, color);
 }

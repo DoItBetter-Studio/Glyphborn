@@ -9,7 +9,7 @@ typedef struct
 	float m[4][4];
 } Mat4;
 
-Mat4 mat4_identity(void);
+void mat4_identity(Mat4 *out);
 Mat4 mat4_translate(Vec3 v);
 Mat4 mat4_scale(Vec3 v);
 Mat4 mat4_rotate_x(float angle);

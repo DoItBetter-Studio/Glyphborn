@@ -1,16 +1,10 @@
 #include "render_map.h"
 #include "sketch.h"
 
-void render_map(
-    const GeometryMap* geo,
-    const Tileset* regional,
-    const Tileset* local,
-    const Tileset* interior,
-    Mat4 model,
-    Mat4 view,
-    Mat4 projection
-)
-{
+void render_map(const GeometryMap *geo, const Tileset *regional, const Tileset *local, const Tileset *interior, Mat4 model, Mat4 view, Mat4 projection) {
+    if (!geo || !regional || !local)
+        return;
+
     for (int layer = 0; layer < MAP_LAYERS; layer++)
     {
         for (int y = 0; y < MAP_HEIGHT; y++)
@@ -19,17 +13,24 @@ void render_map(
             {
                 TileRef ref = geo->tiles[layer][y][x];
 
-                uint8_t tileset_id  = tile_get_tileset(ref);
-                uint16_t tile_id    = tile_get_id(ref);
+                uint8_t tileset_id = tile_get_tileset(ref);
+                uint16_t tile_id = tile_get_id(ref);
 
-                const TileMesh* tile = NULL;
+                const TileMesh *tile = NULL;
 
                 switch (tileset_id)
                 {
-                    case 0: tile = &regional->tiles[tile_id]; break;
-                    case 1: tile = &local->tiles[tile_id]; break;
-                    case 2: tile = &interior->tiles[tile_id]; break;
-                    default: continue;
+                case 0:
+                    tile = &regional->tiles[tile_id];
+                    break;
+                case 1:
+                    tile = &local->tiles[tile_id];
+                    break;
+                case 2:
+                    tile = &interior->tiles[tile_id];
+                    break;
+                default:
+                    continue;
                 }
 
                 if (!tile || tile->vertex_count == 0)
@@ -47,19 +48,17 @@ void render_map(
                 }
 
                 RasterMesh rm = {
-                    .vertices       = rv,
-                    .vertex_count   = tile->vertex_count,
-                    .indices        = tile->indices,
-                    .index_count    = tile->index_count,
-                    .pixels         = tile->pixels,
-                    .tex_width      = tile->texture_width,
-                    .tex_height     = tile->texture_height
-                };
+                    .vertices = rv,
+                    .vertex_count = tile->vertex_count,
+                    .indices = tile->indices,
+                    .index_count = tile->index_count,
+                    .pixels = tile->pixels,
+                    .tex_width = tile->texture_width,
+                    .tex_height = tile->texture_height};
 
                 Mat4 tile_model = mat4_multiply(
                     model,
-                    mat4_translate((Vec3) { (float)x, (float)layer, (float)y})
-                );
+                    mat4_translate((Vec3){(float)x, (float)layer, (float)y}));
 
                 sketch_draw_mesh(&rm, tile_model, view, projection);
             }

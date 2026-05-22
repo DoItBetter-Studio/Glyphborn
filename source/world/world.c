@@ -27,12 +27,20 @@ void world_init(World* world, int start_x, int start_y)
     world->cy = start_y; 
 
     // Load initial 3x3 grid
-    for (int dy = -1; dy <= 1; dy++)
+    // Swap loop hierarchy: DX on the outside, DY on the inside
+    for (int dx = -1; dx <= 1; dx++)
     {
-        for (int dx = -1; dx <= 1; dx++)
+        for (int dy = -1; dy <= 1; dy++)
         {
-            WorldCell* cell = &world->cells[dy+1][dx+1];
-            world_load_cell(cell, start_x + dx, start_y + dy);
+            int wx = start_x + dx;
+            int wy = start_y + dy;
+
+            if (wx < 0 || wy < 0 || wx >= g_WorldMatrix.width || wy >= g_WorldMatrix.height)
+                continue;
+
+            // If you want your array to explicitly match the [X][Y] layout:
+            WorldCell* cell = &world->cells[dx+1][dy+1];
+            world_load_cell(cell, wx, wy);
         }
     }
 }
@@ -80,8 +88,8 @@ static void world_load_cell(WorldCell* cell, int mx, int my)
     cell->collision = collision_load(h->collision_id);
 
     cell->regional_tileset = tileset_load_regional(h->regional_tileset_id);
-    cell->local_tileset = tileset_load_regional(h->local_tileset_id);
-    cell->interior_tileset = tileset_load_regional(h->interior_tileset_id);
+    cell->local_tileset = tileset_load_local(h->local_tileset_id);
+    cell->interior_tileset = tileset_load_interior(h->interior_tileset_id);
 }
 
 /**
@@ -95,6 +103,12 @@ void world_update(World* world, float px, float pz)
     int new_cx = (int)floor(px / MAP_WIDTH);
     int new_cy = (int)floor(pz / MAP_HEIGHT);
 
+    if (new_cx < 0) new_cx = 0;
+    if (new_cy < 0) new_cy = 0;
+
+    if (new_cx >= g_WorldMatrix.width)  new_cx = g_WorldMatrix.width  - 1;
+    if (new_cy >= g_WorldMatrix.height) new_cy = g_WorldMatrix.height - 1;
+
     if (new_cx == world->cx && new_cy == world->cy)
         return;
 
@@ -106,9 +120,16 @@ void world_update(World* world, float px, float pz)
     {
         for (int dx = -1; dx <= 1; dx++)
         {
-            WorldCell* cell = &world->cells[dy+1][dx+1];
-            world_unload_cell(cell);
-            world_load_cell(cell, new_cx + dx, new_cy + dy);
+            int wx = new_cx + dx;
+            int wy = new_cy + dy;
+
+            WorldCell* cell = &world->cells[dx+1][dy+1];
+            if (wx < 0 || wy < 0 || wx >= g_WorldMatrix.width || wy >= g_WorldMatrix.height) {
+                world_unload_cell(cell);
+                continue;
+            }
+
+            world_load_cell(cell, wx, wy);
         }
     }
 }
@@ -121,16 +142,21 @@ void world_update(World* world, float px, float pz)
  */
 void world_render(World* world, Mat4 view, Mat4 projection)
 {
-    for (int dy = -1; dy <= 1; dy++)
+    // DX on the outside, DY on the inside
+    for (int dx = -1; dx <= 1; dx++)
     {
-        for (int dx = -1; dx <= 1; dx++)
+        for (int dy = -1; dy <= 1; dy++)
         {
-            WorldCell* cell = &world->cells[dy+1][dx+1]; 
+            // Match the updated array indexing order [dx+1][dy+1]
+            WorldCell* cell = &world->cells[dx+1][dy+1]; 
+
+            int absolute_wx = world->cx + dx;
+            int absolute_wy = world->cy + dy;
 
             Mat4 model = mat4_translate((Vec3){
-                dx * MAP_WIDTH,
+                absolute_wx * MAP_WIDTH,
                 cell->vertical_offset,
-                dy * MAP_HEIGHT
+                absolute_wy * MAP_HEIGHT
             });
 
             render_map(
@@ -156,7 +182,7 @@ void world_free(World* world)
     { 
         for (int x = 0; x < 3; x++)
         { 
-            world_unload_cell(&world->cells[y][x]);
+            world_unload_cell(&world->cells[x][y]);
         }
     }
 

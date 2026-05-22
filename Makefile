@@ -65,11 +65,15 @@ FORCE ?= false
 VERSION_META := $(shell tools/build/version.sh $(FORCE))
 
 ifeq ($(VERSION_META),SKIP)
-	$(info 🔁 No changes detected — skipping build)
-	@exit 0
-endif
-
+$(info 🔁 No changes detected — skipping build)
+SKIP_BUILD := true
+else
 include $(VERSION_META)
+
+# Now that FULL_VERSION exists, define build paths
+BUILD_BASE := build/$(FULL_VERSION)
+BUILD_TIME := $(shell date +"%Y-%m-%d %H:%M:%S")
+endif
 
 # Now that FULL_VERSION exists, define build paths
 BUILD_BASE := build/$(FULL_VERSION)
@@ -93,10 +97,13 @@ DISTROS := Vanilla Steam GOG
 CC_LINUX  = /usr/bin/gcc
 CC_WIN64  = /usr/bin/x86_64-w64-mingw32-gcc
 CC_WIN32  = /usr/bin/i686-w64-mingw32-gcc
+CC_YGG	  = /usr/bin/x86_64-linux-gnu-gcc
+LD_YGG    = /usr/bin/x86_64-linux-gnu-ld
 
 STRIP_LINUX = /usr/bin/strip
 STRIP_WIN64 = /usr/bin/x86_64-w64-mingw32-strip
 STRIP_WIN32 = /usr/bin/i686-w64-mingw32-strip
+STRIP_YGG   = /usr/bin/x86_64-linux-gnu-strip
 
 
 # ==========================================================
@@ -134,6 +141,36 @@ CFLAGS_LIN  = $(CFLAGS_BASE) -I/c/linux/include
 LDFLAGS_LIN = -L/c/linux/lib -lX11 -lXext -lXrandr -lXrender -lasound -lm
 LDFLAGS_WIN = -luser32 -lgdi32 -ldsound -lkernel32 -lwinmm -lxinput -lm
 
+# Yggdrasil compiler flags - bare metal, no stdlib, links against SDK
+CFLAGS_YGG_BASE = \
+	-std=c17 \
+	-g \
+	$(WARNFLAGS) \
+	-ffreestanding \
+	-fno-stack-protector \
+	-fno-pic \
+	-fno-pie \
+	-mno-red-zone \
+	-mno-mmx \
+	-nostdlib \
+	-nostdinc \
+	-fno-builtin \
+	-mstackrealign \
+	-mpreferred-stack-boundary=4 \
+	-fno-tree-loop-vectorize \
+	-fno-tree-slp-vectorize \
+	-D__YGGDRASIL__ \
+	-DDISTRO_YGGDRASIL \
+	-Iincludes \
+	-Iresources \
+	-I$(YGG_SDK_PATH)/include \
+	-MMD -MP
+
+LDFLAGS_YGG = \
+	-T $(YGG_SDK_PATH)/game.ld \
+	-nostdlib \
+	-L$(YGG_SDK_PATH) \
+	-lyggdrasil
 
 # ==========================================================
 # 🎮 Steamworks SDK
@@ -143,6 +180,13 @@ STEAM_SDK_INCLUDE     := $(STEAM_SDK_PATH)/public
 STEAM_SDK_LIB_LINUX   := $(STEAM_SDK_PATH)/redistributable_bin/linux64
 STEAM_SDK_LIB_WIN64   := $(STEAM_SDK_PATH)/redistributable_bin/win64
 STEAM_SDK_LIB_WIN32   := $(STEAM_SDK_PATH)/redistributable_bin
+
+
+# ==========================================================
+# 🎮 Steamworks SDK
+# ==========================================================
+YGG_SDK_PATH		  := externals/yggdrasil
+YGG_SDK_INCLUDE		  := $(YGG_SDK_PATH)/include
 
 
 # ==========================================================
@@ -174,6 +218,8 @@ endef
 
 GENERATED_SOURCE 	:= source/generated
 GENERATED_HEADERS 	:= includes/generated
+GENERATED_AUDIO		:= includes/generated/Audio.h
+
 GENERATED_FILES 	:= \
     $(GENERATED_SOURCE)/Geometry.c \
     $(GENERATED_HEADERS)/Geometry.h \
@@ -193,48 +239,64 @@ REGISTRY_JSON := $(shell find data/registry -name '*.json')
 # 📁 Source Discovery
 # ==========================================================
 SRC_ALL     	:= $(shell find source -name '*.c')
-SRC_LINUX   	:= $(filter-out %_windows.c,$(SRC_ALL))
-SRC_WINDOWS 	:= $(filter-out %_linux.c,$(SRC_ALL))
+SRC_LINUX   	:= $(filter-out %_windows.c %_yggdrasil.c, $(SRC_ALL))
+SRC_WINDOWS 	:= $(filter-out %_linux.c %_yggdrasil.c, $(SRC_ALL))
+SRC_YGGDRASIL   := $(filter-out %_linux.c %_windows.c, $(SRC_ALL))
 
 OBJDIR_LINUX 	:= obj/linux
 OBJDIR_WIN32 	:= obj/win32
 OBJDIR_WIN64 	:= obj/win64
+OBJDIR_YGG     := obj/yggdrasil
 
-OBJ_LINUX		:= $(patsubst source/%.c,$(OBJDIR_LINUX)/%.o,$(SRC_LINUX))
-OBJ_WIN32		:= $(patsubst source/%.c,$(OBJDIR_WIN32)/%.o,$(SRC_WINDOWS))
-OBJ_WIN64		:= $(patsubst source/%.c,$(OBJDIR_WIN64)/%.o,$(SRC_WINDOWS))
+OBJ_LINUX		:= $(patsubst source/%.c,	$(OBJDIR_LINUX)/%.o,	$(SRC_LINUX))
+OBJ_WIN32		:= $(patsubst source/%.c,	$(OBJDIR_WIN32)/%.o,	$(SRC_WINDOWS))
+OBJ_WIN64		:= $(patsubst source/%.c,	$(OBJDIR_WIN64)/%.o,	$(SRC_WINDOWS))
+OBJ_YGG			:= $(patsubst source/%.c,	$(OBJDIR_YGG)/%.o,		$(SRC_YGGDRASIL))
 
 DEP_LINUX 		:= $(OBJ_LINUX:.o=.d)
 DEP_WIN32 		:= $(OBJ_WIN32:.o=.d)
 DEP_WIN64 		:= $(OBJ_WIN64:.o=.d)
-
+DEP_YGG			:= $(OBJ_YGG:.o=.d)
 
 # ==========================================================
 # 📁 Data Discovery
 # ==========================================================
 
-DATA_EXTRA		:= $(shell find data -name '*.mtx' -o -name '*.hdr')
-DATA_BIN		:= $(shell find data -name '*.bin')
+DATA_BIN    := $(shell find data -name '*.bin')
+DATA_AUDIO  := $(shell find data -name '*.gbaud')
+DATA_EXTRA  := $(shell find data -name '*.mtx' -o -name '*.hdr')
+DATA_SKEL   := $(shell find data -name '*.gban' -o -name '*.gbsk')
+DATA_ALL    := $(DATA_BIN) $(DATA_AUDIO) $(DATA_EXTRA) $(DATA_SKEL)
 
-DATA_ALL		:= $(DATA_BIN) $(DATA_EXTRA)
-
-OBJ_DATA_LINUX	:= $(patsubst data/%, obj/data/linux/%.o, $(DATA_ALL))
-OBJ_DATA_WIN32	:= $(patsubst data/%, obj/data/win32/%.o, $(DATA_ALL))
-OBJ_DATA_WIN64	:= $(patsubst data/%, obj/data/win64/%.o, $(DATA_ALL))
-
+OBJ_DATA_LINUX	:= $(patsubst data/%, obj/data/linux/%.o, 		$(DATA_ALL))
+OBJ_DATA_WIN32	:= $(patsubst data/%, obj/data/win32/%.o, 		$(DATA_ALL))
+OBJ_DATA_WIN64	:= $(patsubst data/%, obj/data/win64/%.o, 		$(DATA_ALL))
+OBJ_DATA_YGG    := $(patsubst data/%, obj/data/yggdrasil/%.o, 	$(DATA_ALL))
 
 # ==========================================================
 # 🌍 Full Target Matrix
 # ==========================================================
 ALL_TARGETS := $(foreach D,$(DISTROS), \
-	$(BUILD_BASE)/$(D)/linux/glyphborn_linux \
-	$(BUILD_BASE)/$(D)/win32/glyphborn_win32.exe \
-	$(BUILD_BASE)/$(D)/win64/glyphborn_win64.exe)
+    $(BUILD_BASE)/$(D)/linux/glyphborn_linux \
+    $(BUILD_BASE)/$(D)/win32/glyphborn_win32.exe \
+    $(BUILD_BASE)/$(D)/win64/glyphborn_win64.exe) \
+    $(BUILD_BASE)/Vanilla/yggdrasil/glyphborn.elf
 
+YGG_TARGET := $(BUILD_BASE)/Vanilla/yggdrasil/glyphborn.elf
 
 # ==========================================================
 # 🏗 Default Rule
 # ==========================================================
+ifeq ($(SKIP_BUILD),true)
+
+all: banner
+	@echo ""
+	@echo "────────────────────────────────────────────"
+	@echo "🔁 No changes detected — skipping build"
+	@echo "────────────────────────────────────────────"
+
+else
+
 all: banner
 	@$(VERBOSE_MSG)
 	@$(DEBUG_MSG)
@@ -244,9 +306,11 @@ all: banner
 	@echo ""
 	@echo "────────────────────────────────────────────"
 	@echo "✅ ${GREEN}All builds complete for Glyphborn $(FULL_VERSION)${RESET}"
+	@echo "   🐧  Linux / 🪟  Win32 / 🪟  Win64 / ⚙️  Yggdrasil"
 	@echo "📦 Output: ${BLUE}$(BUILD_BASE)${RESET}"
 	@echo "────────────────────────────────────────────"
 
+endif
 
 # ==========================================================
 # 🎬 Build Banner
@@ -268,7 +332,7 @@ $(BUILD_BASE)/%/linux/glyphborn_linux: $(OBJ_LINUX) $(OBJ_DATA_LINUX)
 	$(eval $(call set_distro_flags,$*,Linux))
 	$(CC_LINUX) $(CFLAGS_LIN) $(CFLAGS_DEBUG) $(CFLAGS_VERSION) $(CFLAGS_DISTRO) \
 		$(OBJ_LINUX) $(OBJ_DATA_LINUX) -o $@ $(LDFLAGS_LIN) $(LDFLAGS_DISTRO)
-	$(STRIP_LINUX) --strip-unneeded $@
+# 	$(STRIP_LINUX) --strip-unneeded $@
 	@echo "   ${GREEN}✔ Built → $@${RESET}"
 
 
@@ -300,28 +364,54 @@ $(BUILD_BASE)/%/win64/glyphborn_win64.exe: $(OBJ_WIN64) $(OBJ_DATA_WIN64)
 	@echo "   ${GREEN}✔ Built → $@${RESET}"
 
 
+# ==========================================================
+# ⚙️  Yggdrasil Build (always Vanilla)
+# ==========================================================
+$(YGG_TARGET): $(OBJ_YGG) $(OBJ_DATA_YGG)
+	@echo "⚙️  ${BLUE}[Yggdrasil/Vanilla] Linking...${RESET}"
+	@mkdir -p $(dir $@)
+	$(LD_YGG) -T externals/yggdrasil/game.ld -nostdlib \
+		$(OBJ_YGG) $(OBJ_DATA_YGG) \
+		-Lexternals/yggdrasil \
+		-lyggdrasil \
+		-o $@
+# 	$(STRIP_YGG) --strip-unneeded $@
+	@echo "   ${GREEN}✔ Built → $@${RESET}"
 
+
+# ==========================================================
+# 🧠 World Data Code Generation
+# ==========================================================
 $(GENERATED_FILES): tools/build/embed_data.py $(REGISTRY_JSON)
 	@echo "🧠 Generating world data C files..."
 	@python3 tools/build/embed_data.py
 
+$(GENERATED_AUDIO): tools/build/embed_audio.py $(DATA_AUDIO)
+	@echo "🎵 Generating audio asset header..."
+	@python3 tools/build/embed_audio.py
+
 # ==========================================================
 # 🧱 Compilation Rules
 # ==========================================================
-$(OBJDIR_LINUX)/%.o: source/%.c $(OBJ_DATA_LINUX) $(GENERATED_FILES)
+$(OBJDIR_LINUX)/%.o: source/%.c $(OBJ_DATA_LINUX) $(GENERATED_FILES) $(GENERATED_AUDIO)
 	@mkdir -p $(dir $@)
 	@printf "🔧 ${GRAY}Compiling (Linux): %s${RESET}\n" $<
 	@$(CC_LINUX) $(CFLAGS_LIN) $(CFLAGS_DEBUG) $(CFLAGS_VERSION) -c $< -o $@
 
-$(OBJDIR_WIN32)/%.o: source/%.c $(OBJ_DATA_WIN32) $(GENERATED_FILES)
+$(OBJDIR_WIN32)/%.o: source/%.c $(OBJ_DATA_WIN32) $(GENERATED_FILES) $(GENERATED_AUDIO)
 	@mkdir -p $(dir $@)
 	@printf "🔧 ${GRAY}Compiling (Win32): %s${RESET}\n" $<
 	@$(CC_WIN32) $(CFLAGS_BASE) $(CFLAGS_DEBUG) $(CFLAGS_VERSION) -D_WIN32 -c $< -o $@
 
-$(OBJDIR_WIN64)/%.o: source/%.c $(OBJ_DATA_WIN64) $(GENERATED_FILES)
+$(OBJDIR_WIN64)/%.o: source/%.c $(OBJ_DATA_WIN64) $(GENERATED_FILES) $(GENERATED_AUDIO)
 	@mkdir -p $(dir $@)
 	@printf "🔧 ${GRAY}Compiling (Win64): %s${RESET}\n" $<
 	@$(CC_WIN64) $(CFLAGS_BASE) $(CFLAGS_DEBUG) $(CFLAGS_VERSION) -D_WIN32 -D_WIN64 -c $< -o $@
+
+$(OBJDIR_YGG)/%.o: source/%.c $(OBJ_DATA_YGG) $(GENERATED_FILES) $(GENERATED_AUDIO)
+	@mkdir -p $(dir $@)
+	@printf "⚙️  ${GRAY}Compiling (Yggdrasil): %s${RESET}\n" $<
+	@$(CC_YGG) $(CFLAGS_YGG_BASE) $(CFLAGS_DEBUG) $(CFLAGS_VERSION) -c $< -o $@
 
 obj/data/linux/%.o: data/%
 	@mkdir -p $(dir $@)
@@ -337,6 +427,11 @@ obj/data/win64/%.o: data/%
 	@mkdir -p $(dir $@)
 	@printf "📦 Embedding binary (Win64): %s\n" $<
 	@x86_64-w64-mingw32-ld -r -b binary $< -o $@
+
+obj/data/yggdrasil/%.o: data/%
+	@mkdir -p $(dir $@)
+	@printf "📦 ${GRAY}Embedding binary (Yggdrasil): %s${RESET}\n" $<
+	@x86_64-linux-gnu-ld -r -b binary $< -o $@
 
 
 # ==========================================================
@@ -383,4 +478,4 @@ postbuild:
 # ==========================================================
 # 📎 Include Dependency Files
 # ==========================================================
--include $(DEP_LINUX) $(DEP_WIN32) $(DEP_WIN64)
+-include $(DEP_LINUX) $(DEP_WIN32) $(DEP_WIN64) $(DEP_YGG)

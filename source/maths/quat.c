@@ -35,3 +35,16 @@ Quat quat_normalize(Quat q)
 	if (len == 0.0f) return quat_identity();
 	return (Quat) { q.w / len, q.x / len, q.y / len, q.z / len };
 }
+
+Vec3 quat_rotate(Quat q, Vec3 v)
+{
+    // q * v * q^-1 using quaternion multiplication
+    Vec3 u = {q.x, q.y, q.z};
+    float s = q.w;
+    
+    Vec3 t1 = vec3_scale(u, 2.0f * vec3_dot(u, v));
+    Vec3 t2 = vec3_scale(v, s * s - vec3_dot(u, u));
+    Vec3 t3 = vec3_scale(vec3_cross(u, v), 2.0f * s);
+    
+    return vec3_add(vec3_add(t1, t2), t3);
+}
