@@ -4,29 +4,31 @@
 #define COLLISION_H
 
 #include "generated/Blob.h"
+#include "platform.h"
 #include <stdint.h>
 #include <stddef.h>
 
-extern const uint8_t _binary_data_layouts_test_map_0_0_collision_bin_start[] __asm__("_binary_data_layouts_test_map_0_0_collision_bin_start");
-extern const uint8_t _binary_data_layouts_test_map_0_0_collision_bin_end[] __asm__("_binary_data_layouts_test_map_0_0_collision_bin_end");
-extern const uint8_t _binary_data_layouts_test_map_0_1_collision_bin_start[] __asm__("_binary_data_layouts_test_map_0_1_collision_bin_start");
-extern const uint8_t _binary_data_layouts_test_map_0_1_collision_bin_end[] __asm__("_binary_data_layouts_test_map_0_1_collision_bin_end");
-extern const uint8_t _binary_data_layouts_test_map_0_2_collision_bin_start[] __asm__("_binary_data_layouts_test_map_0_2_collision_bin_start");
-extern const uint8_t _binary_data_layouts_test_map_0_2_collision_bin_end[] __asm__("_binary_data_layouts_test_map_0_2_collision_bin_end");
-extern const uint8_t _binary_data_layouts_test_map_1_0_collision_bin_start[] __asm__("_binary_data_layouts_test_map_1_0_collision_bin_start");
-extern const uint8_t _binary_data_layouts_test_map_1_0_collision_bin_end[] __asm__("_binary_data_layouts_test_map_1_0_collision_bin_end");
-extern const uint8_t _binary_data_layouts_test_map_1_1_collision_bin_start[] __asm__("_binary_data_layouts_test_map_1_1_collision_bin_start");
-extern const uint8_t _binary_data_layouts_test_map_1_1_collision_bin_end[] __asm__("_binary_data_layouts_test_map_1_1_collision_bin_end");
-extern const uint8_t _binary_data_layouts_test_map_1_2_collision_bin_start[] __asm__("_binary_data_layouts_test_map_1_2_collision_bin_start");
-extern const uint8_t _binary_data_layouts_test_map_1_2_collision_bin_end[] __asm__("_binary_data_layouts_test_map_1_2_collision_bin_end");
-extern const uint8_t _binary_data_layouts_test_map_2_0_collision_bin_start[] __asm__("_binary_data_layouts_test_map_2_0_collision_bin_start");
-extern const uint8_t _binary_data_layouts_test_map_2_0_collision_bin_end[] __asm__("_binary_data_layouts_test_map_2_0_collision_bin_end");
-extern const uint8_t _binary_data_layouts_test_map_2_1_collision_bin_start[] __asm__("_binary_data_layouts_test_map_2_1_collision_bin_start");
-extern const uint8_t _binary_data_layouts_test_map_2_1_collision_bin_end[] __asm__("_binary_data_layouts_test_map_2_1_collision_bin_end");
-extern const uint8_t _binary_data_layouts_test_map_2_2_collision_bin_start[] __asm__("_binary_data_layouts_test_map_2_2_collision_bin_start");
-extern const uint8_t _binary_data_layouts_test_map_2_2_collision_bin_end[] __asm__("_binary_data_layouts_test_map_2_2_collision_bin_end");
+#define COLLISION_TEST_MAP_0_0_OFFSET  UINT64_C(0x000000000163AD26)
+#define COLLISION_TEST_MAP_0_0_SIZE    UINT64_C(0x0000000000008006)
+#define COLLISION_TEST_MAP_0_1_OFFSET  UINT64_C(0x0000000001652D32)
+#define COLLISION_TEST_MAP_0_1_SIZE    UINT64_C(0x0000000000008006)
+#define COLLISION_TEST_MAP_0_2_OFFSET  UINT64_C(0x000000000166AD3E)
+#define COLLISION_TEST_MAP_0_2_SIZE    UINT64_C(0x0000000000008006)
+#define COLLISION_TEST_MAP_1_0_OFFSET  UINT64_C(0x0000000001682D4A)
+#define COLLISION_TEST_MAP_1_0_SIZE    UINT64_C(0x0000000000008006)
+#define COLLISION_TEST_MAP_1_1_OFFSET  UINT64_C(0x000000000169AD56)
+#define COLLISION_TEST_MAP_1_1_SIZE    UINT64_C(0x0000000000008006)
+#define COLLISION_TEST_MAP_1_2_OFFSET  UINT64_C(0x00000000016B2D62)
+#define COLLISION_TEST_MAP_1_2_SIZE    UINT64_C(0x0000000000008006)
+#define COLLISION_TEST_MAP_2_0_OFFSET  UINT64_C(0x00000000016CAD6E)
+#define COLLISION_TEST_MAP_2_0_SIZE    UINT64_C(0x0000000000008006)
+#define COLLISION_TEST_MAP_2_1_OFFSET  UINT64_C(0x00000000016E2D7A)
+#define COLLISION_TEST_MAP_2_1_SIZE    UINT64_C(0x0000000000008006)
+#define COLLISION_TEST_MAP_2_2_OFFSET  UINT64_C(0x00000000016FAD86)
+#define COLLISION_TEST_MAP_2_2_SIZE    UINT64_C(0x0000000000008006)
 
-extern const Blob g_Collision[];
+extern Blob g_Collision[];
 extern const size_t g_Collision_Count;
+void Collision_init(void);
 
 #endif // COLLISION_H

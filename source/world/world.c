@@ -79,10 +79,24 @@ static void world_load_cell(WorldCell* cell, int mx, int my)
     uint16_t header_id = world_matrix_get(&g_WorldMatrix, mx, my);
     const WorldHeader* h = world_headers_get(&g_WorldHeaders, header_id);
 
+    if (h == NULL)
+    {
+        cell->header_id = 0;
+        cell->world_x = mx;
+        cell->world_y = my;
+        cell->vertical_offset = 0;
+        cell->geometry = NULL;
+        cell->collision = NULL;
+        cell->regional_tileset = NULL;
+        cell->local_tileset = NULL;
+        cell->interior_tileset = NULL;
+        return;
+    }
+
     cell->header_id = header_id;
     cell->world_x = mx;
     cell->world_y = my;
-    cell->vertical_offset = h->vertical_offset; 
+    cell->vertical_offset = h->vertical_offset;
 
     cell->geometry = geometry_load(h->geometry_id);
     cell->collision = collision_load(h->collision_id);
@@ -124,10 +138,10 @@ void world_update(World* world, float px, float pz)
             int wy = new_cy + dy;
 
             WorldCell* cell = &world->cells[dx+1][dy+1];
-            if (wx < 0 || wy < 0 || wx >= g_WorldMatrix.width || wy >= g_WorldMatrix.height) {
-                world_unload_cell(cell);
+            world_unload_cell(cell);
+
+            if (wx < 0 || wy < 0 || wx >= g_WorldMatrix.width || wy >= g_WorldMatrix.height)
                 continue;
-            }
 
             world_load_cell(cell, wx, wy);
         }
@@ -142,13 +156,14 @@ void world_update(World* world, float px, float pz)
  */
 void world_render(World* world, Mat4 view, Mat4 projection)
 {
-    // DX on the outside, DY on the inside
     for (int dx = -1; dx <= 1; dx++)
     {
         for (int dy = -1; dy <= 1; dy++)
         {
-            // Match the updated array indexing order [dx+1][dy+1]
-            WorldCell* cell = &world->cells[dx+1][dy+1]; 
+            WorldCell* cell = &world->cells[dx+1][dy+1];
+
+            if (cell->geometry == NULL)
+                continue;
 
             int absolute_wx = world->cx + dx;
             int absolute_wy = world->cy + dy;

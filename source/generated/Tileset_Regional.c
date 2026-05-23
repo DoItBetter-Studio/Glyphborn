@@ -2,13 +2,12 @@
 
 #include "generated/Tileset_Regional.h"
 
-extern const uint8_t _binary_data_tilesets_regional_test_regional_tileset_bin_start[] __asm__("_binary_data_tilesets_regional_test_regional_tileset_bin_start");
-
-const Blob g_Tileset_Regional[] = {
-    {
-        _binary_data_tilesets_regional_test_regional_tileset_bin_start,
-        30300
-    },
+Blob g_Tileset_Regional[] = {
+    { NULL, TILESET_REGIONAL_TEST_REGIONAL_TILESET_SIZE },
 };
 
 const size_t g_Tileset_Regional_Count = 1;
+
+void Tileset_Regional_init(void) {
+    g_Tileset_Regional[0].data = platform_get_asset(TILESET_REGIONAL_TEST_REGIONAL_TILESET_OFFSET);
+}

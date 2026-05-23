@@ -4,29 +4,31 @@
 #define GEOMETRY_H
 
 #include "generated/Blob.h"
+#include "platform.h"
 #include <stdint.h>
 #include <stddef.h>
 
-extern const uint8_t _binary_data_layouts_test_map_0_0_geometry_bin_start[] __asm__("_binary_data_layouts_test_map_0_0_geometry_bin_start");
-extern const uint8_t _binary_data_layouts_test_map_0_0_geometry_bin_end[] __asm__("_binary_data_layouts_test_map_0_0_geometry_bin_end");
-extern const uint8_t _binary_data_layouts_test_map_0_1_geometry_bin_start[] __asm__("_binary_data_layouts_test_map_0_1_geometry_bin_start");
-extern const uint8_t _binary_data_layouts_test_map_0_1_geometry_bin_end[] __asm__("_binary_data_layouts_test_map_0_1_geometry_bin_end");
-extern const uint8_t _binary_data_layouts_test_map_0_2_geometry_bin_start[] __asm__("_binary_data_layouts_test_map_0_2_geometry_bin_start");
-extern const uint8_t _binary_data_layouts_test_map_0_2_geometry_bin_end[] __asm__("_binary_data_layouts_test_map_0_2_geometry_bin_end");
-extern const uint8_t _binary_data_layouts_test_map_1_0_geometry_bin_start[] __asm__("_binary_data_layouts_test_map_1_0_geometry_bin_start");
-extern const uint8_t _binary_data_layouts_test_map_1_0_geometry_bin_end[] __asm__("_binary_data_layouts_test_map_1_0_geometry_bin_end");
-extern const uint8_t _binary_data_layouts_test_map_1_1_geometry_bin_start[] __asm__("_binary_data_layouts_test_map_1_1_geometry_bin_start");
-extern const uint8_t _binary_data_layouts_test_map_1_1_geometry_bin_end[] __asm__("_binary_data_layouts_test_map_1_1_geometry_bin_end");
-extern const uint8_t _binary_data_layouts_test_map_1_2_geometry_bin_start[] __asm__("_binary_data_layouts_test_map_1_2_geometry_bin_start");
-extern const uint8_t _binary_data_layouts_test_map_1_2_geometry_bin_end[] __asm__("_binary_data_layouts_test_map_1_2_geometry_bin_end");
-extern const uint8_t _binary_data_layouts_test_map_2_0_geometry_bin_start[] __asm__("_binary_data_layouts_test_map_2_0_geometry_bin_start");
-extern const uint8_t _binary_data_layouts_test_map_2_0_geometry_bin_end[] __asm__("_binary_data_layouts_test_map_2_0_geometry_bin_end");
-extern const uint8_t _binary_data_layouts_test_map_2_1_geometry_bin_start[] __asm__("_binary_data_layouts_test_map_2_1_geometry_bin_start");
-extern const uint8_t _binary_data_layouts_test_map_2_1_geometry_bin_end[] __asm__("_binary_data_layouts_test_map_2_1_geometry_bin_end");
-extern const uint8_t _binary_data_layouts_test_map_2_2_geometry_bin_start[] __asm__("_binary_data_layouts_test_map_2_2_geometry_bin_start");
-extern const uint8_t _binary_data_layouts_test_map_2_2_geometry_bin_end[] __asm__("_binary_data_layouts_test_map_2_2_geometry_bin_end");
+#define GEOMETRY_TEST_MAP_0_0_OFFSET  UINT64_C(0x0000000001642D2C)
+#define GEOMETRY_TEST_MAP_0_0_SIZE    UINT64_C(0x0000000000010006)
+#define GEOMETRY_TEST_MAP_0_1_OFFSET  UINT64_C(0x000000000165AD38)
+#define GEOMETRY_TEST_MAP_0_1_SIZE    UINT64_C(0x0000000000010006)
+#define GEOMETRY_TEST_MAP_0_2_OFFSET  UINT64_C(0x0000000001672D44)
+#define GEOMETRY_TEST_MAP_0_2_SIZE    UINT64_C(0x0000000000010006)
+#define GEOMETRY_TEST_MAP_1_0_OFFSET  UINT64_C(0x000000000168AD50)
+#define GEOMETRY_TEST_MAP_1_0_SIZE    UINT64_C(0x0000000000010006)
+#define GEOMETRY_TEST_MAP_1_1_OFFSET  UINT64_C(0x00000000016A2D5C)
+#define GEOMETRY_TEST_MAP_1_1_SIZE    UINT64_C(0x0000000000010006)
+#define GEOMETRY_TEST_MAP_1_2_OFFSET  UINT64_C(0x00000000016BAD68)
+#define GEOMETRY_TEST_MAP_1_2_SIZE    UINT64_C(0x0000000000010006)
+#define GEOMETRY_TEST_MAP_2_0_OFFSET  UINT64_C(0x00000000016D2D74)
+#define GEOMETRY_TEST_MAP_2_0_SIZE    UINT64_C(0x0000000000010006)
+#define GEOMETRY_TEST_MAP_2_1_OFFSET  UINT64_C(0x00000000016EAD80)
+#define GEOMETRY_TEST_MAP_2_1_SIZE    UINT64_C(0x0000000000010006)
+#define GEOMETRY_TEST_MAP_2_2_OFFSET  UINT64_C(0x0000000001702D8C)
+#define GEOMETRY_TEST_MAP_2_2_SIZE    UINT64_C(0x0000000000010006)
 
-extern const Blob g_Geometry[];
+extern Blob g_Geometry[];
 extern const size_t g_Geometry_Count;
+void Geometry_init(void);
 
 #endif // GEOMETRY_H

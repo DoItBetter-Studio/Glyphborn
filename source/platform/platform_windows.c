@@ -10,6 +10,10 @@
 static bool running = false;
 static HWND hwnd;
 
+const uint8_t* g_asset_volumes[MAX_VOLUMES] = { 0 };
+static HANDLE g_volume_files[MAX_VOLUMES]   = { 0 };
+static HANDLE g_volume_maps[MAX_VOLUMES]    = { 0 };
+
 LRESULT CALLBACK window_proc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
 	switch (msg)
@@ -120,4 +124,72 @@ void* platform_get_native_window(void)
 {
 	return (void*)hwnd;
 }
+
+void platform_set_window_title(const char* title)
+{
+    if (hwnd)
+    {
+        SetWindowTextA(hwnd, title);
+    }
+}
+
+void platform_init_assets(int total_volumes)
+{
+	for (int i = 0; i < total_volumes && i < MAX_VOLUMES; i++)
+	{
+		char filename[64];
+		snprintf(filename, sizeof(filename), "data/data_%03d.dat", i);
+
+		g_volume_files[i] = CreateFileA(
+			filename, 
+			GENERIC_READ, 
+			FILE_SHARE_READ, 
+			NULL, 
+			OPEN_EXISTING, 
+			FILE_ATTRIBUTE_NORMAL | FILE_FLAG_SEQUENTIAL_SCAN, 
+			NULL
+		);
+
+		if (g_volume_files[i] == INVALID_HANDLE_VALUE)
+			continue;
+
+		g_volume_maps[i] = CreateFileMappingA(
+			g_volume_files[i],
+			NULL,
+			PAGE_READONLY,
+			0, 0,
+			NULL
+		);
+
+		if (g_volume_maps[i])
+		{
+			g_asset_volumes[i] = (const uint8_t*)MapViewOfFile(g_volume_maps[i], FILE_MAP_READ, 0, 0, 0);
+		}
+	}
+}
+
+void platform_shutdown_assets(int total_volumes)
+{
+	for (int i = 0; i < total_volumes; i++)
+	{
+		if (g_asset_volumes[i])
+		{
+			UnmapViewOfFile(g_asset_volumes[i]);
+			g_asset_volumes[i] = NULL;
+		}
+		
+		if (g_volume_maps[i])
+		{
+			CloseHandle(g_volume_maps[i]);
+			g_volume_maps[i] = NULL;
+		}
+
+		if (g_volume_files[i] != INVALID_HANDLE_VALUE && g_volume_files[i] != NULL)
+		{
+			CloseHandle(g_volume_files[i]);
+			g_volume_files[i] = INVALID_HANDLE_VALUE;
+		}
+	}
+}
+
 #endif // _WIN32

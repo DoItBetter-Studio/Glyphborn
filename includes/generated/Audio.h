@@ -4,10 +4,11 @@
 #define AUDIO_ASSETS_H
 
 #include "audio.h"
+#include "platform.h"
+#include <stdint.h>
 
-extern const unsigned char _binary_data_audio_music_the_longest_journey_gbaud_start[] __asm__("_binary_data_audio_music_the_longest_journey_gbaud_start");
-extern const unsigned char _binary_data_audio_music_the_longest_journey_gbaud_end[]   __asm__("_binary_data_audio_music_the_longest_journey_gbaud_end");
-
-#define MUSIC_MUSIC_THE_LONGEST_JOURNEY (_binary_data_audio_music_the_longest_journey_gbaud_start)
+#define MUSIC_MUSIC_THE_LONGEST_JOURNEY_OFFSET  UINT64_C(0x0000000000000000)
+#define MUSIC_MUSIC_THE_LONGEST_JOURNEY_SIZE    UINT64_C(0x000000000163AD26)
+#define MUSIC_MUSIC_THE_LONGEST_JOURNEY         (platform_get_asset(MUSIC_MUSIC_THE_LONGEST_JOURNEY_OFFSET))
 
 #endif // AUDIO_ASSETS_H

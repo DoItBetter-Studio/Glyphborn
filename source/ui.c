@@ -130,70 +130,59 @@ int ui_text_height(const char* text, int max_width)
 	return total_height;
 }
 
-static void blit_tiled_region(int dst_x, int dst_y, int dst_w, int dst_h, int src_x, int src_y, int src_w, int src_h, const unsigned char* pixels, const unsigned char* palette, int image_w, int image_h, int depth)
+static void blit_tiled_region(int dst_x, int dst_y, int dst_w, int dst_h,
+    int src_x, int src_y, int src_w, int src_h,
+    const uint32_t* pixels, int image_w, int image_h)
 {
-	int mask = (1 << depth) - 1;
+    for (int dy = 0; dy < dst_h; ++dy)
+    {
+        for (int dx = 0; dx < dst_w; ++dx)
+        {
+            int tx = dx % src_w;
+            int ty = dy % src_h;
+            int src_px_x = src_x + tx;
+            int src_px_y = src_y + ty;
 
-	for (int dy = 0; dy < dst_h; ++dy) {
-		for (int dx = 0; dx < dst_w; ++dx) {
-			// Tile source coordinates
-			int tx = dx % src_w;
-			int ty = dy % src_h;
-			int src_px_x = src_x + tx;
-			int src_px_y = src_y + ty;
+            if (src_px_x >= image_w || src_px_y >= image_h) continue;
 
-			// Bounds check
-			if (src_px_x >= image_w || src_px_y >= image_h)
-				continue;
+            uint32_t pixel = pixels[src_px_y * image_w + src_px_x];
 
-			int pixel_index = src_px_y * image_w + src_px_x;
-			int byte_index = (pixel_index * depth) / 8;
-			int bit_shift = 8 - depth - ((pixel_index * depth) % 8);
+            if ((pixel >> 24) == 0) continue;
 
-			uint8_t byte = pixels[byte_index];
-			uint8_t index = (byte >> bit_shift) & mask;
+            int dst_px_x = dst_x + dx;
+            int dst_px_y = dst_y + dy;
 
-			if (index == 0)
-				continue;
+            if (dst_px_x < 0 || dst_px_x >= FB_WIDTH ||
+                dst_px_y < 0 || dst_px_y >= FB_HEIGHT) continue;
 
-			uint8_t r = palette[index * 3 + 0];
-			uint8_t g = palette[index * 3 + 1];
-			uint8_t b = palette[index * 3 + 2];
-			uint32_t color = (0xFF << 24) | (r << 16) | (g << 8) | b;
-
-			int dst_px_x = dst_x + dx;
-			int dst_px_y = dst_y + dy;
-
-			if (dst_px_x < 0 || dst_px_x >= FB_WIDTH || dst_px_y < 0 || dst_px_y >= FB_HEIGHT)
-				continue;
-
-			framebuffer_ui[dst_px_y * FB_WIDTH + dst_px_x] = color;
-		}
-	}
+            framebuffer_ui[dst_px_y * FB_WIDTH + dst_px_x] = pixel;
+        }
+    }
 }
 
-void ui_draw_nineslice(int dst_x, int dst_y, int dst_w, int dst_h, const unsigned char* pixels, const unsigned char* palette, int depth, int src_w, int src_h, int slice_left, int slice_top, int slice_right, int slice_bottom)
+void ui_draw_nineslice(int dst_x, int dst_y, int dst_w, int dst_h,
+    const uint32_t* pixels, int src_w, int src_h,
+    int slice_left, int slice_top, int slice_right, int slice_bottom)
 {
-	int center_src_w = src_w - slice_left - slice_right;
-	int center_src_h = src_h - slice_top - slice_bottom;
+    int center_src_w = src_w - slice_left - slice_right;
+    int center_src_h = src_h - slice_top - slice_bottom;
+    int center_dst_w = dst_w - slice_left - slice_right;
+    int center_dst_h = dst_h - slice_top - slice_bottom;
 
-	int center_dst_w = dst_w - slice_left - slice_right;
-	int center_dst_h = dst_h - slice_top - slice_bottom;
+    // Corners
+    blit_tiled_region(dst_x,                    dst_y,                    slice_left,  slice_top,    0,                    0,                    slice_left,  slice_top,    pixels, src_w, src_h);
+    blit_tiled_region(dst_x + dst_w - slice_right, dst_y,                 slice_right, slice_top,    src_w - slice_right,  0,                    slice_right, slice_top,    pixels, src_w, src_h);
+    blit_tiled_region(dst_x,                    dst_y + dst_h - slice_bottom, slice_left, slice_bottom, 0,                 src_h - slice_bottom, slice_left,  slice_bottom, pixels, src_w, src_h);
+    blit_tiled_region(dst_x + dst_w - slice_right, dst_y + dst_h - slice_bottom, slice_right, slice_bottom, src_w - slice_right, src_h - slice_bottom, slice_right, slice_bottom, pixels, src_w, src_h);
 
-	// Corners
-	blit_tiled_region(dst_x, dst_y, slice_left, slice_top, 0, 0, slice_left, slice_top, pixels, palette, src_w, src_h, depth); // top-left
-	blit_tiled_region(dst_x + dst_w - slice_right, dst_y, slice_right, slice_top, src_w - slice_right, 0, slice_right, slice_top, pixels, palette, src_w, src_h, depth); // top-right
-	blit_tiled_region(dst_x, dst_y + dst_h - slice_bottom, slice_left, slice_bottom, 0, src_h - slice_bottom, slice_left, slice_bottom, pixels, palette, src_w, src_h, depth); // bottom-left
-	blit_tiled_region(dst_x + dst_w - slice_right, dst_y + dst_h - slice_bottom, slice_right, slice_bottom, src_w - slice_right, src_h - slice_bottom, slice_right, slice_bottom, pixels, palette, src_w, src_h, depth); // bottom-right
+    // Edges
+    blit_tiled_region(dst_x + slice_left,         dst_y,                    center_dst_w, slice_top,    slice_left,           0,                    center_src_w, slice_top,    pixels, src_w, src_h);
+    blit_tiled_region(dst_x + slice_left,         dst_y + dst_h - slice_bottom, center_dst_w, slice_bottom, slice_left,      src_h - slice_bottom, center_src_w, slice_bottom, pixels, src_w, src_h);
+    blit_tiled_region(dst_x,                    dst_y + slice_top,          slice_left,  center_dst_h, 0,                    slice_top,            slice_left,  center_src_h, pixels, src_w, src_h);
+    blit_tiled_region(dst_x + dst_w - slice_right, dst_y + slice_top,      slice_right, center_dst_h, src_w - slice_right,  slice_top,            slice_right, center_src_h, pixels, src_w, src_h);
 
-	// Edges
-	blit_tiled_region(dst_x + slice_left, dst_y, center_dst_w, slice_top, slice_left, 0, center_src_w, slice_top, pixels, palette, src_w, src_h, depth); // top
-	blit_tiled_region(dst_x + slice_left, dst_y + dst_h - slice_bottom, center_dst_w, slice_bottom, slice_left, src_h - slice_bottom, center_src_w, slice_bottom, pixels, palette, src_w, src_h, depth); // bottom
-	blit_tiled_region(dst_x, dst_y + slice_top, slice_left, center_dst_h, 0, slice_top, slice_left, center_src_h, pixels, palette, src_w, src_h, depth); // left
-	blit_tiled_region(dst_x + dst_w - slice_right, dst_y + slice_top, slice_right, center_dst_h, src_w - slice_right, slice_top, slice_right, center_src_h, pixels, palette, src_w, src_h, depth); // right
-
-	// Center
-	blit_tiled_region(dst_x + slice_left, dst_y + slice_top, center_dst_w, center_dst_h, slice_left, slice_top, center_src_w, center_src_h, pixels, palette, src_w, src_h, depth);
+    // Center
+    blit_tiled_region(dst_x + slice_left, dst_y + slice_top, center_dst_w, center_dst_h, slice_left, slice_top, center_src_w, center_src_h, pixels, src_w, src_h);
 }
 
 static int ui_gen_id(void)
@@ -263,7 +252,10 @@ bool ui_button(int x, int y, int width, int height, const char* label, uint32_t 
 
 	const UISkin* skin = ui_get_skin();
 
-	ui_draw_nineslice(x, y, width, height, skin->panel.pixels, skin->active_palette, skin->panel.depth, skin->panel.width, skin->panel.height, 16, 16, 16, 16);
+	ui_draw_nineslice(x, y, width, height,
+		skin->panel.pixels,
+		skin->panel.width, skin->panel.height,
+		16, 16, 16, 16);
 	ui_draw_text_colored(text_x, text_y, label, text_color);
 
 	return clicked;

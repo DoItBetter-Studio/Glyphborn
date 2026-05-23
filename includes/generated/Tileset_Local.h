@@ -4,13 +4,15 @@
 #define TILESET_LOCAL_H
 
 #include "generated/Blob.h"
+#include "platform.h"
 #include <stdint.h>
 #include <stddef.h>
 
-extern const uint8_t _binary_data_tilesets_local_test_local_tileset_bin_start[] __asm__("_binary_data_tilesets_local_test_local_tileset_bin_start");
-extern const uint8_t _binary_data_tilesets_local_test_local_tileset_bin_end[] __asm__("_binary_data_tilesets_local_test_local_tileset_bin_end");
+#define TILESET_LOCAL_TEST_LOCAL_TILESET_OFFSET  UINT64_C(0x000000000175F8BA)
+#define TILESET_LOCAL_TEST_LOCAL_TILESET_SIZE    UINT64_C(0x000000000000000E)
 
-extern const Blob g_Tileset_Local[];
+extern Blob g_Tileset_Local[];
 extern const size_t g_Tileset_Local_Count;
+void Tileset_Local_init(void);
 
 #endif // TILESET_LOCAL_H

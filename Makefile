@@ -220,7 +220,7 @@ GENERATED_SOURCE 	:= source/generated
 GENERATED_HEADERS 	:= includes/generated
 GENERATED_AUDIO		:= includes/generated/Audio.h
 
-GENERATED_FILES 	:= \
+GENERATED_FILES     := \
     $(GENERATED_SOURCE)/Geometry.c \
     $(GENERATED_HEADERS)/Geometry.h \
     $(GENERATED_SOURCE)/Collision.c \
@@ -230,7 +230,11 @@ GENERATED_FILES 	:= \
     $(GENERATED_SOURCE)/Tileset_Local.c \
     $(GENERATED_HEADERS)/Tileset_Local.h \
     $(GENERATED_SOURCE)/Tileset_Interior.c \
-    $(GENERATED_HEADERS)/Tileset_Interior.h
+    $(GENERATED_HEADERS)/Tileset_Interior.h \
+    $(GENERATED_SOURCE)/World_Headers.c \
+    $(GENERATED_HEADERS)/World_Headers.h \
+    $(GENERATED_SOURCE)/World_Matrix.c \
+    $(GENERATED_HEADERS)/World_Matrix.h
 
 REGISTRY_JSON := $(shell find data/registry -name '*.json')
 
@@ -262,11 +266,9 @@ DEP_YGG			:= $(OBJ_YGG:.o=.d)
 # 📁 Data Discovery
 # ==========================================================
 
-DATA_BIN    := $(shell find data -name '*.bin')
-DATA_AUDIO  := $(shell find data -name '*.gbaud')
-DATA_EXTRA  := $(shell find data -name '*.mtx' -o -name '*.hdr')
-DATA_SKEL   := $(shell find data -name '*.gban' -o -name '*.gbsk')
-DATA_ALL    := $(DATA_BIN) $(DATA_AUDIO) $(DATA_EXTRA) $(DATA_SKEL)
+DATA_SKIN   := $(shell find data -name '*.gbskin')
+DATA_MAPS   := $(shell find data -name '*.mtx' -o -name '*.hdr')
+DATA_ALL    := $(DATA_SKIN) $(DATA_MAPS)
 
 OBJ_DATA_LINUX	:= $(patsubst data/%, obj/data/linux/%.o, 		$(DATA_ALL))
 OBJ_DATA_WIN32	:= $(patsubst data/%, obj/data/win32/%.o, 		$(DATA_ALL))
@@ -280,7 +282,7 @@ ALL_TARGETS := $(foreach D,$(DISTROS), \
     $(BUILD_BASE)/$(D)/linux/glyphborn_linux \
     $(BUILD_BASE)/$(D)/win32/glyphborn_win32.exe \
     $(BUILD_BASE)/$(D)/win64/glyphborn_win64.exe) \
-    $(BUILD_BASE)/Vanilla/yggdrasil/glyphborn.elf
+#     $(BUILD_BASE)/Vanilla/yggdrasil/glyphborn.elf
 
 YGG_TARGET := $(BUILD_BASE)/Vanilla/yggdrasil/glyphborn.elf
 
@@ -333,6 +335,8 @@ $(BUILD_BASE)/%/linux/glyphborn_linux: $(OBJ_LINUX) $(OBJ_DATA_LINUX)
 	$(CC_LINUX) $(CFLAGS_LIN) $(CFLAGS_DEBUG) $(CFLAGS_VERSION) $(CFLAGS_DISTRO) \
 		$(OBJ_LINUX) $(OBJ_DATA_LINUX) -o $@ $(LDFLAGS_LIN) $(LDFLAGS_DISTRO)
 # 	$(STRIP_LINUX) --strip-unneeded $@
+	@mkdir -p $(dir $@)/data
+	@cp -r data/volumes/* $(dir $@)/data
 	@echo "   ${GREEN}✔ Built → $@${RESET}"
 
 
@@ -347,6 +351,8 @@ $(BUILD_BASE)/%/win32/glyphborn_win32.exe: $(OBJ_WIN32)  $(OBJ_DATA_WIN32)
 		-D_WIN32 -Wl,-subsystem,$(SUBSYSTEM) \
 		$(OBJ_WIN32) $(OBJ_DATA_WIN32) -o $@ $(LDFLAGS_WIN) $(LDFLAGS_DISTRO)
 	$(STRIP_WIN32) --strip-unneeded $@
+	@mkdir -p $(dir $@)/data
+	@cp -r data/volumes/* $(dir $@)/data
 	@echo "   ${GREEN}✔ Built → $@${RESET}"
 
 
@@ -361,54 +367,63 @@ $(BUILD_BASE)/%/win64/glyphborn_win64.exe: $(OBJ_WIN64) $(OBJ_DATA_WIN64)
 		-D_WIN32 -D_WIN64 -Wl,-subsystem,$(SUBSYSTEM) \
 		$(OBJ_WIN64) $(OBJ_DATA_WIN64) -o $@ $(LDFLAGS_WIN) $(LDFLAGS_DISTRO)
 	$(STRIP_WIN64) --strip-unneeded $@
+	@mkdir -p $(dir $@)/data
+	@cp -r data/volumes/* $(dir $@)/data
 	@echo "   ${GREEN}✔ Built → $@${RESET}"
 
 
 # ==========================================================
-# ⚙️  Yggdrasil Build (always Vanilla)
+# ⚙️  Yggdrasil Build (always Vanilla)   - DISABLED! RE-ENABLE AT SOME POINT WHEN API IS BETTER!
 # ==========================================================
-$(YGG_TARGET): $(OBJ_YGG) $(OBJ_DATA_YGG)
-	@echo "⚙️  ${BLUE}[Yggdrasil/Vanilla] Linking...${RESET}"
-	@mkdir -p $(dir $@)
-	$(LD_YGG) -T externals/yggdrasil/game.ld -nostdlib \
-		$(OBJ_YGG) $(OBJ_DATA_YGG) \
-		-Lexternals/yggdrasil \
-		-lyggdrasil \
-		-o $@
-# 	$(STRIP_YGG) --strip-unneeded $@
-	@echo "   ${GREEN}✔ Built → $@${RESET}"
+# $(YGG_TARGET): $(OBJ_YGG) $(OBJ_DATA_YGG)
+# 	@echo "⚙️  ${BLUE}[Yggdrasil/Vanilla] Linking...${RESET}"
+# 	@mkdir -p $(dir $@)
+# 	$(LD_YGG) -T externals/yggdrasil/game.ld -nostdlib \
+# 		$(OBJ_YGG) $(OBJ_DATA_YGG) \
+# 		-Lexternals/yggdrasil \
+# 		-lyggdrasil \
+# 		-o $@
+# # 	$(STRIP_YGG) --strip-unneeded $@
+# 	@echo "   ${GREEN}✔ Built → $@${RESET}"
 
 
 # ==========================================================
 # 🧠 World Data Code Generation
 # ==========================================================
-$(GENERATED_FILES): tools/build/embed_data.py $(REGISTRY_JSON)
+PACKABLE_DATA   := $(shell find data -path data/volumes -prune -o \( -name '*.bin' -o -name '*.gbaud' -o -name '*.mtx' -o -name '*.hdr' -o -name '*.gban' -o -name '*.gbsk' \) -print)
+ASSET_MAP_JSON  := data/volumes/asset_map.json
+
+$(ASSET_MAP_JSON): tools/build/pack_assets.py $(PACKABLE_DATA)
+	@echo "🗜  Packing asset volumes..."
+	@python3 tools/build/pack_assets.py
+
+$(GENERATED_FILES): tools/build/embed_data.py $(ASSET_MAP_JSON) $(REGISTRY_JSON)
 	@echo "🧠 Generating world data C files..."
 	@python3 tools/build/embed_data.py
 
-$(GENERATED_AUDIO): tools/build/embed_audio.py $(DATA_AUDIO)
+$(GENERATED_AUDIO): tools/build/embed_audio.py $(ASSET_MAP_JSON)
 	@echo "🎵 Generating audio asset header..."
 	@python3 tools/build/embed_audio.py
 
 # ==========================================================
 # 🧱 Compilation Rules
 # ==========================================================
-$(OBJDIR_LINUX)/%.o: source/%.c $(OBJ_DATA_LINUX) $(GENERATED_FILES) $(GENERATED_AUDIO)
+$(OBJDIR_LINUX)/%.o: source/%.c $(ASSET_MAP_JSON) $(OBJ_DATA_LINUX) $(GENERATED_FILES) $(GENERATED_AUDIO)
 	@mkdir -p $(dir $@)
 	@printf "🔧 ${GRAY}Compiling (Linux): %s${RESET}\n" $<
 	@$(CC_LINUX) $(CFLAGS_LIN) $(CFLAGS_DEBUG) $(CFLAGS_VERSION) -c $< -o $@
 
-$(OBJDIR_WIN32)/%.o: source/%.c $(OBJ_DATA_WIN32) $(GENERATED_FILES) $(GENERATED_AUDIO)
+$(OBJDIR_WIN32)/%.o: source/%.c $(ASSET_MAP_JSON) $(OBJ_DATA_WIN32) $(GENERATED_FILES) $(GENERATED_AUDIO)
 	@mkdir -p $(dir $@)
 	@printf "🔧 ${GRAY}Compiling (Win32): %s${RESET}\n" $<
 	@$(CC_WIN32) $(CFLAGS_BASE) $(CFLAGS_DEBUG) $(CFLAGS_VERSION) -D_WIN32 -c $< -o $@
 
-$(OBJDIR_WIN64)/%.o: source/%.c $(OBJ_DATA_WIN64) $(GENERATED_FILES) $(GENERATED_AUDIO)
+$(OBJDIR_WIN64)/%.o: source/%.c $(ASSET_MAP_JSON) $(OBJ_DATA_WIN64) $(GENERATED_FILES) $(GENERATED_AUDIO)
 	@mkdir -p $(dir $@)
 	@printf "🔧 ${GRAY}Compiling (Win64): %s${RESET}\n" $<
 	@$(CC_WIN64) $(CFLAGS_BASE) $(CFLAGS_DEBUG) $(CFLAGS_VERSION) -D_WIN32 -D_WIN64 -c $< -o $@
 
-$(OBJDIR_YGG)/%.o: source/%.c $(OBJ_DATA_YGG) $(GENERATED_FILES) $(GENERATED_AUDIO)
+$(OBJDIR_YGG)/%.o: source/%.c $(ASSET_MAP_JSON) $(OBJ_DATA_YGG) $(GENERATED_FILES) $(GENERATED_AUDIO)
 	@mkdir -p $(dir $@)
 	@printf "⚙️  ${GRAY}Compiling (Yggdrasil): %s${RESET}\n" $<
 	@$(CC_YGG) $(CFLAGS_YGG_BASE) $(CFLAGS_DEBUG) $(CFLAGS_VERSION) -c $< -o $@

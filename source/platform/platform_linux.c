@@ -17,6 +17,9 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <sys/types.h>
+#include <fcntl.h>
+#include <sys/mman.h>
+#include <sys/stat.h>
 
 typedef struct
 {
@@ -33,6 +36,9 @@ static GC gc;
 static X11Context x11;
 static struct timespec last_time;
 static Atom wm_delete_window;
+
+const uint8_t* g_asset_volumes[MAX_VOLUMES] = { 0 };
+static int g_volume_fds[MAX_VOLUMES]        = { 0 };
 
 void platform_init(const PlatformWindowDesc* desc)
 {
@@ -134,5 +140,65 @@ float platform_frame_timing(void)
 
 	last_time = now;
 	return (float)elapsed;
+}
+
+void platform_set_window_title(const char* title)
+{
+    if (display && window)
+    {
+        XStoreName(display, window, title);
+        XFlush(display); // Force X11 to redraw the title bar immediately
+    }
+}
+
+void platform_init_assets(int total_volumes)
+{
+	for (int i = 0; i < total_volumes && i < MAX_VOLUMES; i++)
+	{
+		char filename[64];
+		snprintf(filename, sizeof(filename), "data/data_%03d.dat", i);
+
+		int fd = open(filename, O_RDONLY);
+		if (fd < 0)
+		{
+			continue;
+		}
+		g_volume_fds[i] = fd;
+
+		// Hinting flags:
+		// MAP_PRIVATE protects internal file alignment
+		// PROT_READ mirrors your exact compilation .rodata goals
+		void* mapped_address = mmap(NULL, VOLUME_SIZE, PROT_READ, MAP_PRIVATE, fd, 0);
+		
+		if (mapped_address == MAP_FAILED)
+		{
+			close(fd);
+			g_volume_fds[i] = -1;
+			continue;
+		}
+
+		// Advise the Linux kernel that we will access this sequentially 
+		// to maximize hardware-level lookahead reading performance
+		madvise(mapped_address, VOLUME_SIZE, MADV_SEQUENTIAL);
+
+		g_asset_volumes[i] = (const uint8_t*)mapped_address;
+	}
+}
+
+void platform_shutdown_assets(int total_volumes)
+{
+	for (int i = 0; i < total_volumes; i++)
+	{
+		if (g_asset_volumes[i] && g_asset_volumes[i] != MAP_FAILED)
+		{
+			munmap((void*)g_asset_volumes[i], VOLUME_SIZE);
+			g_asset_volumes[i] = NULL;
+		}
+		if (g_volume_fds[i] >= 0)
+		{
+			close(g_volume_fds[i]);
+			g_volume_fds[i] = -1;
+		}
+	}
 }
 #endif // __linux__

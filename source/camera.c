@@ -25,7 +25,8 @@ void camera_update(Camera* cam, Vec3 target_focus, CameraFacing facing, float de
     float distance = 14.14f;
     float height = 10.0f; 
 
-    cam->pitch = 0.615f; 
+    cam->pitch = 0.615f;
+    // cam->pitch = 0.15f;
 
     // FIXED: Corrected angles so East matches +X and West matches -X 
     // when processed through sin() and cos()
@@ -50,7 +51,14 @@ void camera_update(Camera* cam, Vec3 target_focus, CameraFacing facing, float de
 
     // Smoothly interpolate current yaw toward target yaw
     float lerp_speed = 5.0f; 
+#if __YGGDRASIL__
+    // Bare-metal fallback: Use a simple linear approximation for frame-rate dampening
+    float factor = lerp_speed * delta_time;
+    if (factor > 1.0f) factor = 1.0f;
+#else
+    // Standard PC platforms use the math library's exponential decay function
     float factor = 1.0f - expf(-lerp_speed * delta_time);
+#endif
     cam->current_yaw = lerp_angle(cam->current_yaw, cam->target_yaw, factor);
 
     // Calculate position via standard orbit math

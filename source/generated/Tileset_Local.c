@@ -2,13 +2,12 @@
 
 #include "generated/Tileset_Local.h"
 
-extern const uint8_t _binary_data_tilesets_local_test_local_tileset_bin_start[] __asm__("_binary_data_tilesets_local_test_local_tileset_bin_start");
-
-const Blob g_Tileset_Local[] = {
-    {
-        _binary_data_tilesets_local_test_local_tileset_bin_start,
-        14
-    },
+Blob g_Tileset_Local[] = {
+    { NULL, TILESET_LOCAL_TEST_LOCAL_TILESET_SIZE },
 };
 
 const size_t g_Tileset_Local_Count = 1;
+
+void Tileset_Local_init(void) {
+    g_Tileset_Local[0].data = platform_get_asset(TILESET_LOCAL_TEST_LOCAL_TILESET_OFFSET);
+}

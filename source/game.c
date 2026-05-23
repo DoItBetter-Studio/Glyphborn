@@ -1,9 +1,15 @@
+#ifdef __linux__
+#ifndef _POSIX_C_SOURCE
+#define _POSIX_C_SOURCE 199309L // 199309L explicitly unlocks clock_gettime
+#endif
+#include <time.h>
+#endif
+
 #include "game.h"
 #include "input.h"
 #include "camera.h"
 #include "test_cube.h"
 #include "audio.h"
-#include "audio/player_jump.h"
 #include "ui_skin.h"
 #include "ui.h"
 #include "sketch.h"
@@ -11,10 +17,11 @@
 #include "world/world.h"
 #include "lighting/directional_light.h"
 #include "generated/Audio.h"
-
-#if __YGGDRASIL__
-#include <yggdrasil.h>
-#endif
+#include "generated/Geometry.h"
+#include "generated/Collision.h"
+#include "generated/Tileset_Regional.h"
+#include "generated/Tileset_Local.h"
+#include "generated/Tileset_Interior.h"
 
 #include <stdio.h>
 #include <math.h>
@@ -46,6 +53,13 @@ void game_init(void)
 	input_init();
 	//achievements_init();
 
+	Geometry_init();
+	Collision_init();
+	Tileset_Regional_init();
+	Tileset_Local_init();
+	Tileset_Interior_init();
+
+	ui_skins_init();
 	ui_set_skin(SKIN_GLYPHBORN);
 
 	main_camera.position = (Vec3){0.0f, 10.0f, -10.0f};
@@ -165,7 +179,7 @@ void game_update(float delta_time)
 	// Optional: adjust ambient based on season
 	sun.ambient = 0.25f + season * 0.15f; // Brighter in summer
 
-	world_update(&world, main_camera.position.x, main_camera.position.z);
+	world_update(&world, camera_focus.x, camera_focus.z);
 }
 
 static void draw_cross()
@@ -204,74 +218,51 @@ void game_render(void)
 
 void game_render_ui(void)
 {
-	ui_begin_frame(0, 0, false, activate);
+    ui_begin_frame(0, 0, false, activate);
 
-	if (nav_dx || nav_dy)
-	{
-		g_ui.nav_mode = true;
-		g_ui.focused_id += nav_dy;
-		if (g_ui.focused_id < 1)
-			g_ui.focused_id = 1;
-	}
+    if (nav_dx || nav_dy)
+    {
+        g_ui.nav_mode = true;
+        g_ui.focused_id += nav_dy;
+        if (g_ui.focused_id < 1)
+            g_ui.focused_id = 1;
+    }
 
-	if (ui_button(16, 16, 100, 30, "Jump", 0xFF000000))
-	{
-		audio_play_sound(player_jump);
-	}
+    if (ui_button(20, 20, 128, 48, "Hello World!", 0xFF606060)) {}
 
-	if (showUI)
-	{
-		draw_test_pattern_ui();
-	}
+    if (showUI)
+    {
+        draw_test_pattern_ui();
+    }
 
-	char buffer[32];
-	snprintf(buffer, sizeof(buffer), "%f, %f, %f", main_camera.position.x, main_camera.position.y, main_camera.position.z);
+    char buffer[32];
+    snprintf(buffer, sizeof(buffer), "%f, %f, %f", main_camera.position.x, main_camera.position.y, main_camera.position.z);
 
-	ui_draw_text_colored(200, 10, (const char *)buffer, 0xFFFFFFFF);
+    ui_draw_text_colored(200, 10, (const char *)buffer, 0xFFFFFFFF);
 
-	static char* facing_dir;
+    static char* facing_dir;
 
-	switch (current_facing)
-	{
-		case CAM_FACE_NORTH: facing_dir = "north"; break;
-		case CAM_FACE_SOUTH: facing_dir = "south"; break;
-		case CAM_FACE_EAST: facing_dir = "east"; break;
-		case CAM_FACE_WEST: facing_dir = "west"; break;
-	}
+    switch (current_facing)
+    {
+        case CAM_FACE_NORTH: facing_dir = "north"; break;
+        case CAM_FACE_SOUTH: facing_dir = "south"; break;
+        case CAM_FACE_EAST: facing_dir = "east"; break;
+        case CAM_FACE_WEST: facing_dir = "west"; break;
+    }
 
-	snprintf(buffer, sizeof(buffer), "facing: %s", facing_dir);
+    snprintf(buffer, sizeof(buffer), "facing: %s", facing_dir);
 
-	ui_draw_text_colored(500, 10, (const char *)buffer, 0xFFFFFFFF);
+    ui_draw_text_colored(500, 10, (const char *)buffer, 0xFFFFFFFF);
 
-	#if __YGGDRASIL__
-	uint64_t ms = pit_millis();
-	char tbuf[12];
-	int ti = 10;
-	tbuf[11] = '\0';
-	tbuf[10] = '\0';
-	if (ms == 0) {
-		tbuf[0] = '0';
-		tbuf[1] = '\0';
-		ui_draw_text_colored(300, 10, tbuf, 0xFFFFFF00);
-	} else {
-		tbuf[ti] = '\0';
-		while (ms > 0 && ti > 0) {
-			tbuf[--ti] = '0' + (ms % 10);
-			ms /= 10;
-		}
-		ui_draw_text_colored(300, 10, &tbuf[ti], 0xFFFFFF00);
-	}
-	#endif
+    char* dot = ".";
+    int dot_w = ui_text_width(dot);
+    int dot_h = ui_text_height(dot, 8);
 
-	char* dot = ".";
-	int dot_w = ui_text_width(dot);
-	int dot_h = ui_text_height(dot, 8);
+    int text_x = (FB_WIDTH - dot_w) / 2;
+    int text_y = (FB_HEIGHT - dot_h) / 2;
 
-	int text_x = (FB_WIDTH - dot_w) / 2;
-	int text_y = (FB_HEIGHT - dot_h) / 2;
-
-	ui_draw_text_colored(text_x, text_y, dot, 0xFFFF00FF);
-	ui_end_frame();
+    ui_draw_text_colored(text_x, text_y, dot, 0xFFFF00FF);
+    ui_end_frame();
 }
 
 void game_shutdown(void)
