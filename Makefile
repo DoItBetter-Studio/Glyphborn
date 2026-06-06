@@ -138,8 +138,8 @@ endif
 CFLAGS_BASE = -std=c17 $(WARNFLAGS) -Iincludes -Iresources -MMD -MP
 
 CFLAGS_LIN  = $(CFLAGS_BASE) -I/c/linux/include
-LDFLAGS_LIN = -L/c/linux/lib -lX11 -lXext -lXrandr -lXrender -lasound -lm
-LDFLAGS_WIN = -luser32 -lgdi32 -ldsound -lkernel32 -lwinmm -lxinput -lm
+LDFLAGS_LIN = -L/c/linux/lib -lGL -lX11 -lXext -lXrandr -lXrender -lasound -lm
+LDFLAGS_WIN = -luser32 -lopengl32 -lgdi32 -ldsound -lkernel32 -lwinmm -lxinput -lm
 
 # Yggdrasil compiler flags - bare metal, no stdlib, links against SDK
 CFLAGS_YGG_BASE = \

@@ -10,8 +10,8 @@
 #include "camera.h"
 #include "test_cube.h"
 #include "audio.h"
-#include "ui_skin.h"
-#include "ui.h"
+#include "ui/ui_skin.h"
+#include "ui/ui.h"
 #include "sketch.h"
 #include "achievements.h"
 #include "world/world.h"
@@ -82,7 +82,7 @@ static bool activate = false;
 int nav_dx = 0, nav_dy = 0;
 static bool showUI = false;
 static bool showUVs = false;
-static float sun_angle = 0.0f;
+static float sun_angle = 1.5708f;
 static float season = 0.0f;
 
 void game_update(float delta_time)
@@ -175,6 +175,14 @@ void game_update(float delta_time)
 	float x = horizontal * cosf(tilt);
 
 	sun.dir = vec3_normalize((Vec3){x, y, z});
+
+	// Add near the sun.dir assignment
+	static float debug_timer = 0;
+	debug_timer += delta_time;
+	if (debug_timer > 2.0f) {
+		printf("sun.dir: %.3f %.3f %.3f\n", sun.dir.x, sun.dir.y, sun.dir.z);
+		debug_timer = 0;
+	}
 
 	// Optional: adjust ambient based on season
 	sun.ambient = 0.25f + season * 0.15f; // Brighter in summer

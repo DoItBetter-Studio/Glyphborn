@@ -52,13 +52,25 @@ void sketch_show_uvs(bool showUVs)
 	show_uvs = showUVs;
 }
 
+/*
+ * Updated sketch_clear for the GPU path.
+ * Replace the existing sketch_clear() in sketch.c with this.
+ * The depth buffer clear is now handled by GL_DEPTH_BUFFER_BIT in world_render,
+ * and the color clear is handled by GL_COLOR_BUFFER_BIT in render_present.
+ * sketch_clear() is kept as a no-op so game.c doesn't need to change.
+ *
+ * If you still want a CPU-side clear for the game framebuffer (e.g. for
+ * sketch_draw_line_3d which still writes to framebuffer_game), keep the
+ * framebuffer_game clear but drop the depthbuffer clear.
+ */
+
 void sketch_clear(uint32_t clear_color)
 {
-	for (int i = 0; i < FB_WIDTH * FB_HEIGHT; i++)
-	{
-		framebuffer_game[i] = clear_color;
-		depthbuffer[i] = 1.0f;
-	}
+    /* Clear the game framebuffer for 2D line draws that still use it */
+    for (int i = 0; i < FB_WIDTH * FB_HEIGHT; i++)
+        framebuffer_game[i] = clear_color;
+
+    /* Depth buffer is now managed by GL — no CPU clear needed */
 }
 
 typedef struct {
@@ -330,6 +342,15 @@ void sketch_draw_mesh(const RasterMesh* mesh, Mat4 model, Mat4 view, Mat4 projec
             RasterVert a = clipvert_to_rastervert(&clipped[t].v[0]);
             RasterVert b = clipvert_to_rastervert(&clipped[t].v[1]);
             RasterVert c = clipvert_to_rastervert(&clipped[t].v[2]);
+
+            float min_x = fminf(a.x, fminf(b.x, c.x));
+            float max_x = fmaxf(a.x, fmaxf(b.x, c.x));
+
+            float min_y = fminf(a.y, fminf(b.y, c.y));
+            float max_y = fmaxf(a.y, fmaxf(b.y, c.y));
+
+            if (max_x < 0 || min_x >= FB_WIDTH || max_y < 0 || min_y >= FB_HEIGHT)
+                continue;
 
             draw_triangle(a, b, c, mesh, light_factor);
         }
