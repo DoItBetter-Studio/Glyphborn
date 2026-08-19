@@ -4,12 +4,12 @@
 #define TILESET_LOCAL_H
 
 #include "generated/Blob.h"
-#include "platform.h"
+#include "platform/platform.h"
 #include <stdint.h>
 #include <stddef.h>
 
-#define TILESET_LOCAL_TEST_LOCAL_TILESET_OFFSET  UINT64_C(0x000000000175F8BA)
-#define TILESET_LOCAL_TEST_LOCAL_TILESET_SIZE    UINT64_C(0x000000000000000E)
+#define TILESET_LOCAL_TEST_LOCAL_OFFSET  UINT64_C(0x00000000016A3F5D)
+#define TILESET_LOCAL_TEST_LOCAL_SIZE    UINT64_C(0x000000000000000E)
 
 extern Blob g_Tileset_Local[];
 extern const size_t g_Tileset_Local_Count;

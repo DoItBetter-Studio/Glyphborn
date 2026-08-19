@@ -10,10 +10,12 @@
 #include <time.h>
 #include <unistd.h>
 
-#include "platform.h"
-#include "version.h"
+#include "platform/platform.h"
+#include "core/version.h"
+#include "generated/Icon.h"
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
+#include <X11/Xatom.h>
 #include <GL/glx.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -168,6 +170,18 @@ void platform_init(const PlatformWindowDesc* desc)
     gc = XCreateGC(display, window, 0, NULL);
 
     XMapWindow(display, window);
+
+    int64_t net_icon[2 + ICON_WIDTH * ICON_HEIGHT];
+    net_icon[0] = ICON_WIDTH;
+    net_icon[1] = ICON_HEIGHT;
+    for (int i = 0; i < ICON_WIDTH * ICON_HEIGHT; i++)
+        net_icon[2 + i] = (int64_t)icon_argb[i];
+
+    Atom net_wm_icon = XInternAtom(display, "_NET_WM_ICON", False);
+    XChangeProperty(display, window, net_wm_icon, XA_CARDINAL, 32,
+                    PropModeReplace, (unsigned char*)net_icon,
+                    2 + ICON_WIDTH * ICON_HEIGHT);
+
     XFlush(display);
 
     x11.display = display;

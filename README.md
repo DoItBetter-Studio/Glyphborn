@@ -6,7 +6,7 @@
 
 Glyphborn is a multiplayer, classless, historical Viking-Age sandbox game that blends grounded survival, deep skill-based progression, hand-crafted exploration, player-driven politics, and immersive roleplay systems. Set in the 10th–11th century, players inhabit a shared Viking world where they define their identity through skills, reputation, and choices—no classes, no predetermined roles.
 
-Built entirely in C with zero external dependencies, Glyphborn features a fully 3D environment with a cardinal-locked 2.5D camera perspective. It's designed as both a creative work and a long-term technical foundation for the upcoming **Damascus — The Steel Editor Suite**.
+Built in C17, Glyphborn uses platform APIs, OpenGL 3.3, X11/GLX on Linux, and the bundled Steamworks integration where applicable. It features a fully 3D environment with a cardinal-locked 2.5D camera perspective. It's designed as both a creative work and a long-term technical foundation for the upcoming **Damascus — The Steel Editor Suite**.
 
 This repository is an active internal development branch and is not open source at this time.
 
@@ -22,29 +22,49 @@ Glyphborn/
 │   ├── audio/        # Audio files (.gbaud)
 │   ├── layouts/      # World layout geometry and collision (.bin)
 │   ├── registry/     # World registry JSON files
-│   ├── skeletons/    # Skeletal animation files (.gban, .gbsk)
+│   ├── models/       # Model and animation data
 │   ├── tilesets/     # Tileset data (.bin)
 │   ├── ui_skins/     # UI skin files (.gbskin)
 │   └── volumes/      # Packed asset volumes (.dat) + asset map
 ├── docs/             # Technical documentation
 ├── externals/        # External SDKs (Steamworks, Yggdrasil)
 ├── includes/         # C header files (.h)
-│   ├── generated/    # Auto-generated headers (Audio.h, Geometry.h, etc.)
+│   ├── generated/    # Auto-generated data bindings
+│   ├── audio/        # Audio interfaces and formats
+│   ├── core/         # Core runtime types
+│   ├── dialogue/     # Dialogue and localization interfaces
+│   ├── entities/     # Entity and skill systems
+│   ├── game/         # Game state and gameplay interfaces
 │   ├── lighting/     # Lighting system headers
 │   ├── maths/        # Math utilities
-│   ├── skeleton/     # Animation skeleton system
+│   ├── models/       # Model and animation interfaces
+│   ├── platform/     # Platform abstraction headers
+│   ├── render/       # OpenGL and camera interfaces
+│   ├── save/         # Save/load interfaces
+│   ├── ui/           # UI interfaces
 │   └── world/        # World system headers
 ├── obj/              # Object files from compilation
 ├── source/           # C source files (.c)
 │   ├── achievements/ # Achievement system
 │   ├── audio/        # Audio system (platform-specific)
-│   ├── generated/    # Auto-generated source files (Geometry.c, Collision.c, etc.)
+│   ├── core/         # Core runtime code
+│   ├── dialogue/     # Dialogue and localization
+│   ├── entity/       # Entity and skill systems
+│   ├── game/         # Game state and main gameplay flow
+│   ├── generated/    # Auto-generated data bindings
 │   ├── input/        # Input handling
-│   ├── platform/     # Platform abstraction (Windows/Linux)
-│   ├── render/       # Rendering system
+│   ├── models/       # Model and animation code
+│   ├── platform/     # Platform backends (Windows/Linux)
+│   ├── render/       # OpenGL renderer, camera, and mesh code
+│   ├── save_load/    # Save/load backends
+│   ├── ui/           # UI implementation
 │   └── world/        # World management (chunk loading, streaming)
-├── tools/            # Build tools and Damascus suite
-│   └── build/        # Build scripts (pack_assets.py, embed_audio.py, embed_data.py)
+├── tools/            # Build tools and Damascus suite prototypes
+│   ├── atlas/        # Atlas data tooling
+│   ├── build/        # Packing, code generation, and version scripts
+│   ├── echo/         # Echo audio tooling
+│   ├── font_tool/    # Font tooling
+│   └── mapper/       # Mapper world authoring
 ├── GDD.md            # Game Design Document
 ├── LICENSE           # Proprietary license
 ├── Makefile          # Cross-platform build system
@@ -72,25 +92,26 @@ Glyphborn/
 ## 🧠 Technical Overview
 
 ### Architecture
-- **Pure C Implementation**: No external libraries or frameworks beyond OS APIs.
+- **C17 Implementation**: A native C17 runtime with platform APIs and OpenGL 3.3; no game engine or large framework dependency.
 - **Modular Subsystems**: Isolated systems for platform, rendering, audio, input, UI, world simulation, etc.
-- **Software Rendering**: Custom rasterizer with depth buffering, supporting 3D geometry and textures.
+- **OpenGL Rendering**: OpenGL 3.3 core rendering for world and skinned meshes, with a software framebuffer/UI rasterizer for selected drawing paths and debug utilities.
 - **Chunk-Based World**: 3x3 cell grid around player, with deterministic loading/unloading.
 - **Platform Abstraction**: Unified APIs for Windows (Win32) and Linux (Xlib), with support for custom platforms (Yggdrasil).
 
 ### Key Systems
 | Subsystem | Description | Key Files |
 |-----------|-------------|-----------|
-| **Platform** | Window management, event polling, timing, asset volumes | `platform.h/c`, platform-specific impls |
-| **Renderer** | Software rasterizer, framebuffers, depth testing | `render.h/c`, `sketch.h/c` |
+| **Platform** | Window management, event polling, timing, asset volumes | `platform/`, platform-specific impls |
+| **Renderer** | OpenGL 3.3 world and skinned-mesh rendering, framebuffers, camera, and debug rasterization | `render/`, `world/world_render_gl.c` |
 | **World** | Chunk streaming, geometry, collision, tilesets | `world/world.h`, geometry/collision systems |
-| **Game** | Main loop, camera, UI, achievements | `game.h/c`, `camera.h/c`, `ui.h/c` |
-| **Audio** | Sound playback, platform backends | `audio.h/c`, platform-specific impls |
-| **UI** | Immediate-mode UI, nineslice rendering, skin system | `ui.h/c`, `ui_skin.h/c` |
-| **Input** | Keyboard/gamepad abstraction | `input.h/c` |
+| **Game** | Main loop, camera, UI, dialogue, entities, and achievements | `game/`, `render/camera.c`, `ui/`, `dialogue/` |
+| **Audio** | Sound playback, platform backends | `audio/`, platform-specific impls |
+| **UI** | Immediate-mode UI, nineslice rendering, skin system | `ui/`, `ui_skin.c` |
+| **Input** | Keyboard/gamepad abstraction | `input/`, platform-specific impls |
 | **Maths** | Vectors, matrices, transformations | `maths/` directory |
 | **Lighting** | Directional lighting | `lighting/directional_light.h` |
-| **Skeleton** | Animation system for 3D models | `skeleton/` directory |
+| **Models** | Mesh, material, skeleton, and animation systems | `models/` directory |
+| **Save/Load** | Region files and platform-specific save handling | `save/`, `save_load/` |
 
 ### Data Pipeline
 
@@ -98,9 +119,9 @@ The build pipeline processes all game data before compilation through a two-stag
 
 **Stage 1 — Asset Volume Packing (`pack_assets.py`)**
 
-All large game data files (`.bin`, `.gbaud`, `.mtx`, `.hdr`, `.gban`, `.gbsk`) are packed into fixed 4GB volume files at `data/volumes/data_000.dat`, `data_001.dat`, etc. A manifest (`asset_map.json`) records the global offset and size of every asset. This avoids executable bloat and keeps shipped files under AV thresholds, while still providing direct memory-mapped access at runtime via `platform_get_asset()`.
+All large game data files (`.bin`, `.gbaud`, `.mtx`, `.hdr`, `.gbani`, `.gbsk`, `.gbmsh`, `.gbmat`, `.locale`) are packed into fixed 4GB volume files at `data/volumes/data_000.dat`, `data_001.dat`, etc. A manifest (`asset_map.json`) records the volume, offset, and size of every asset. This avoids executable bloat while still providing direct asset access at runtime via `platform_get_asset()`.
 
-**Stage 2 — Code Generation (`embed_data.py`, `embed_audio.py`)**
+**Stage 2 — Code Generation (`embed_data.py`)**
 
 These scripts read `asset_map.json` and generate typed C headers and source files with offset macros for each asset. Generated files live in `includes/generated/` and `source/generated/` and are never edited by hand.
 
@@ -131,6 +152,37 @@ Elements are written in a fixed order matching the `UISkin` struct. Skins suppor
 **Versioning**
 
 The build system generates versioned outputs with SHA256 checksums. Revision numbers increment only when source files change, enabling incremental builds.
+
+### Localization and Generated Bindings
+
+Localization data is compiled into locale blobs and exposed to C through generated files in `includes/generated/`. `LocaleBindings.h` provides generated direct-index constants for entries in the currently active locale:
+
+- `Locales` defines the locale string-table entries, such as the block containing `LOCALES_EN_US` and `LOCALES_PT_BR`.
+- `Ui` defines UI text entries, such as `UI_MENU_START_GAME` and `UI_MENU_SETTINGS`.
+
+The locale selected by `locale_set_active(locale_index)` is resolved from the locale array independently of the generated string IDs. Once a locale is active, UI code passes a generated binding directly to `locale_get_string_terminated()`:
+
+```c
+ui_button(x, y, width, height,
+          locale_get_string_terminated(UI_MENU_START_GAME),
+          UI_COLOR_BLACK);
+```
+
+For language-selection controls, the locale array index is kept separate from the string-table ID. A selector can iterate over the locale entries and use its loop index for activation while using the corresponding generated binding for display:
+
+```c
+for (int32_t i = 0; i < LOCALES_COUNT; i++)
+{
+  if (ui_button(x, y, width, height,
+          locale_get_string_terminated(LOCALES_EN_US + i),
+          UI_COLOR_BLACK))
+  {
+    locale_set_active(i);
+  }
+}
+```
+
+The generated binding is a direct index into `g_ActiveLocale`; `locale_set_active(i)` selects a separate entry in the locale array. This keeps locale selection independent from generated string-ID numbering as more bindings are added. `locale_get_string()` also exposes the byte length for code that needs length-prefixed text; `locale_get_string_terminated()` copies the value into the locale scratch buffer and adds a null terminator for standard C/UI APIs. Generated bindings and generated locale data are build outputs and must not be edited by hand.
 
 ---
 
@@ -165,8 +217,9 @@ Tools are developed in separate repositories and are planned for open-source rel
 - Python 3 (for build scripts)
 
 ### Supported Platforms
-- 🐧 **Linux** (native GCC)
-- 🪟 **Windows** x86/x64 (MinGW-w64)
+- 🐧 **Linux** (GCC, X11/GLX, OpenGL 3.3)
+- 🪟 **Windows** x86/x64 (MinGW-w64, Win32, OpenGL 3.3)
+- ⚙️ **Yggdrasil** (toolchain support exists, but the Makefile target is currently disabled)
 
 ### Supported Distributions
 - Vanilla (standalone)
@@ -181,9 +234,9 @@ cd ./Glyphborn/
 # Build all targets
 make
 
-# Build with options
-make verbose=false  # Disable verbose output
-make debug=true     # Enable debug mode
+# Build with options (Make variables are uppercase)
+make VERBOSE=false  # Disable compiler warnings
+make DEBUG=true      # Enable debug symbols and a console window
 
 # Clean up
 make clean          # Remove object files
@@ -195,17 +248,16 @@ Builds are organized as:
 ```
 build/<version>/<distro>/<platform>/
 ```
-Example: `build/1.0.0/Steam/win64/glyphborn_win64.exe`
+Example: `build/0.0.1.185/Vanilla/win64/glyphborn_win64.exe`
 
 ### Running
-The game executable must be run with `data/volumes/` in the same directory. The volume files contain all large game assets and are required at runtime.
+The game executable must be run with its generated `data/` directory in the same directory. The volume files contain the large game assets and are required at runtime.
 
 ```
 glyphborn_win64.exe
 data/
-  volumes/
-    data_000.dat
-    asset_map.json
+  data_000.dat
+  asset_map.json
 ```
 
 The `ascii_tileset`, world matrix, world headers, and UI skins are embedded in the executable and require no external files.
@@ -216,7 +268,7 @@ The `ascii_tileset`, world matrix, world headers, and UI skins are embedded in t
 
 Glyphborn is in active development as both a game and a technical foundation. The repository is publicly visible for transparency and portfolio purposes but remains proprietary.
 
-The underlying runtime and tools will be rebranded and open-sourced under **Damascus — The Steel Editor Suite** in the future. Timeline and licensing details will be announced upon release.
+The underlying runtime and tools may be rebranded and open-sourced under **Damascus — The Steel Editor Suite** in the future. Timeline and licensing details will be announced upon release.
 
 ---
 

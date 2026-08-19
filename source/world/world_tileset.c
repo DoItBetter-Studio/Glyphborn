@@ -8,8 +8,6 @@
 
 #define TILESET_MAGIC 0x53544C47  // "GBTS"
 
-static FILE* debug_log = NULL;
-
 static Tileset* parse_tileset(const Blob* blob)
 {
     const uint8_t* ptr = blob->data;
@@ -19,7 +17,7 @@ static Tileset* parse_tileset(const Blob* blob)
     uint16_t version = *(uint16_t*)ptr; ptr += sizeof(uint16_t);
     uint16_t tile_count = *(uint16_t*)ptr; ptr += sizeof(uint16_t);
 
-    if (magic != TILESET_MAGIC || version != 1) {
+    if (magic != TILESET_MAGIC || version != 2) {
         return NULL;
     }
 
@@ -53,7 +51,7 @@ static Tileset* parse_tileset(const Blob* blob)
         if (tile->vertex_count > 0) {
             size_t vbytes = tile->vertex_count * sizeof(Vertex);
             #if _WIN32 || __linux__
-            if (ptr + vbytes > end) { fprintf(debug_log, "OOB vertices\n"); break; }
+            if (ptr + vbytes > end) { fprintf(stderr, "OOB vertices\n"); break; }
             #endif
             tile->vertices = malloc(vbytes);
 
@@ -131,7 +129,7 @@ void tileset_free(Tileset* tileset)
 {
     if (!tileset) return;
 
-    for (int i = 0; i < tileset->tile_count; i++)
+    for (int32_t i = 0; i < tileset->tile_count; i++)
     {
         TileMesh* tile = &tileset->tiles[i];
         free(tile->vertices);

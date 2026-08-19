@@ -109,7 +109,7 @@ void tileset_cache_shutdown(void)
         g_interior_cache
     };
 
-    for (int i = 0; i < 3; i++)
+    for (int32_t i = 0; i < 3; i++)
     {
         CachedTileset* entry = caches[i];
 

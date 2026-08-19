@@ -5,148 +5,94 @@
     "global_offset": 0,
     "size": 23309606
   },
-  "data/layouts/test_map_0_0/collision.bin": {
+  "data/dialogue/dialogue.bin": {
     "volume": 0,
     "offset": 23309606,
     "global_offset": 23309606,
+    "size": 350
+  },
+  "data/dialogue/en_US.locale": {
+    "volume": 0,
+    "offset": 23309956,
+    "global_offset": 23309956,
+    "size": 278
+  },
+  "data/dialogue/pt_BR.locale": {
+    "volume": 0,
+    "offset": 23310234,
+    "global_offset": 23310234,
+    "size": 307
+  },
+  "data/layouts/test_map_0_0/collision.bin": {
+    "volume": 0,
+    "offset": 23310541,
+    "global_offset": 23310541,
     "size": 32774
   },
   "data/layouts/test_map_0_0/geometry.bin": {
     "volume": 0,
-    "offset": 23342380,
-    "global_offset": 23342380,
+    "offset": 23343315,
+    "global_offset": 23343315,
     "size": 65542
   },
-  "data/layouts/test_map_0_1/collision.bin": {
+  "data/layouts/test_map_0_0/rooms.bin": {
     "volume": 0,
-    "offset": 23407922,
-    "global_offset": 23407922,
-    "size": 32774
-  },
-  "data/layouts/test_map_0_1/geometry.bin": {
-    "volume": 0,
-    "offset": 23440696,
-    "global_offset": 23440696,
+    "offset": 23408857,
+    "global_offset": 23408857,
     "size": 65542
   },
-  "data/layouts/test_map_0_2/collision.bin": {
+  "data/models/animation/test.gbani": {
     "volume": 0,
-    "offset": 23506238,
-    "global_offset": 23506238,
-    "size": 32774
+    "offset": 23474399,
+    "global_offset": 23474399,
+    "size": 15798
   },
-  "data/layouts/test_map_0_2/geometry.bin": {
+  "data/models/material/Body.gbmat": {
     "volume": 0,
-    "offset": 23539012,
-    "global_offset": 23539012,
-    "size": 65542
+    "offset": 23490197,
+    "global_offset": 23490197,
+    "size": 65550
   },
-  "data/layouts/test_map_1_0/collision.bin": {
+  "data/models/material/Eye.gbmat": {
     "volume": 0,
-    "offset": 23604554,
-    "global_offset": 23604554,
-    "size": 32774
+    "offset": 23555747,
+    "global_offset": 23555747,
+    "size": 4110
   },
-  "data/layouts/test_map_1_0/geometry.bin": {
+  "data/models/mesh/test.gbmsh": {
     "volume": 0,
-    "offset": 23637328,
-    "global_offset": 23637328,
-    "size": 65542
+    "offset": 23559857,
+    "global_offset": 23559857,
+    "size": 172120
   },
-  "data/layouts/test_map_1_1/collision.bin": {
+  "data/models/skeleton/metarig.gbsk": {
     "volume": 0,
-    "offset": 23702870,
-    "global_offset": 23702870,
-    "size": 32774
+    "offset": 23731977,
+    "global_offset": 23731977,
+    "size": 8276
   },
-  "data/layouts/test_map_1_1/geometry.bin": {
+  "data/tilesets/local/test_local.bin": {
     "volume": 0,
-    "offset": 23735644,
-    "global_offset": 23735644,
-    "size": 65542
-  },
-  "data/layouts/test_map_1_2/collision.bin": {
-    "volume": 0,
-    "offset": 23801186,
-    "global_offset": 23801186,
-    "size": 32774
-  },
-  "data/layouts/test_map_1_2/geometry.bin": {
-    "volume": 0,
-    "offset": 23833960,
-    "global_offset": 23833960,
-    "size": 65542
-  },
-  "data/layouts/test_map_2_0/collision.bin": {
-    "volume": 0,
-    "offset": 23899502,
-    "global_offset": 23899502,
-    "size": 32774
-  },
-  "data/layouts/test_map_2_0/geometry.bin": {
-    "volume": 0,
-    "offset": 23932276,
-    "global_offset": 23932276,
-    "size": 65542
-  },
-  "data/layouts/test_map_2_1/collision.bin": {
-    "volume": 0,
-    "offset": 23997818,
-    "global_offset": 23997818,
-    "size": 32774
-  },
-  "data/layouts/test_map_2_1/geometry.bin": {
-    "volume": 0,
-    "offset": 24030592,
-    "global_offset": 24030592,
-    "size": 65542
-  },
-  "data/layouts/test_map_2_2/collision.bin": {
-    "volume": 0,
-    "offset": 24096134,
-    "global_offset": 24096134,
-    "size": 32774
-  },
-  "data/layouts/test_map_2_2/geometry.bin": {
-    "volume": 0,
-    "offset": 24128908,
-    "global_offset": 24128908,
-    "size": 65542
-  },
-  "data/skeletons/test.gbsk": {
-    "volume": 0,
-    "offset": 24194450,
-    "global_offset": 24194450,
-    "size": 9216
-  },
-  "data/skeletons/test_metarigAction.gban": {
-    "volume": 0,
-    "offset": 24203666,
-    "global_offset": 24203666,
-    "size": 304936
-  },
-  "data/tilesets/local/test_local_tileset.bin": {
-    "volume": 0,
-    "offset": 24508602,
-    "global_offset": 24508602,
+    "offset": 23740253,
+    "global_offset": 23740253,
     "size": 14
   },
-  "data/tilesets/regional/test_regional_tileset.bin": {
+  "data/tilesets/regional/test_regional.bin": {
     "volume": 0,
-    "offset": 24508616,
-    "global_offset": 24508616,
-    "size": 30300
+    "offset": 23740267,
+    "global_offset": 23740267,
+    "size": 56540
   },
   "data/world_headers.hdr": {
     "volume": 0,
-    "offset": 24538916,
-    "global_offset": 24538916,
-    "size": 152
+    "offset": 23796807,
+    "global_offset": 23796807,
+    "size": 24
   },
   "data/world_matrix.mtx": {
     "volume": 0,
-    "offset": 24539068,
-    "global_offset": 24539068,
+    "offset": 23796831,
+    "global_offset": 23796831,
     "size": 210
   }
 }

@@ -2,7 +2,7 @@
 #define WORLD_TILESET_H
 
 #include <stdint.h>
-#include "vertex.h"
+#include "render/vertex.h"
 
 typedef struct TileMesh {
     Vertex* vertices;

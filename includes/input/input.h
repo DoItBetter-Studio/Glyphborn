@@ -1,0 +1,57 @@
+#ifndef INPUT_H
+#define INPUT_H
+
+#include <stdbool.h>
+#include <stdint.h>
+
+#define MAX_CONTROLLERS		1
+#define KEY_COUNT			256
+
+typedef enum
+{
+	BUTTON_UP,
+	BUTTON_DOWN,
+	BUTTON_LEFT,
+	BUTTON_RIGHT,
+	BUTTON_A,
+	BUTTON_B,
+	BUTTON_X,
+	BUTTON_Y,
+	BUTTON_RIGHT_BUMPER,
+	BUTTON_LEFT_BUMPER,
+	BUTTON_START,
+	BUTTON_SELECT,
+	BUTTON_COUNT
+} InputKey;
+
+typedef struct
+{
+	int keyboard_key;
+	uint16_t controller_button;
+} InputMapping;
+
+typedef struct
+{
+	bool button_down[BUTTON_COUNT];
+	bool button_prev[BUTTON_COUNT];
+
+	int32_t mouse_x;
+	int32_t mouse_y;
+	bool mouse_down;
+	bool mouse_prev;
+} InputState;
+
+void input_init(void* platform_context);
+void input_update(void);
+bool input_get_button(InputKey key);
+bool input_button_down(InputKey key);
+bool input_button_up(InputKey key);
+
+int32_t input_get_mouse_x(void);
+int32_t input_get_mouse_y(void);
+
+bool input_get_mouse_button(void);
+bool input_mouse_button_down(void);
+bool input_mouse_button_up(void);
+
+#endif // !INPUT_H

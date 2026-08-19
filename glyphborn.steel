@@ -1,0 +1,67 @@
+[project]
+name = "Glyphborn"
+version = "0.0.1"
+engine = "Damascus"
+
+# =========================
+# Tools
+# =========================
+
+[tools.mapper]
+version = "2.0.0"
+repo = "DoItBetter-Studio/Mapper"
+binary = "Mapper"
+
+[tools.echo]
+version = "1.0.0"
+repo = "DoItBetter-Studio/Echo"
+binary = "Echo"
+
+[tools.pigment]
+version = "2.0.0"
+repo = "DoItBetter-Studio/Pigment"
+binary = "Pigment"
+
+[tools.forge]
+version = "1.0.0"
+repo = "DoItBetter-Studio/Forge"
+binary = "Forge"
+
+[tools.atlas]
+version = "1.0.0"
+repo = "DoItBetter-Studio/Atlas"
+binary = "Atlas"
+
+# =========================
+# Hub UI Surface Control
+# (what is shown by default)
+# =========================
+[hub]
+
+show_mapper = true
+show_echo   = true
+show_forge  = true
+show_pigment = true
+
+# High-impact / advanced tools
+show_atlas = true
+show_build = true
+show_data_pipeline = true
+
+group_tools = true
+default_view = "project"
+
+# =========================
+# Environment Expectations
+# =========================
+[environment]
+requires_wsl = true
+requires_linux_toolchain = true
+requires_damascus_sdk = true
+
+# =========================
+# Metadata (display only)
+# =========================
+[meta]
+author = "IBogairgI"
+description = "Core game project for Glyphborn engine"

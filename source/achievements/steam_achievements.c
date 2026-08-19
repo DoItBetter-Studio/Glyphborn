@@ -1,4 +1,4 @@
-#include "achievements.h"
+#include "achievements/achievements.h"
 #include "stdio.h"
 
 #ifdef DISTRO_STEAM

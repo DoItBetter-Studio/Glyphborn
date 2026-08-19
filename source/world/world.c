@@ -1,5 +1,5 @@
 #include "world/world.h"
-#include "frustum.h"
+#include "render/frustum.h"
 #include "world/world_render_gl.h"
 #include "lighting/directional_light.h"
 #include <stdlib.h>
@@ -8,10 +8,9 @@
 extern DirectionalLight sun;
 
 WorldMatrix g_WorldMatrix = {0};
-WorldHeaders g_WorldHeaders = {0};
 
 /* Forward declarations for internal streaming utilities */
-static void world_load_cell_at(WorldCell* cell, int mx, int my);
+static void world_load_cell_at(WorldCell* cell, int32_t mx, int32_t my);
 static void world_unload_cell_internal(WorldCell* cell);
 
 static void world_shift_east(World* world);
@@ -20,10 +19,9 @@ static void world_shift_north(World* world);
 static void world_shift_south(World* world);
 
 // Step 2 Recommendation: Persistent Allocation
-void world_init(World* world, int start_x, int start_y)
+void world_init(World* world, int32_t start_x, int32_t start_y)
 {
     world_matrix_load(&g_WorldMatrix);
-    world_headers_load(&g_WorldHeaders);
 
     world_gl_init();
 
@@ -31,22 +29,22 @@ void world_init(World* world, int start_x, int start_y)
     world->cy = start_y;
 
     // Allocate persistent memory pointers once. Content rolls dynamically underneath.
-    for (int y = 0; y < 3; y++)
+    for (int32_t y = 0; y < 3; y++)
     {
-        for (int x = 0; x < 3; x++)
+        for (int32_t x = 0; x < 3; x++)
         {
             world->cells[x][y] = calloc(1, sizeof(WorldCell));
             world->cells[x][y]->state = CELL_EMPTY;
             
             // Prime initial map state values relative to starting focal position
-            int cell_wx = start_x + (x - 1);
-            int cell_wy = start_y + (y - 1);
+            int32_t cell_wx = start_x + (x - 1);
+            int32_t cell_wy = start_y + (y - 1);
             world_load_cell_at(world->cells[x][y], cell_wx, cell_wy);
         }
     }
 }
 
-static void world_load_cell_at(WorldCell* cell, int mx, int my)
+static void world_load_cell_at(WorldCell* cell, int32_t mx, int32_t my)
 {
     if (!cell) return;
     
@@ -59,10 +57,7 @@ static void world_load_cell_at(WorldCell* cell, int mx, int my)
     cell->world_x = mx;
     cell->world_y = my;
 
-    uint16_t header_id = world_matrix_get(&g_WorldMatrix, mx, my);
-    cell->header_id = header_id;
-
-    const WorldHeader* header = world_headers_get(&g_WorldHeaders, header_id);
+    const Header* header = world_matrix_get(&g_WorldMatrix, mx, my);
     if (!header)
     {
         cell->geometry = NULL;
@@ -129,12 +124,12 @@ static void world_unload_cell_internal(WorldCell* cell)
 void world_update(World* world, float player_x, float player_z)
 {
     // Derive absolute mathematical index boundaries from physical positions 
-    int current_cx = (int)floor(player_x / (float)MAP_WIDTH);
-    int current_cy = (int)floor(player_z / (float)MAP_HEIGHT);
+    int32_t current_cx = (int32_t)floor(player_x / (float)MAP_WIDTH);
+    int32_t current_cy = (int32_t)floor(player_z / (float)MAP_HEIGHT);
 
     // Calculate shifting displacement vectors
-    int dx = current_cx - world->cx;
-    int dy = current_cy - world->cy;
+    int32_t dx = current_cx - world->cx;
+    int32_t dy = current_cy - world->cy;
 
     // Process shifts loop intervals until coordinates synchronize seamlessly
     while (dx != 0 || dy != 0)
@@ -149,7 +144,7 @@ void world_update(World* world, float player_x, float player_z)
 
 // Step 4 Recommendation: Shifting Row/Col Pointer Ownerships instead of Reallocating
 // Internal helper to safely check if coordinates are within the global matrix bounds
-static bool is_valid_matrix_coord(int mx, int my)
+static bool is_valid_matrix_coord(int32_t mx, int32_t my)
 {
     return (mx >= 0 && mx < g_WorldMatrix.width && 
             my >= 0 && my < g_WorldMatrix.height);
@@ -157,15 +152,15 @@ static bool is_valid_matrix_coord(int mx, int my)
 
 static void world_shift_east(World* world)
 {
-    for (int y = 0; y < 3; y++)
+    for (int32_t y = 0; y < 3; y++)
     {
         WorldCell* recycled = world->cells[0][y];
         world->cells[0][y] = world->cells[1][y];
         world->cells[1][y] = world->cells[2][y];
         world->cells[2][y] = recycled;
 
-        int new_wx = world->cx + 2; 
-        int new_wy = world->cy + (y - 1);
+        int32_t new_wx = world->cx + 2; 
+        int32_t new_wy = world->cy + (y - 1);
 
         // Safeguard edge boundaries cleanly!
         if (is_valid_matrix_coord(new_wx, new_wy)) {
@@ -182,15 +177,15 @@ static void world_shift_east(World* world)
 
 static void world_shift_west(World* world)
 {
-    for (int y = 0; y < 3; y++)
+    for (int32_t y = 0; y < 3; y++)
     {
         WorldCell* recycled = world->cells[2][y];
         world->cells[2][y] = world->cells[1][y];
         world->cells[1][y] = world->cells[0][y];
         world->cells[0][y] = recycled;
 
-        int new_wx = world->cx - 2;
-        int new_wy = world->cy + (y - 1);
+        int32_t new_wx = world->cx - 2;
+        int32_t new_wy = world->cy + (y - 1);
 
         if (is_valid_matrix_coord(new_wx, new_wy)) {
             world_load_cell_at(recycled, new_wx, new_wy);
@@ -205,15 +200,15 @@ static void world_shift_west(World* world)
 
 static void world_shift_south(World* world)
 {
-    for (int x = 0; x < 3; x++)
+    for (int32_t x = 0; x < 3; x++)
     {
         WorldCell* recycled = world->cells[x][0];
         world->cells[x][0] = world->cells[x][1];
         world->cells[x][1] = world->cells[x][2];
         world->cells[x][2] = recycled;
 
-        int new_wx = world->cx + (x - 1);
-        int new_wy = world->cy + 2;
+        int32_t new_wx = world->cx + (x - 1);
+        int32_t new_wy = world->cy + 2;
 
         if (is_valid_matrix_coord(new_wx, new_wy)) {
             world_load_cell_at(recycled, new_wx, new_wy);
@@ -228,15 +223,15 @@ static void world_shift_south(World* world)
 
 static void world_shift_north(World* world)
 {
-    for (int x = 0; x < 3; x++)
+    for (int32_t x = 0; x < 3; x++)
     {
         WorldCell* recycled = world->cells[x][2];
         world->cells[x][2] = world->cells[x][1];
         world->cells[x][1] = world->cells[x][0];
         world->cells[x][0] = recycled;
 
-        int new_wx = world->cx + (x - 1);
-        int new_wy = world->cy - 2;
+        int32_t new_wx = world->cx + (x - 1);
+        int32_t new_wy = world->cy - 2;
 
         if (is_valid_matrix_coord(new_wx, new_wy)) {
             world_load_cell_at(recycled, new_wx, new_wy);
@@ -265,10 +260,11 @@ void world_render(World* world, Mat4 view, Mat4 projection)
     frustum_extract(&frustum, view_projection);
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glClearColor(0 / 255, 0 / 255, 0 / 255, 255 / 255);
     world_gl_begin_pass();
 
-    for (int y = 0; y < 3; y++)
-    for (int x = 0; x < 3; x++)
+    for (int32_t y = 0; y < 3; y++)
+    for (int32_t x = 0; x < 3; x++)
     {
         WorldCell* cell = world->cells[x][y];
         if (!cell || !cell->baked || cell->state != CELL_READY) continue;
@@ -288,9 +284,9 @@ void world_free(World* world)
 {
     world_gl_shutdown();
 
-    for (int y = 0; y < 3; y++)
+    for (int32_t y = 0; y < 3; y++)
     {
-        for (int x = 0; x < 3; x++)
+        for (int32_t x = 0; x < 3; x++)
         {
             if (world->cells[x][y])
             {
@@ -301,6 +297,5 @@ void world_free(World* world)
         }
     }
     world_matrix_free(&g_WorldMatrix);
-    world_headers_free(&g_WorldHeaders);
     tileset_cache_shutdown();
 }

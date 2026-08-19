@@ -1,11 +1,14 @@
 #ifdef _WIN32
 
-#include "platform.h"
-#include "version.h"
+#include "platform/platform.h"
+#include "core/version.h"
+#include "resources.h"
 #include <windows.h>
 #include <mmsystem.h>
 #include <stdint.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 static bool running = false;
 static HWND hwnd;
@@ -65,6 +68,13 @@ void platform_init(const PlatformWindowDesc* desc)
 	{
 		MessageBox(NULL, "Failed to create window.", "Error", MB_OK | MB_ICONERROR);
 		return;
+	}
+
+	HICON hIcon = (HICON)LoadImage(GetModuleHandle(NULL), MAKEINTRESOURCE(IDI_APPICON), IMAGE_ICON, 0, 0, LR_DEFAULTSIZE);
+	if (hIcon)
+	{
+		SendMessage(hwnd, WM_SETICON, ICON_BIG, (LPARAM)hIcon);
+		SendMessage(hwnd, WM_SETICON, ICON_SMALL, (LPARAM)hIcon);
 	}
 
 	running = true;
@@ -133,25 +143,61 @@ void platform_set_window_title(const char* title)
     }
 }
 
-void platform_init_assets(int total_volumes)
+void platform_init_assets(int32_t total_volumes)
 {
-	for (int i = 0; i < total_volumes && i < MAX_VOLUMES; i++)
+	for (int32_t i = 0; i < total_volumes && i < MAX_VOLUMES; i++)
 	{
-		char filename[64];
-		snprintf(filename, sizeof(filename), "data/data_%03d.dat", i);
+		char filename[512];
+		char exe_path[MAX_PATH] = {0};
+		char base_dir[MAX_PATH] = {0};
+		char candidate_paths[4][512] = {0};
+		int32_t candidate_count = 0;
 
-		g_volume_files[i] = CreateFileA(
-			filename, 
-			GENERIC_READ, 
-			FILE_SHARE_READ, 
-			NULL, 
-			OPEN_EXISTING, 
-			FILE_ATTRIBUTE_NORMAL | FILE_FLAG_SEQUENTIAL_SCAN, 
-			NULL
-		);
+		GetModuleFileNameA(NULL, exe_path, sizeof(exe_path));
+		for (int32_t j = (int32_t)strlen(exe_path) - 1; j >= 0; j--)
+		{
+			if (exe_path[j] == '\\' || exe_path[j] == '/')
+			{
+				exe_path[j] = '\0';
+				break;
+			}
+		}
+		if (exe_path[0] != '\0')
+		{
+			_snprintf_s(base_dir, sizeof(base_dir), _TRUNCATE, "%s", exe_path);
+			_snprintf_s(candidate_paths[candidate_count++], sizeof(candidate_paths[0]), _TRUNCATE, "%s\\data\\data_%03d.dat", base_dir, i);
+			_snprintf_s(candidate_paths[candidate_count++], sizeof(candidate_paths[0]), _TRUNCATE, "%s\\data_%03d.dat", base_dir, i);
+		}
+		_snprintf_s(candidate_paths[candidate_count++], sizeof(candidate_paths[0]), _TRUNCATE, "data\\data_%03d.dat", i);
+		_snprintf_s(candidate_paths[candidate_count++], sizeof(candidate_paths[0]), _TRUNCATE, "data_%03d.dat", i);
+
+		for (int32_t c = 0; c < candidate_count; c++)
+		{
+			if (candidate_paths[c][0] == '\0')
+				continue;
+
+			g_volume_files[i] = CreateFileA(
+				candidate_paths[c],
+				GENERIC_READ,
+				FILE_SHARE_READ,
+				NULL,
+				OPEN_EXISTING,
+				FILE_ATTRIBUTE_NORMAL | FILE_FLAG_SEQUENTIAL_SCAN,
+				NULL
+			);
+
+			if (g_volume_files[i] != INVALID_HANDLE_VALUE)
+			{
+				_snprintf_s(filename, sizeof(filename), _TRUNCATE, "%s", candidate_paths[c]);
+				break;
+			}
+		}
 
 		if (g_volume_files[i] == INVALID_HANDLE_VALUE)
+		{
+			fprintf(stderr, "[platform] missing asset volume: %s\n", filename);
 			continue;
+		}
 
 		g_volume_maps[i] = CreateFileMappingA(
 			g_volume_files[i],
@@ -164,13 +210,17 @@ void platform_init_assets(int total_volumes)
 		if (g_volume_maps[i])
 		{
 			g_asset_volumes[i] = (const uint8_t*)MapViewOfFile(g_volume_maps[i], FILE_MAP_READ, 0, 0, 0);
+			if (!g_asset_volumes[i])
+			{
+				fprintf(stderr, "[platform] failed to map asset volume: %s\n", filename);
+			}
 		}
 	}
 }
 
-void platform_shutdown_assets(int total_volumes)
+void platform_shutdown_assets(int32_t total_volumes)
 {
-	for (int i = 0; i < total_volumes; i++)
+	for (int32_t i = 0; i < total_volumes; i++)
 	{
 		if (g_asset_volumes[i])
 		{

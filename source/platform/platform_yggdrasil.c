@@ -1,5 +1,5 @@
 #ifdef __YGGDRASIL__
-#include "platform.h"
+#include "platform/platform.h"
 #include <yggdrasil.h>
 
 static bool     g_running    = false;

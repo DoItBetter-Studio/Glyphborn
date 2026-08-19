@@ -13,27 +13,10 @@
  */
 
 #include "world/world_render_gl.h"
-#include "gl_loader.h"
+#include "render/gl_loader.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
-/* -------------------------------------------------------------------------
- * Additional GL enumerants
- * ------------------------------------------------------------------------- */
-#define GL_ELEMENT_ARRAY_BUFFER  0x8893
-#define GL_TRIANGLES             0x0004
-#define GL_UNSIGNED_SHORT        0x1403
-#define GL_TEXTURE_2D            0x0DE1
-#define GL_FALSE                 0
-
-typedef void (*PFNGLUNIFORMMATRIX4FVPROC)(GLint, GLsizei, GLboolean, const float*);
-typedef void (*PFNGLUNIFORM3FPROC)       (GLint, float, float, float);
-typedef void (*PFNGLUNIFORM1FPROC)       (GLint, float);
-
-static PFNGLUNIFORMMATRIX4FVPROC s_glUniformMatrix4fv = NULL;
-static PFNGLUNIFORM3FPROC        s_glUniform3f        = NULL;
-static PFNGLUNIFORM1FPROC        s_glUniform1f        = NULL;
 
 /* -------------------------------------------------------------------------
  * Shader source
@@ -51,21 +34,20 @@ static const char* s_vert =
     "layout(location = 2) in vec3 a_normal;\n"
     "\n"
     "uniform mat4 u_mvp;\n"
-    "uniform mat4 u_model;\n"
     "\n"
     "out vec2  v_uv;\n"
-    "flat out vec3  v_normal;\n"  /* flat: no interpolation — preserves per-face lighting */
+    "out vec3  v_local_pos;\n" // Bypasses u_model completely
     "\n"
     "void main() {\n"
     "    gl_Position = u_mvp * vec4(a_pos, 1.0);\n"
     "    v_uv        = a_uv;\n"
-    "    v_normal    = mat3(u_model) * a_normal;\n"
+    "    v_local_pos = a_pos;\n"
     "}\n";
 
 static const char* s_frag =
     "#version 330 core\n"
     "in vec2  v_uv;\n"
-    "flat in vec3  v_normal;\n"  /* flat: matches vertex shader declaration */
+    "in vec3  v_local_pos;\n"
     "out vec4 frag_color;\n"
     "\n"
     "uniform sampler2D u_atlas;\n"
@@ -76,10 +58,12 @@ static const char* s_frag =
     "void main() {\n"
     "    vec4 tex = texture(u_atlas, v_uv);\n"
     "\n"
-    /* No normalize needed — flat means the value is constant and already
-     * normalised from gpu_mesh_upload. dot with -sun_dir because sun_dir
-     * points away from the sun (toward ground), same as the CPU rasterizer. */
-    "    float ndotl  = max(dot(v_normal, u_sun_dir), 0.0);\n"
+    "    // Reconstruct the true geometric face normal using local gradients\n"
+    "    vec3 dx = dFdx(v_local_pos);\n"
+    "    vec3 dy = dFdy(v_local_pos);\n"
+    "    vec3 face_normal = normalize(cross(dy, dx));\n" // Swapped to point outward\n"
+    "\n"
+    "    float ndotl  = max(dot(face_normal, u_sun_dir), 0.0);\n"
     "    float light  = clamp(u_ambient + ndotl * u_intensity, 0.0, 1.0);\n"
     "\n"
     "    frag_color = vec4(tex.rgb * light, tex.a);\n"
@@ -123,26 +107,11 @@ static GLuint compile_shader(GLenum type, const char* src)
     return shader;
 }
 
-static void load_extra_uniforms(void)
-{
-#ifdef _WIN32
-    s_glUniformMatrix4fv = (PFNGLUNIFORMMATRIX4FVPROC) wglGetProcAddress("glUniformMatrix4fv");
-    s_glUniform3f        = (PFNGLUNIFORM3FPROC)        wglGetProcAddress("glUniform3f");
-    s_glUniform1f        = (PFNGLUNIFORM1FPROC)        wglGetProcAddress("glUniform1f");
-#else
-    s_glUniformMatrix4fv = (PFNGLUNIFORMMATRIX4FVPROC) glXGetProcAddress((const GLubyte*)"glUniformMatrix4fv");
-    s_glUniform3f        = (PFNGLUNIFORM3FPROC)        glXGetProcAddress((const GLubyte*)"glUniform3f");
-    s_glUniform1f        = (PFNGLUNIFORM1FPROC)        glXGetProcAddress((const GLubyte*)"glUniform1f");
-#endif
-}
-
 /* -------------------------------------------------------------------------
  * Public API
  * ------------------------------------------------------------------------- */
 void world_gl_init(void)
 {
-    load_extra_uniforms();
-
     GLuint vert = compile_shader(GL_VERTEX_SHADER,   s_vert);
     GLuint frag = compile_shader(GL_FRAGMENT_SHADER, s_frag);
 
@@ -212,7 +181,7 @@ void world_gl_draw(const GPUMesh*          mesh,
                    const DirectionalLight* sun)
 {
     if (!mesh || !mesh->vao || !mesh->index_count) return;
-    if (!s_program || !s_glUniformMatrix4fv) return;
+    if (!s_program || !glUniformMatrix4fv) return;
 
     /* MVP = projection * view * model */
     Mat4 mv  = mat4_multiply(view, model);
@@ -224,12 +193,12 @@ void world_gl_draw(const GPUMesh*          mesh,
      * Mat4 is column-major in this engine — m[col][row] — which matches
      * what GL expects natively. GL_FALSE: no transpose needed.
      */
-    s_glUniformMatrix4fv(s_loc_mvp,   1, GL_FALSE, &mvp.m[0][0]);
-    s_glUniformMatrix4fv(s_loc_model, 1, GL_FALSE, &model.m[0][0]);
+    glUniformMatrix4fv(s_loc_mvp,   1, GL_FALSE, &mvp.m[0][0]);
+    glUniformMatrix4fv(s_loc_model, 1, GL_FALSE, &model.m[0][0]);
 
-    s_glUniform3f(s_loc_sun_dir,  sun->dir.x, sun->dir.y, sun->dir.z);
-    s_glUniform1f(s_loc_ambient,  sun->ambient);
-    s_glUniform1f(s_loc_intensity, sun->intensity);
+    glUniform3f(s_loc_sun_dir,  sun->dir.x, sun->dir.y, sun->dir.z);
+    glUniform1f(s_loc_ambient,  sun->ambient);
+    glUniform1f(s_loc_intensity, sun->intensity);
 
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, mesh->texture);

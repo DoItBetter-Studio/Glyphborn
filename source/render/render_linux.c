@@ -30,8 +30,8 @@
  *   from glXGetVisualFromFBConfig. See the comment in render_init below.
  */
 
-#include "render.h"
-#include "gl_loader.h"
+#include "render/render.h"
+#include "render/gl_loader.h"
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
 #include <GL/glx.h>
@@ -390,14 +390,62 @@ void render_present(void)
 {
     if (!s_display || !s_context) return;
 
+    /* 1. Fetch window dimensions */
     XWindowAttributes attrs;
     XGetWindowAttributes(s_display, s_window, &attrs);
-    glViewport(0, 0, attrs.width, attrs.height);
+    int win_w = attrs.width;
+    int win_h = attrs.height;
 
-    /*
-     * The world geometry is already in the backbuffer from world_render.
-     * We only upload and composite the UI layer on top of it.
-     */
+    if (win_w <= 0 || win_h <= 0) return;
+
+    /* 2. Calculate 16:9 aspect ratio box */
+    const float TARGET_ASPECT = (float)FB_WIDTH / (float)FB_HEIGHT; /* 640 / 360 */
+    float win_aspect = (float)win_w / (float)win_h;
+
+    int vp_x = 0, vp_y = 0;
+    int vp_w = win_w, vp_h = win_h;
+
+    if (win_aspect > TARGET_ASPECT) {
+        /* Window too wide -> Pillarbox */
+        vp_w = (int)((float)win_h * TARGET_ASPECT);
+        vp_x = (win_w - vp_w) / 2;
+    } else {
+        /* Window too tall -> Letterbox */
+        vp_h = (int)((float)win_w / TARGET_ASPECT);
+        vp_y = (win_h - vp_h) / 2;
+    }
+
+    /* 3. Clear ONLY the black bars using glScissor (DO NOT CLEAR THE 3D SCENE) */
+    if (vp_x > 0 || vp_y > 0)
+    {
+        glEnable(GL_SCISSOR_TEST);
+
+        /* Left / Right Pillarbox Bars */
+        if (vp_x > 0) {
+            glScissor(0, 0, vp_x, win_h);
+            glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+            glClear(GL_COLOR_BUFFER_BIT);
+
+            glScissor(vp_x + vp_w, 0, win_w - (vp_x + vp_w), win_h);
+            glClear(GL_COLOR_BUFFER_BIT);
+        }
+        /* Top / Bottom Letterbox Bars */
+        if (vp_y > 0) {
+            glScissor(0, 0, win_w, vp_y);
+            glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+            glClear(GL_COLOR_BUFFER_BIT);
+
+            glScissor(0, vp_y + vp_h, win_w, win_h - (vp_y + vp_h));
+            glClear(GL_COLOR_BUFFER_BIT);
+        }
+
+        glDisable(GL_SCISSOR_TEST);
+    }
+
+    /* 4. Constrain UI quad rendering to the centered aspect ratio rectangle */
+    glViewport(vp_x, vp_y, vp_w, vp_h);
+
+    /* 5. Upload & composite UI software framebuffer quad over 3D world */
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, s_tex_ui);
     glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0,

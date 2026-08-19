@@ -6,7 +6,6 @@ extern const uint8_t _binary_data_ui_skins_default_gbskin_start[] 	__asm__("_bin
 extern const uint8_t _binary_data_ui_skins_default_gbskin_end[] 	__asm__("_binary_data_ui_skins_default_gbskin_end");
 
 static UISkin     g_skins[SKIN_COUNT];
-// static uint32_t*  g_skin_palettes[SKIN_COUNT][256]; // max 256 palette variants per skin
 static const UISkin* g_current_skin = NULL;
 
 // ----------------------------------------------------------------
@@ -63,9 +62,9 @@ static void skin_load(UISkin* skin, const uint8_t* data)
         &skin->checkbox_checked,
     };
 
-    int element_count = sizeof(elements) / sizeof(elements[0]);
+    int32_t element_count = sizeof(elements) / sizeof(elements[0]);
 
-    for (int i = 0; i < element_count; i++)
+    for (int32_t i = 0; i < element_count; i++)
     {
         uint32_t w = *(const uint32_t*)p; p += 4;
         uint32_t h = *(const uint32_t*)p; p += 4;

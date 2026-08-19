@@ -1,6 +1,6 @@
 #ifdef __YGGDRASIL__
-#include "audio.h"
-#include "gbaud.h"
+#include "audio/audio.h"
+#include "audio/gbaud.h"
 #include <yggdrasil.h>
 
 typedef struct {

@@ -26,8 +26,8 @@
  *   is retained in memory but never uploaded to GL.
  */
 
-#include "render.h"
-#include "gl_loader.h"
+#include "render/render.h"
+#include "render/gl_loader.h"
 #include <stdio.h>
 #include <string.h>
 
@@ -35,8 +35,8 @@
  * wgl extension types and enumerants
  * Only what we need — no wglext.h dependency.
  * ------------------------------------------------------------------------- */
-typedef HGLRC (WINAPI* PFNWGLCREATECONTEXTATTRIBSARBPROC)(HDC hDC, HGLRC hShareContext, const int* attribList);
-typedef BOOL  (WINAPI* PFNWGLCHOOSEPIXELFORMATARBPROC)(HDC hdc, const int* piAttribIList, const FLOAT* pfAttribFList, UINT nMaxFormats, int* piFormats, UINT* nNumFormats);
+typedef HGLRC (WINAPI* PFNWGLCREATECONTEXTATTRIBSARBPROC)(HDC hDC, HGLRC hShareContext, const int32_t* attribList);
+typedef BOOL  (WINAPI* PFNWGLCHOOSEPIXELFORMATARBPROC)(HDC hdc, const int32_t* piAttribIList, const FLOAT* pfAttribFList, UINT nMaxFormats, int32_t* piFormats, UINT* nNumFormats);
 
 #define WGL_CONTEXT_MAJOR_VERSION_ARB   0x2091
 #define WGL_CONTEXT_MINOR_VERSION_ARB   0x2092
@@ -72,6 +72,7 @@ float    depthbuffer[FB_WIDTH * FB_HEIGHT];
 static HDC   s_hdc   = NULL;
 static HGLRC s_hglrc = NULL;
 
+static bool s_use_legacy_gl = false;
 static GLuint s_vao         = 0;
 static GLuint s_vbo         = 0;
 static GLuint s_program     = 0;
@@ -200,17 +201,19 @@ void render_init(void* platform_context)
     pfd.cColorBits = 32;
     pfd.cDepthBits = 24;
 
-    int dummy_fmt = ChoosePixelFormat(dummy_dc, &pfd);
+    int32_t dummy_fmt = ChoosePixelFormat(dummy_dc, &pfd);
     SetPixelFormat(dummy_dc, dummy_fmt, &pfd);
 
     HGLRC dummy_ctx = wglCreateContext(dummy_dc);
     wglMakeCurrent(dummy_dc, dummy_ctx);
 
+    void* wglCreateContextAttribsARB_raw = (void*)wglGetProcAddress("wglCreateContextAttribsARB");
     PFNWGLCREATECONTEXTATTRIBSARBPROC wglCreateContextAttribsARB =
-        (PFNWGLCREATECONTEXTATTRIBSARBPROC)wglGetProcAddress("wglCreateContextAttribsARB");
+        (PFNWGLCREATECONTEXTATTRIBSARBPROC)wglCreateContextAttribsARB_raw;
 
+    void* wglChoosePixelFormatARB_raw = (void*)wglGetProcAddress("wglChoosePixelFormatARB");
     PFNWGLCHOOSEPIXELFORMATARBPROC wglChoosePixelFormatARB =
-        (PFNWGLCHOOSEPIXELFORMATARBPROC)wglGetProcAddress("wglChoosePixelFormatARB");
+        (PFNWGLCHOOSEPIXELFORMATARBPROC)wglChoosePixelFormatARB_raw;
 
     wglMakeCurrent(NULL, NULL);
     wglDeleteContext(dummy_ctx);
@@ -220,13 +223,16 @@ void render_init(void* platform_context)
     if (!wglCreateContextAttribsARB || !wglChoosePixelFormatARB)
     {
         fprintf(stderr, "render_windows: WGL extensions unavailable — GL 3.3 not supported\n");
+        fprintf(stderr, "render_windows: wglCreateContextAttribsARB=%p wglChoosePixelFormatARB=%p\n",
+                (void*)wglCreateContextAttribsARB,
+                (void*)wglChoosePixelFormatARB);
         return;
     }
 
     /* --- Pass 2: real context on the game window ------------------------ */
     s_hdc = GetDC(hwnd);
 
-    const int pf_attribs[] = {
+    const int32_t pf_attribs[] = {
         WGL_DRAW_TO_WINDOW_ARB, GL_TRUE,
         WGL_SUPPORT_OPENGL_ARB, GL_TRUE,
         WGL_DOUBLE_BUFFER_ARB,  GL_TRUE,
@@ -238,7 +244,7 @@ void render_init(void* platform_context)
         0
     };
 
-    int pixel_format = 0;
+    int32_t pixel_format = 0;
     UINT num_formats  = 0;
     wglChoosePixelFormatARB(s_hdc, pf_attribs, NULL, 1, &pixel_format, &num_formats);
 
@@ -246,7 +252,7 @@ void render_init(void* platform_context)
     DescribePixelFormat(s_hdc, pixel_format, sizeof(chosen_pfd), &chosen_pfd);
     SetPixelFormat(s_hdc, pixel_format, &chosen_pfd);
 
-    const int ctx_attribs[] = {
+    const int32_t ctx_attribs[] = {
         WGL_CONTEXT_MAJOR_VERSION_ARB,  3,
         WGL_CONTEXT_MINOR_VERSION_ARB,  3,
         WGL_CONTEXT_PROFILE_MASK_ARB,   WGL_CONTEXT_CORE_PROFILE_BIT_ARB,
@@ -257,8 +263,15 @@ void render_init(void* platform_context)
     s_hglrc = wglCreateContextAttribsARB(s_hdc, NULL, ctx_attribs);
     if (!s_hglrc)
     {
-        fprintf(stderr, "render_windows: failed to create GL 3.3 core context\n");
-        return;
+        DWORD err = GetLastError();
+        fprintf(stderr, "render_windows: failed to create GL 3.3 core context (GetLastError=%lu), trying legacy fallback\n", err);
+        s_hglrc = wglCreateContext(s_hdc);
+        if (!s_hglrc)
+        {
+            fprintf(stderr, "render_windows: failed to create any GL context\n");
+            return;
+        }
+        s_use_legacy_gl = true;
     }
 
     wglMakeCurrent(s_hdc, s_hglrc);
@@ -266,52 +279,67 @@ void render_init(void* platform_context)
     /* --- Load GL 3.3 function pointers ---------------------------------- */
     gl_loader_init();
 
-    /* --- Build the fullscreen quad VAO/VBO ------------------------------ */
-    glGenVertexArrays(1, &s_vao);
-    glBindVertexArray(s_vao);
-
-    glGenBuffers(1, &s_vbo);
-    glBindBuffer(GL_ARRAY_BUFFER, s_vbo);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(s_quad), s_quad, GL_STATIC_DRAW);
-
-    /* layout(location=0) vec2 a_pos */
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE,
-                          4 * sizeof(float), (void*)0);
-
-    /* layout(location=1) vec2 a_uv */
-    glEnableVertexAttribArray(1);
-    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE,
-                          4 * sizeof(float), (void*)(2 * sizeof(float)));
-
-    glBindVertexArray(0);
-
-    /* --- Compile and link shaders --------------------------------------- */
-    GLuint vert = compile_shader(GL_VERTEX_SHADER,   s_vert_src);
-    GLuint frag = compile_shader(GL_FRAGMENT_SHADER, s_frag_src);
-
-    s_program = glCreateProgram();
-    glAttachShader(s_program, vert);
-    glAttachShader(s_program, frag);
-    glLinkProgram(s_program);
-
-    GLint link_ok = 0;
-    glGetProgramiv(s_program, GL_LINK_STATUS, &link_ok);
-    if (!link_ok)
+    if (glGenVertexArrays == NULL)
     {
-        GLint len = 0;
-        glGetProgramiv(s_program, GL_INFO_LOG_LENGTH, &len);
-        char* log = (char*)_alloca(len + 1);
-        glGetProgramInfoLog(s_program, len, NULL, log);
-        fprintf(stderr, "render_windows: program link error:\n%s\n", log);
+        MessageBox(NULL, "Failed to load GL Functions!", "ERROR", MB_OK);
+        return;
     }
 
-    glDeleteShader(vert);
-    glDeleteShader(frag);
+    if (!s_use_legacy_gl)
+    {
+        if (!glGenVertexArrays || !glBindVertexArray || !glCreateShader || !glLinkProgram || !glUseProgram)
+        {
+            fprintf(stderr, "render_windows: OpenGL function loading failed after context creation\n");
+            return;
+        }
 
-    glUseProgram(s_program);
-    s_loc_ui = glGetUniformLocation(s_program, "u_ui");
-    glUniform1i(s_loc_ui, 0);   /* texture unit 0 */
+        /* --- Build the fullscreen quad VAO/VBO -------------------------- */
+        glGenVertexArrays(1, &s_vao);
+        glBindVertexArray(s_vao);
+
+        glGenBuffers(1, &s_vbo);
+        glBindBuffer(GL_ARRAY_BUFFER, s_vbo);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(s_quad), s_quad, GL_STATIC_DRAW);
+
+        /* layout(location=0) vec2 a_pos */
+        glEnableVertexAttribArray(0);
+        glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE,
+                              4 * sizeof(float), (void*)0);
+
+        /* layout(location=1) vec2 a_uv */
+        glEnableVertexAttribArray(1);
+        glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE,
+                              4 * sizeof(float), (void*)(2 * sizeof(float)));
+
+        glBindVertexArray(0);
+
+        /* --- Compile and link shaders ----------------------------------- */
+        GLuint vert = compile_shader(GL_VERTEX_SHADER,   s_vert_src);
+        GLuint frag = compile_shader(GL_FRAGMENT_SHADER, s_frag_src);
+
+        s_program = glCreateProgram();
+        glAttachShader(s_program, vert);
+        glAttachShader(s_program, frag);
+        glLinkProgram(s_program);
+
+        GLint link_ok = 0;
+        glGetProgramiv(s_program, GL_LINK_STATUS, &link_ok);
+        if (!link_ok)
+        {
+            GLint len = 0;
+            glGetProgramiv(s_program, GL_INFO_LOG_LENGTH, &len);
+            char* log = (char*)_alloca(len + 1);
+            glGetProgramInfoLog(s_program, len, NULL, log);
+            fprintf(stderr, "render_windows: program link error:\n%s\n", log);
+        }
+
+        glDeleteShader(vert);
+        glDeleteShader(frag);
+
+        glUseProgram(s_program);
+        s_loc_ui = glGetUniformLocation(s_program, "u_ui");
+        glUniform1i(s_loc_ui, 0);   /* texture unit 0 */
+    }
 
     /* --- Allocate UI framebuffer texture -------------------------------- */
     s_tex_ui = create_texture();
@@ -330,7 +358,7 @@ uint32_t* render_get_framebuffer(void)
  * ------------------------------------------------------------------------- */
 void render_clear(uint32_t* buffer, uint32_t color)
 {
-    for (int i = 0; i < FB_WIDTH * FB_HEIGHT; ++i)
+    for (int32_t i = 0; i < FB_WIDTH * FB_HEIGHT; ++i)
         buffer[i] = color;
 }
 
@@ -357,17 +385,61 @@ void render_present(void)
 {
     if (!s_hdc || !s_hglrc) return;
 
-    /* Sync viewport to window size every frame — handles resize for free */
-    RECT rect;
-    GetClientRect(WindowFromDC(s_hdc), &rect);
-    glViewport(0, 0, rect.right - rect.left, rect.bottom - rect.top);
+    HWND hwnd = WindowFromDC(s_hdc);
+    RECT rect = {0};
+    if (hwnd) GetClientRect(hwnd, &rect);
 
-    /*
-     * The world geometry is already in the backbuffer from world_render.
-     * We only upload and composite the UI layer on top of it.
-     * GL_BLEND with standard src-alpha lets UI pixels with alpha=0 pass
-     * through to the world geometry underneath.
-     */
+    int win_w = rect.right - rect.left;
+    int win_h = rect.bottom - rect.top;
+
+    if (win_w <= 0 || win_h <= 0) return;
+
+    /* 1. Calculate 16:9 pillar/letterbox bounds */
+    const float TARGET_ASPECT = (float)FB_WIDTH / (float)FB_HEIGHT;
+    float win_aspect = (float)win_w / (float)win_h;
+
+    int vp_x = 0, vp_y = 0;
+    int vp_w = win_w, vp_h = win_h;
+
+    if (win_aspect > TARGET_ASPECT) {
+        vp_w = (int)((float)win_h * TARGET_ASPECT);
+        vp_x = (win_w - vp_w) / 2;
+    } else {
+        vp_h = (int)((float)win_w / TARGET_ASPECT);
+        vp_y = (win_h - vp_h) / 2;
+    }
+
+    /* 2. Optional: Clear ONLY the black bars (margin scissor clear) */
+    if (vp_x > 0 || vp_y > 0)
+    {
+        glEnable(GL_SCISSOR_TEST);
+        
+        /* Left bar */
+        if (vp_x > 0) {
+            glScissor(0, 0, vp_x, win_h);
+            glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+            glClear(GL_COLOR_BUFFER_BIT);
+
+            glScissor(vp_x + vp_w, 0, win_w - (vp_x + vp_w), win_h);
+            glClear(GL_COLOR_BUFFER_BIT);
+        }
+        /* Top/Bottom bars */
+        if (vp_y > 0) {
+            glScissor(0, 0, win_w, vp_y);
+            glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+            glClear(GL_COLOR_BUFFER_BIT);
+
+            glScissor(0, vp_y + vp_h, win_w, win_h - (vp_y + vp_h));
+            glClear(GL_COLOR_BUFFER_BIT);
+        }
+        
+        glDisable(GL_SCISSOR_TEST);
+    }
+
+    /* 3. Constrain UI quad to 16:9 viewport (DO NOT GL_CLEAR HERE) */
+    glViewport(vp_x, vp_y, vp_w, vp_h);
+
+    /* 4. Upload & Composite UI Framebuffer over 3D World */
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, s_tex_ui);
     glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0,
@@ -375,16 +447,41 @@ void render_present(void)
                     GL_BGRA, GL_UNSIGNED_BYTE,
                     framebuffer_ui);
 
-    glDisable(GL_DEPTH_TEST);
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    if (s_use_legacy_gl)
+    {
+        glMatrixMode(GL_PROJECTION);
+        glLoadIdentity();
+        glOrtho(-1.0, 1.0, -1.0, 1.0, -1.0, 1.0);
+        glMatrixMode(GL_MODELVIEW);
+        glLoadIdentity();
 
-    glUseProgram(s_program);
-    glBindVertexArray(s_vao);
-    glDrawArrays(GL_TRIANGLES, 0, 6);
-    glBindVertexArray(0);
+        glEnable(GL_TEXTURE_2D);
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-    glDisable(GL_BLEND);
+        glBegin(GL_QUADS);
+        glTexCoord2f(0.0f, 0.0f); glVertex2f(-1.0f,  1.0f);
+        glTexCoord2f(1.0f, 0.0f); glVertex2f( 1.0f,  1.0f);
+        glTexCoord2f(1.0f, 1.0f); glVertex2f( 1.0f, -1.0f);
+        glTexCoord2f(0.0f, 1.0f); glVertex2f(-1.0f, -1.0f);
+        glEnd();
+
+        glDisable(GL_BLEND);
+        glDisable(GL_TEXTURE_2D);
+    }
+    else
+    {
+        glDisable(GL_DEPTH_TEST);
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+        glUseProgram(s_program);
+        glBindVertexArray(s_vao);
+        glDrawArrays(GL_TRIANGLES, 0, 6);
+        glBindVertexArray(0);
+
+        glDisable(GL_BLEND);
+    }
 
     SwapBuffers(s_hdc);
 }
@@ -396,22 +493,21 @@ void render_shutdown(void)
 {
     if (s_hglrc)
     {
-        glDeleteTextures(1, &s_tex_ui);
-        glDeleteProgram(s_program);
-        glBindVertexArray(0);
-        /* VAO and VBO cleanup */
-        GLuint bufs[] = { s_vbo };
-        /* glDeleteBuffers is GL 1.5 — available via proc address */
-        /* For correctness we call through the loader */
-        typedef void (*PFNGLDELETEBUFFERSPROC)(GLsizei, const GLuint*);
-        PFNGLDELETEBUFFERSPROC glDeleteBuffers =
-            (PFNGLDELETEBUFFERSPROC)wglGetProcAddress("glDeleteBuffers");
-        if (glDeleteBuffers) glDeleteBuffers(1, bufs);
-
-        typedef void (*PFNGLDELETEVERTEXARRAYSPROC)(GLsizei, const GLuint*);
-        PFNGLDELETEVERTEXARRAYSPROC glDeleteVertexArrays =
-            (PFNGLDELETEVERTEXARRAYSPROC)wglGetProcAddress("glDeleteVertexArrays");
-        if (glDeleteVertexArrays) glDeleteVertexArrays(1, &s_vao);
+        if (!s_use_legacy_gl)
+        {
+            glDeleteTextures(1, &s_tex_ui);
+            glDeleteProgram(s_program);
+            glBindVertexArray(0);
+            /* VAO and VBO cleanup */
+            GLuint bufs[] = { s_vbo };
+            
+            glDeleteBuffers(1, bufs);
+            glDeleteVertexArrays(1, &s_vao);
+        }
+        else
+        {
+            glDeleteTextures(1, &s_tex_ui);
+        }
 
         wglMakeCurrent(NULL, NULL);
         wglDeleteContext(s_hglrc);

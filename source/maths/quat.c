@@ -33,7 +33,7 @@ Quat quat_normalize(Quat q)
 {
 	float len = sqrtf(q.w * q.w + q.x * q.x + q.y * q.y + q.z * q.z);
 	if (len == 0.0f) return quat_identity();
-	return (Quat) { q.w / len, q.x / len, q.y / len, q.z / len };
+	return (Quat) { q.x / len, q.y / len, q.z / len, q.w / len };
 }
 
 Vec3 quat_rotate(Quat q, Vec3 v)

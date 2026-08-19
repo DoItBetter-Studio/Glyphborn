@@ -1,10 +1,11 @@
 #include <stdio.h>
 
-#include "platform.h"
-#include "render.h"
-#include "game.h"
-#include "audio.h"
-#include "achievements.h"
+#include "platform/platform.h"
+#include "render/render.h"
+#include "input/input.h"
+#include "game/game.h"
+#include "audio/audio.h"
+#include "achievements/achievements.h"
 
 #ifdef _WIN32
 #include <windows.h>
@@ -51,10 +52,11 @@ int main()
 
 	render_init(platform_get_native_window());
 	audio_init();
+	input_init(platform_get_native_window());
 	game_init();
 
 	float true_fps_accumulator = 0.0f;
-	int true_frame_counter = 0;
+	int32_t true_frame_counter = 0;
 	char title_buffer[128];
 
 	while (platform_running())

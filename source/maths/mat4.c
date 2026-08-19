@@ -1,5 +1,6 @@
 #include "maths/mat4.h"
 #include <math.h>
+#include <stdint.h>
 
 void mat4_identity(Mat4 *out)
 {
@@ -72,9 +73,9 @@ Mat4 mat4_rotate_z(float angle)
 Mat4 mat4_multiply(Mat4 a, Mat4 b)
 {
 	Mat4 result = { 0 };
-	for (int i = 0; i < 4; i++)
+	for (int32_t i = 0; i < 4; i++)
 	{
-		for (int j = 0; j < 4; j++)
+		for (int32_t j = 0; j < 4; j++)
 		{
 			result.m[i][j] = a.m[0][j] * b.m[i][0] +
 							 a.m[1][j] * b.m[i][1] +

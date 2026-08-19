@@ -1,5 +1,5 @@
 #ifdef __YGGDRASIL__
-#include "input.h"
+#include "input/input.h"
 #include <yggdrasil.h>
 #include <string.h>
 
@@ -21,7 +21,7 @@ static const uint16_t button_masks[BUTTON_COUNT] = {
 
 static InputState input_state;
 
-void input_init(void) {
+void input_init(void* platform_context) {
     memset(&input_state, 0, sizeof(InputState));
 }
 

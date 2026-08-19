@@ -25,7 +25,7 @@ CollisionMap* collision_load(uint16_t collision_id)
     uint16_t version = *(uint16_t*)ptr;
     ptr += sizeof(uint16_t);
 
-    if (version != 1)
+    if (version != 2)
     {
         return NULL;
     }
@@ -34,11 +34,11 @@ CollisionMap* collision_load(uint16_t collision_id)
     CollisionMap* map = malloc(sizeof(CollisionMap));
 
     // Read all tiles
-    for (int layer = 0; layer < MAP_LAYERS; layer++)
+    for (int32_t layer = 0; layer < MAP_LAYERS; layer++)
     {
-        for (int y = 0; y < MAP_HEIGHT; y++)
+        for (int32_t y = 0; y < MAP_HEIGHT; y++)
         {
-            for (int x = 0; x < MAP_WIDTH; x++)
+            for (int32_t x = 0; x < MAP_WIDTH; x++)
             {
                 map->tiles[layer][y][x] = *(char*)ptr;
                 ptr += sizeof(char);

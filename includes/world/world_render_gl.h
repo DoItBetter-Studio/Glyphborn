@@ -18,7 +18,7 @@
  * Texture unit 0 is the chunk atlas (bound by the caller per draw).
  */
 
-#include "gpu_mesh.h"
+#include "render/gpu_mesh.h"
 #include "maths/mat4.h"
 #include "lighting/directional_light.h"
 

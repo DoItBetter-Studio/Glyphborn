@@ -1,12 +1,12 @@
 #include "ui/ui_core.h"
 #include "ui/ui.h"
 
-int ui_gen_id(void)
+int32_t ui_gen_id(void)
 {
     return g_ui.next_id++;
 }
 
-void ui_begin_frame(int mouse_x, int mouse_y, bool mouse_down, bool nav_activate)
+void ui_begin_frame(int32_t mouse_x, int32_t mouse_y, bool mouse_down, bool nav_activate)
 {
     g_ui.mouse_x = mouse_x;
     g_ui.mouse_y = mouse_y;

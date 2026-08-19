@@ -1,5 +1,5 @@
 #ifdef __YGGDRASIL__
-#include "render.h"
+#include "render/render.h"
 #include <yggdrasil.h>
 
 /* Game-side framebuffer storage — always 1280x720 internally */

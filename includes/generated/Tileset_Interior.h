@@ -4,7 +4,7 @@
 #define TILESET_INTERIOR_H
 
 #include "generated/Blob.h"
-#include "platform.h"
+#include "platform/platform.h"
 #include <stdint.h>
 #include <stddef.h>
 

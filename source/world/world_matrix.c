@@ -1,13 +1,14 @@
 #include "world/world_matrix.h"
 #include <stdlib.h>
 #include <string.h>
+#include <stdio.h>
 
 // Embedded binary
 extern const uint8_t _binary_data_world_matrix_mtx_start[] __asm__("_binary_data_world_matrix_mtx_start");
 extern const uint8_t _binary_data_world_matrix_mtx_end[] __asm__("_binary_data_world_matrix_mtx_end");
 
 #define MATRIX_MAGIC 0x4D574247     // "GBWM"
-#define VERSION 1
+#define VERSION 2
 
 void world_matrix_load(WorldMatrix* matrix)
 {
@@ -19,7 +20,7 @@ void world_matrix_load(WorldMatrix* matrix)
 
     if (magic != MATRIX_MAGIC)
     {
-        // Error handling
+        printf("Error: world matrix magic mismatch. Expected 0x%X, got 0x%X\n", MATRIX_MAGIC, magic);
         return;
     }
 
@@ -29,7 +30,7 @@ void world_matrix_load(WorldMatrix* matrix)
 
     if (version != VERSION)
     {
-        // Error handling
+        printf("Warning: world matrix version mismatch. Expected %d, got %d\n", VERSION, version);
         return;
     }
 
@@ -42,8 +43,21 @@ void world_matrix_load(WorldMatrix* matrix)
 
     // Allocate and copy cells
     size_t cell_count = matrix->width * matrix->height;
-    matrix->cells = malloc(cell_count * sizeof(uint16_t));
-    memcpy(matrix->cells, ptr, cell_count * sizeof(uint16_t));
+    matrix->cells = malloc(cell_count * sizeof(Header));
+
+    for (uint32_t i = 0; i < cell_count; i++)
+    {
+        Header* header = &matrix->cells[i];
+
+        header->header_id = *(uint32_t*)ptr; ptr += sizeof(uint32_t);
+        header->vertical_offset = *(int16_t*)ptr; ptr += sizeof(int16_t);
+        header->geometry_id = *(uint16_t*)ptr; ptr += sizeof(uint16_t);
+        header->collision_id = *(uint16_t*)ptr; ptr += sizeof(uint16_t);
+        header->regional_tileset_id = *(uint16_t*)ptr; ptr += sizeof(uint16_t);
+        header->local_tileset_id = *(uint16_t*)ptr; ptr += sizeof(uint16_t);
+        header->interior_tileset_id = *(uint16_t*)ptr; ptr += sizeof(uint16_t);
+        header->metadata_id = *(uint16_t*)ptr; ptr += sizeof(uint16_t);
+    }
 }
 
 void world_matrix_free(WorldMatrix* matrix)
@@ -55,12 +69,12 @@ void world_matrix_free(WorldMatrix* matrix)
     }
 }
 
-uint16_t world_matrix_get(const WorldMatrix* matrix, uint16_t x, uint16_t y)
+const Header* world_matrix_get(const WorldMatrix* matrix, uint16_t x, uint16_t y)
 {
     if (x >= matrix->width || y >= matrix->height)
     {
-        return 0;
+        return NULL;
     }
 
-    return matrix->cells[y * matrix->width + x];
+    return &matrix->cells[y * matrix->width + x];
 }

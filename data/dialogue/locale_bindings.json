@@ -1,0 +1,37 @@
+{
+  "locales": {
+    "cs_cz": 0,
+    "da_dk": 1,
+    "de_de": 2,
+    "en_au": 3,
+    "en_ca": 4,
+    "en_gb": 5,
+    "en_us": 6,
+    "es_es": 7,
+    "es_mx": 8,
+    "fi_fi": 9,
+    "fr_ca": 10,
+    "fr_fr": 11,
+    "is_is": 12,
+    "it_it": 13,
+    "ja_jp": 14,
+    "ko_kr": 15,
+    "nl_nl": 16,
+    "no_no": 17,
+    "pl_pl": 18,
+    "pt_br": 19,
+    "pt_pt": 20,
+    "ru_ru": 21,
+    "sv_se": 22,
+    "tr_tr": 23,
+    "uk_ua": 24,
+    "zh_cn": 25,
+    "zh_tw": 26
+  },
+  "ui": {
+    "menu": {
+      "settings": 27,
+      "start_game": 28
+    }
+  }
+}

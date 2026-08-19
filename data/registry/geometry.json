@@ -6,46 +6,6 @@
       "Index": 0,
       "Label": "test_map_0_0",
       "Valid": true
-    },
-    {
-      "Index": 1,
-      "Label": "test_map_0_1",
-      "Valid": true
-    },
-    {
-      "Index": 2,
-      "Label": "test_map_0_2",
-      "Valid": true
-    },
-    {
-      "Index": 3,
-      "Label": "test_map_1_0",
-      "Valid": true
-    },
-    {
-      "Index": 4,
-      "Label": "test_map_1_1",
-      "Valid": true
-    },
-    {
-      "Index": 5,
-      "Label": "test_map_1_2",
-      "Valid": true
-    },
-    {
-      "Index": 6,
-      "Label": "test_map_2_0",
-      "Valid": true
-    },
-    {
-      "Index": 7,
-      "Label": "test_map_2_1",
-      "Valid": true
-    },
-    {
-      "Index": 8,
-      "Label": "test_map_2_2",
-      "Valid": true
     }
   ]
 }

@@ -1,6 +1,7 @@
 #include "world/world_geometry.h"
 #include <stdlib.h>
 #include <string.h>
+#include <stdio.h>
 
 GeometryMap* geometry_load(uint16_t geometry_id)
 {
@@ -18,6 +19,7 @@ GeometryMap* geometry_load(uint16_t geometry_id)
 
     if (magic != GEOMETRY_MAGIC)
     {
+        printf("Error: geometry magic mismatch. Expected 0x%X, got 0x%X\n", GEOMETRY_MAGIC, magic);
         return NULL;
     }
 
@@ -25,8 +27,9 @@ GeometryMap* geometry_load(uint16_t geometry_id)
     uint16_t version = *(uint16_t*)ptr;
     ptr += sizeof(uint16_t);
 
-    if (version != 1)
+    if (version != 2)
     {
+        printf("Warning: geometry version mismatch. Expected 2, got %d\n", version);
         return NULL;
     }
 
@@ -34,11 +37,11 @@ GeometryMap* geometry_load(uint16_t geometry_id)
     GeometryMap* map = malloc(sizeof(GeometryMap));
 
     // Read all tiles
-    for (int layer = 0; layer < MAP_LAYERS; layer++)
+    for (int32_t layer = 0; layer < MAP_LAYERS; layer++)
     {
-        for (int y = 0; y < MAP_HEIGHT; y++)
+        for (int32_t y = 0; y < MAP_HEIGHT; y++)
         {
-            for (int x = 0; x < MAP_WIDTH; x++)
+            for (int32_t x = 0; x < MAP_WIDTH; x++)
             {
                 map->tiles[layer][y][x].packed = *(uint16_t*)ptr;
                 ptr += sizeof(uint16_t);

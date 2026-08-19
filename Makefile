@@ -33,6 +33,7 @@ GRAY   := \033[0;37m
 BOLD   := \033[1m
 RESET  := \033[0m
 
+.DEFAULT_GOAL := all
 
 # ==========================================================
 # 🧠 Environment Sanity Check
@@ -61,7 +62,6 @@ endif
 
 ifeq ($(SKIP_VERSIONING),)
 FORCE ?= false
-
 VERSION_META := $(shell tools/build/version.sh $(FORCE))
 
 ifeq ($(VERSION_META),SKIP)
@@ -74,10 +74,6 @@ include $(VERSION_META)
 BUILD_BASE := build/$(FULL_VERSION)
 BUILD_TIME := $(shell date +"%Y-%m-%d %H:%M:%S")
 endif
-
-# Now that FULL_VERSION exists, define build paths
-BUILD_BASE := build/$(FULL_VERSION)
-BUILD_TIME := $(shell date +"%Y-%m-%d %H:%M:%S")
 endif
 
 # ==========================================================
@@ -105,6 +101,11 @@ STRIP_WIN64 = /usr/bin/x86_64-w64-mingw32-strip
 STRIP_WIN32 = /usr/bin/i686-w64-mingw32-strip
 STRIP_YGG   = /usr/bin/x86_64-linux-gnu-strip
 
+# ==========================================================
+# 📂 Windows Resources
+# ==========================================================
+WINDRES_WIN32 = /usr/bin/i686-w64-mingw32-windres
+WINDRES_WIN64 = /usr/bin/x86_64-w64-mingw32-windres
 
 # ==========================================================
 # ⚙️ Verbose / Debug Mode
@@ -183,11 +184,25 @@ STEAM_SDK_LIB_WIN32   := $(STEAM_SDK_PATH)/redistributable_bin
 
 
 # ==========================================================
-# 🎮 Steamworks SDK
+# 🎮 Yggdrasil SDK
 # ==========================================================
 YGG_SDK_PATH		  := externals/yggdrasil
 YGG_SDK_INCLUDE		  := $(YGG_SDK_PATH)/include
 
+# ==========================================================
+# 📷 Icon
+# ==========================================================
+ICON_SRC = resources/glyphborn.png
+ICON_ICO = resources/glyphborn.ico
+ICON_HEADER := includes/generated/Icon.h
+
+$(ICON_ICO): $(ICON_SRC)
+	@echo "🎨 ${BLUE}Generating Windows icon from $(ICON_SRC)...${RESET}"
+	@convert $< -define icon:auto-resize=256,128,64,48,32,16 $@
+
+$(ICON_HEADER): $(ICON_SRC)
+	@echo "🖼  ${BLUE}Generating icon header...${RESET}"
+	@python3 tools/build/gen_icon.py $< $@
 
 # ==========================================================
 # 🧩 Per-Distro Flag Injection
@@ -218,9 +233,9 @@ endef
 
 GENERATED_SOURCE 	:= source/generated
 GENERATED_HEADERS 	:= includes/generated
-GENERATED_AUDIO		:= includes/generated/Audio.h
 
 GENERATED_FILES     := \
+	$(GENERATED_HEADERS)/Audio.h \
     $(GENERATED_SOURCE)/Geometry.c \
     $(GENERATED_HEADERS)/Geometry.h \
     $(GENERATED_SOURCE)/Collision.c \
@@ -234,8 +249,21 @@ GENERATED_FILES     := \
     $(GENERATED_SOURCE)/World_Headers.c \
     $(GENERATED_HEADERS)/World_Headers.h \
     $(GENERATED_SOURCE)/World_Matrix.c \
-    $(GENERATED_HEADERS)/World_Matrix.h
-
+    $(GENERATED_HEADERS)/World_Matrix.h \
+	$(GENERATED_SOURCE)/Skeletons.c \
+    $(GENERATED_HEADERS)/Skeletons.h \
+    $(GENERATED_SOURCE)/Meshs.c \
+    $(GENERATED_HEADERS)/Meshs.h \
+    $(GENERATED_SOURCE)/Animations.c \
+    $(GENERATED_HEADERS)/Animations.h \
+    $(GENERATED_SOURCE)/Materials.c \
+    $(GENERATED_HEADERS)/Materials.h \
+    $(GENERATED_SOURCE)/DialogueTable.c \
+    $(GENERATED_HEADERS)/DialogueTable.h \
+    $(GENERATED_SOURCE)/Locales.c \
+    $(GENERATED_HEADERS)/Locales.h \
+	$(GENERATED_HEADERS)/LocaleBindings.h
+	
 REGISTRY_JSON := $(shell find data/registry -name '*.json')
 
 
@@ -275,6 +303,9 @@ OBJ_DATA_WIN32	:= $(patsubst data/%, obj/data/win32/%.o, 		$(DATA_ALL))
 OBJ_DATA_WIN64	:= $(patsubst data/%, obj/data/win64/%.o, 		$(DATA_ALL))
 OBJ_DATA_YGG    := $(patsubst data/%, obj/data/yggdrasil/%.o, 	$(DATA_ALL))
 
+OBJ_RC_WIN32 := obj/win32/glyphborn.res.o
+OBJ_RC_WIN64 := obj/win64/glyphborn.res.o
+
 # ==========================================================
 # 🌍 Full Target Matrix
 # ==========================================================
@@ -289,6 +320,8 @@ YGG_TARGET := $(BUILD_BASE)/Vanilla/yggdrasil/glyphborn.elf
 # ==========================================================
 # 🏗 Default Rule
 # ==========================================================
+.PHONY: all banner checksums clean distclean buildver postbuild
+
 ifeq ($(SKIP_BUILD),true)
 
 all: banner
@@ -337,19 +370,24 @@ $(BUILD_BASE)/%/linux/glyphborn_linux: $(OBJ_LINUX) $(OBJ_DATA_LINUX)
 # 	$(STRIP_LINUX) --strip-unneeded $@
 	@mkdir -p $(dir $@)/data
 	@cp -r data/volumes/* $(dir $@)/data
+	@cp $(ICON_SRC) $(dir $@)glyphborn.png
+	@printf '[Desktop Entry]\nName=Glyphborn\nExec=%sglyphborn_linux\nIcon=%sglyphborn.png\nType=Application\nCategories=Game;\nTerminal=false\nComment=Glyphborn %s\n' \
+		$(CURDIR)/$(dir $@) $(CURDIR)/$(dir $@) $(FULL_VERSION) \
+		> $(dir $@)Glyphborn.desktop
+	@chmod +x $(dir $@)Glyphborn.desktop
 	@echo "   ${GREEN}✔ Built → $@${RESET}"
 
 
 # ==========================================================
 # 🪟 Win32 Build
 # ==========================================================
-$(BUILD_BASE)/%/win32/glyphborn_win32.exe: $(OBJ_WIN32)  $(OBJ_DATA_WIN32)
+$(BUILD_BASE)/%/win32/glyphborn_win32.exe: $(OBJ_WIN32)  $(OBJ_DATA_WIN32) $(OBJ_RC_WIN32)
 	@echo "🟨 ${YELLOW}[Win32/$*] Linking...${RESET}"
 	@mkdir -p $(dir $@)
 	$(eval $(call set_distro_flags,$*,Win32))
 	$(CC_WIN32) $(CFLAGS_BASE) $(CFLAGS_DEBUG) $(CFLAGS_VERSION) $(CFLAGS_DISTRO) \
 		-D_WIN32 -Wl,-subsystem,$(SUBSYSTEM) \
-		$(OBJ_WIN32) $(OBJ_DATA_WIN32) -o $@ $(LDFLAGS_WIN) $(LDFLAGS_DISTRO)
+		$(OBJ_WIN32) $(OBJ_DATA_WIN32) $(OBJ_RC_WIN32) -o $@ $(LDFLAGS_WIN) $(LDFLAGS_DISTRO)
 	$(STRIP_WIN32) --strip-unneeded $@
 	@mkdir -p $(dir $@)/data
 	@cp -r data/volumes/* $(dir $@)/data
@@ -359,13 +397,13 @@ $(BUILD_BASE)/%/win32/glyphborn_win32.exe: $(OBJ_WIN32)  $(OBJ_DATA_WIN32)
 # ==========================================================
 # 🪟 Win64 Build
 # ==========================================================
-$(BUILD_BASE)/%/win64/glyphborn_win64.exe: $(OBJ_WIN64) $(OBJ_DATA_WIN64)
+$(BUILD_BASE)/%/win64/glyphborn_win64.exe: $(OBJ_WIN64) $(OBJ_DATA_WIN64) $(OBJ_RC_WIN64)
 	@echo "🟦 ${BLUE}[Win64/$*] Linking...${RESET}"
 	@mkdir -p $(dir $@)
 	$(eval $(call set_distro_flags,$*,Win64))
 	$(CC_WIN64) $(CFLAGS_BASE) $(CFLAGS_DEBUG) $(CFLAGS_VERSION) $(CFLAGS_DISTRO) \
-		-D_WIN32 -D_WIN64 -Wl,-subsystem,$(SUBSYSTEM) \
-		$(OBJ_WIN64) $(OBJ_DATA_WIN64) -o $@ $(LDFLAGS_WIN) $(LDFLAGS_DISTRO)
+		-D_WIN64 -Wl,-subsystem,$(SUBSYSTEM) \
+		$(OBJ_WIN64) $(OBJ_DATA_WIN64) $(OBJ_RC_WIN64) -o $@ $(LDFLAGS_WIN) $(LDFLAGS_DISTRO)
 	$(STRIP_WIN64) --strip-unneeded $@
 	@mkdir -p $(dir $@)/data
 	@cp -r data/volumes/* $(dir $@)/data
@@ -390,7 +428,10 @@ $(BUILD_BASE)/%/win64/glyphborn_win64.exe: $(OBJ_WIN64) $(OBJ_DATA_WIN64)
 # ==========================================================
 # 🧠 World Data Code Generation
 # ==========================================================
-PACKABLE_DATA   := $(shell find data -path data/volumes -prune -o \( -name '*.bin' -o -name '*.gbaud' -o -name '*.mtx' -o -name '*.hdr' -o -name '*.gban' -o -name '*.gbsk' \) -print)
+PACKABLE_DATA := $(shell find data -path data/volumes -prune -o \( \
+    -name '*.bin' -o -name '*.gbaud' -o -name '*.mtx' -o -name '*.hdr' \
+    -o -name '*.gbani' -o -name '*.gbsk' -o -name '*.gbmsh' -o -name '*.gbmat' \
+    -o -name '*.locale' \) -print)
 ASSET_MAP_JSON  := data/volumes/asset_map.json
 
 $(ASSET_MAP_JSON): tools/build/pack_assets.py $(PACKABLE_DATA)
@@ -401,29 +442,25 @@ $(GENERATED_FILES): tools/build/embed_data.py $(ASSET_MAP_JSON) $(REGISTRY_JSON)
 	@echo "🧠 Generating world data C files..."
 	@python3 tools/build/embed_data.py
 
-$(GENERATED_AUDIO): tools/build/embed_audio.py $(ASSET_MAP_JSON)
-	@echo "🎵 Generating audio asset header..."
-	@python3 tools/build/embed_audio.py
-
 # ==========================================================
 # 🧱 Compilation Rules
 # ==========================================================
-$(OBJDIR_LINUX)/%.o: source/%.c $(ASSET_MAP_JSON) $(OBJ_DATA_LINUX) $(GENERATED_FILES) $(GENERATED_AUDIO)
+$(OBJDIR_LINUX)/%.o: source/%.c $(filter %.h, $(GENERATED_FILES)) $(ICON_HEADER)
 	@mkdir -p $(dir $@)
 	@printf "🔧 ${GRAY}Compiling (Linux): %s${RESET}\n" $<
 	@$(CC_LINUX) $(CFLAGS_LIN) $(CFLAGS_DEBUG) $(CFLAGS_VERSION) -c $< -o $@
 
-$(OBJDIR_WIN32)/%.o: source/%.c $(ASSET_MAP_JSON) $(OBJ_DATA_WIN32) $(GENERATED_FILES) $(GENERATED_AUDIO)
+$(OBJDIR_WIN32)/%.o: source/%.c $(filter %.h, $(GENERATED_FILES))
 	@mkdir -p $(dir $@)
 	@printf "🔧 ${GRAY}Compiling (Win32): %s${RESET}\n" $<
 	@$(CC_WIN32) $(CFLAGS_BASE) $(CFLAGS_DEBUG) $(CFLAGS_VERSION) -D_WIN32 -c $< -o $@
 
-$(OBJDIR_WIN64)/%.o: source/%.c $(ASSET_MAP_JSON) $(OBJ_DATA_WIN64) $(GENERATED_FILES) $(GENERATED_AUDIO)
+$(OBJDIR_WIN64)/%.o: source/%.c $(filter %.h, $(GENERATED_FILES))
 	@mkdir -p $(dir $@)
 	@printf "🔧 ${GRAY}Compiling (Win64): %s${RESET}\n" $<
 	@$(CC_WIN64) $(CFLAGS_BASE) $(CFLAGS_DEBUG) $(CFLAGS_VERSION) -D_WIN32 -D_WIN64 -c $< -o $@
 
-$(OBJDIR_YGG)/%.o: source/%.c $(ASSET_MAP_JSON) $(OBJ_DATA_YGG) $(GENERATED_FILES) $(GENERATED_AUDIO)
+$(OBJDIR_YGG)/%.o: source/%.c $(ASSET_MAP_JSON) $(OBJ_DATA_YGG) $(GENERATED_FILES)
 	@mkdir -p $(dir $@)
 	@printf "⚙️  ${GRAY}Compiling (Yggdrasil): %s${RESET}\n" $<
 	@$(CC_YGG) $(CFLAGS_YGG_BASE) $(CFLAGS_DEBUG) $(CFLAGS_VERSION) -c $< -o $@
@@ -448,6 +485,15 @@ obj/data/yggdrasil/%.o: data/%
 	@printf "📦 ${GRAY}Embedding binary (Yggdrasil): %s${RESET}\n" $<
 	@x86_64-linux-gnu-ld -r -b binary $< -o $@
 
+$(OBJ_RC_WIN32): resources/glyphborn.rc $(ICON_ICO)
+	@mkdir -p $(dir $@)
+	@printf "🎨 ${GRAY}Compiling resource (Win32): $<${RESET}\n"
+	@$(WINDRES_WIN32) $< -o $@
+
+$(OBJ_RC_WIN64): resources/glyphborn.rc $(ICON_ICO)
+	@mkdir -p $(dir $@)
+	@printf "🎨 ${GRAY}Compiling resource (Win64): $<${RESET}\n"
+	@$(WINDRES_WIN64) $< -o $@
 
 # ==========================================================
 # 🔒 SHA256 Checksums
@@ -455,7 +501,7 @@ obj/data/yggdrasil/%.o: data/%
 checksums:
 	@echo "🔑 ${BLUE}Generating SHA256 checksums for $(BUILD_BASE)${RESET}"
 	@mkdir -p $(BUILD_BASE)
-	@find $(BUILD_BASE) -type f -print0 | sort -z | xargs -0 sha256sum | tee $(BUILD_BASE)/checksums.txt >/dev/null
+	@find $(BUILD_BASE) -type f ! -name "checksums.txt" -print0 | sort -z | xargs -0 sha256sum > $(BUILD_BASE)/checksums.txt
 	@echo "📄 ${YELLOW}Checksums saved to: $(BUILD_BASE)/checksums.txt${RESET}"
 
 

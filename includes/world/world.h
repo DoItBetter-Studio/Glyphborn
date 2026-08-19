@@ -2,7 +2,6 @@
 #define WORLD_H
 
 #include "world/world_matrix.h"
-#include "world/world_headers.h"
 #include "world/world_geometry.h"
 #include "world/world_collision.h"
 #include "world/world_tileset.h"

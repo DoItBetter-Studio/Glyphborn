@@ -3,8 +3,8 @@
 
 #include "world/world_geometry.h"
 #include "world/world_tileset.h"
-#include "sketch.h"
-#include "gpu_mesh.h"
+#include "render/sketch.h"
+#include "render/gpu_mesh.h"
 #include <stdint.h>
 
 #define ATLAS_TILE_SIZE  32
