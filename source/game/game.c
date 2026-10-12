@@ -41,6 +41,8 @@
 
 #include "dialogue/dialogue.h"
 
+#include "items/items_registry.h"
+
 #include <stdio.h>
 #include <math.h>
 #include <stdlib.h>
@@ -91,6 +93,11 @@ void game_init(void)
 	Materials_init();
 	DialogueTable_init();
 	Locales_init();
+
+	items_registry_init();
+
+	deferred_manager_finalize_all();
+	items_registry_build_dense_table();
 
 	test_skel = gb_skeleton_load(g_Skeletons[0].data);
 	test_mesh = gb_mesh_load(g_Meshs[0].data);
