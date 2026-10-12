@@ -1,0 +1,37 @@
+{
+  "locales": {
+    "cs_cz": "Tšekki",
+    "da_dk": "Tanska",
+    "de_de": "Saksa",
+    "en_au": "Englanti (AU)",
+    "en_ca": "Englanti (CA)",
+    "en_gb": "Englanti (UK)",
+    "en_us": "Englanti (US)",
+    "es_es": "Espanja (ES)",
+    "es_mx": "Espanja (MX)",
+    "fi_fi": "Suomi",
+    "fr_ca": "Ranska (CA)",
+    "fr_fr": "Ranska (FR)",
+    "is_is": "Islasti",
+    "it_it": "Italia",
+    "ja_jp": "Japani",
+    "ko_kr": "Korea",
+    "nl_nl": "Hollanti",
+    "no_no": "Norja",
+    "pl_pl": "Puola",
+    "pt_br": "Portugali (BR)",
+    "pt_pt": "Portugali (PT)",
+    "ru_ru": "Venäjä",
+    "sv_se": "Ruotsi",
+    "tr_tr": "Turkki",
+    "uk_ua": "Ukraina",
+    "zh_cn": "Kiina (Yksinkertaistettu)",
+    "zh_tw": "Kiina (Perinteinen)"
+  },
+  "ui": {
+    "menu": {
+      "settings": "Asetukset",
+      "start_game": "Aloita peli"
+    }
+  }
+}

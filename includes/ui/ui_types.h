@@ -30,6 +30,12 @@ typedef struct
     float y;
 } UIScrollValue;
 
+typedef struct
+{
+    int32_t x;
+    int32_t y;
+} UIScrollOffset;
+
 extern UIContext g_ui;
 
 #endif // !UI_TYPES_H

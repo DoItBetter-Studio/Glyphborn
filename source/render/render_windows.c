@@ -37,6 +37,9 @@
  * ------------------------------------------------------------------------- */
 typedef HGLRC (WINAPI* PFNWGLCREATECONTEXTATTRIBSARBPROC)(HDC hDC, HGLRC hShareContext, const int32_t* attribList);
 typedef BOOL  (WINAPI* PFNWGLCHOOSEPIXELFORMATARBPROC)(HDC hdc, const int32_t* piAttribIList, const FLOAT* pfAttribFList, UINT nMaxFormats, int32_t* piFormats, UINT* nNumFormats);
+typedef BOOL (WINAPI* PFNWGLSWAPINTERVALEXTPROC)(int interval);
+static PFNWGLSWAPINTERVALEXTPROC wglSwapIntervalEXT = NULL;
+
 
 #define WGL_CONTEXT_MAJOR_VERSION_ARB   0x2091
 #define WGL_CONTEXT_MINOR_VERSION_ARB   0x2092
@@ -276,6 +279,18 @@ void render_init(void* platform_context)
 
     wglMakeCurrent(s_hdc, s_hglrc);
 
+	    /* --- Disable vsync on the REAL context ------------------------------ */
+    wglSwapIntervalEXT = (PFNWGLSWAPINTERVALEXTPROC)wglGetProcAddress("wglSwapIntervalEXT");
+    if (wglSwapIntervalEXT)
+    {
+        wglSwapIntervalEXT(0);
+        printf("render_windows: wglSwapIntervalEXT(0) applied successfully.\n");
+    }
+    else
+    {
+        fprintf(stderr, "render_windows: wglSwapIntervalEXT extension not supported by driver\n");
+    }
+
     /* --- Load GL 3.3 function pointers ---------------------------------- */
     gl_loader_init();
 
@@ -356,10 +371,32 @@ uint32_t* render_get_framebuffer(void)
 /* -------------------------------------------------------------------------
  * render_clear
  * ------------------------------------------------------------------------- */
+#if defined(__SSE2__) || defined(_M_X64) || defined(_M_AMD64)
+#include <emmintrin.h>
+#define HAVE_SSE2 1
+#endif
+
 void render_clear(uint32_t* buffer, uint32_t color)
 {
-    for (int32_t i = 0; i < FB_WIDTH * FB_HEIGHT; ++i)
+    const size_t count = (size_t)FB_WIDTH * (size_t)FB_HEIGHT;
+
+    if (color == 0)
+    {
+        memset(buffer, 0, count * sizeof(uint32_t));
+        return;
+    }
+
+#ifdef HAVE_SSE2
+    const __m128i v = _mm_set1_epi32((int)color);
+    size_t i = 0;
+    for (; i + 4 <= count; i += 4)
+        _mm_storeu_si128((__m128i*)(buffer + i), v);
+    for (; i < count; ++i)
         buffer[i] = color;
+#else
+    for (size_t i = 0; i < count; ++i)
+        buffer[i] = color;
+#endif
 }
 
 /* -------------------------------------------------------------------------

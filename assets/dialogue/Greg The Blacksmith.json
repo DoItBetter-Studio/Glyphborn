@@ -1,0 +1,105 @@
+{
+  "Id": "b29537089ce8462f9e817678748d87a5",
+  "Name": "Greg The Blacksmith",
+  "EntryNodeId": "3932eecbc10f4706916d606fb9bd7e70",
+  "Nodes": [
+    {
+      "Id": "3932eecbc10f4706916d606fb9bd7e70",
+      "SpeakerKey": "",
+      "TextKey": "",
+      "Choices": [
+        {
+          "TextKey": "",
+          "NextNodeId": "5781f5a3d1d946bb8442513fab45515b",
+          "Conditions": []
+        },
+        {
+          "TextKey": "",
+          "NextNodeId": "1d6bd6f931f240bd821ed5c8b02b6d72",
+          "Conditions": []
+        },
+        {
+          "TextKey": "",
+          "NextNodeId": "cfa244ccee784383837f8be54b7813e5",
+          "Conditions": []
+        },
+        {
+          "TextKey": "",
+          "NextNodeId": "ee580165b6ba45f99ae4f076426e26b0",
+          "Conditions": []
+        }
+      ],
+      "NextNodeId": null,
+      "Conditions": [],
+      "Events": [],
+      "EditorX": 10,
+      "EditorY": 10
+    },
+    {
+      "Id": "5781f5a3d1d946bb8442513fab45515b",
+      "SpeakerKey": "",
+      "TextKey": "",
+      "Choices": [],
+      "NextNodeId": null,
+      "Conditions": [],
+      "Events": [],
+      "EditorX": 340,
+      "EditorY": 30
+    },
+    {
+      "Id": "1d6bd6f931f240bd821ed5c8b02b6d72",
+      "SpeakerKey": "",
+      "TextKey": "",
+      "Choices": [],
+      "NextNodeId": null,
+      "Conditions": [],
+      "Events": [],
+      "EditorX": 340,
+      "EditorY": 130
+    },
+    {
+      "Id": "cfa244ccee784383837f8be54b7813e5",
+      "SpeakerKey": "",
+      "TextKey": "",
+      "Choices": [],
+      "NextNodeId": "f56ea7f63a054a2590d4aecdd0757416",
+      "Conditions": [],
+      "Events": [],
+      "EditorX": 340,
+      "EditorY": 230
+    },
+    {
+      "Id": "ee580165b6ba45f99ae4f076426e26b0",
+      "SpeakerKey": "",
+      "TextKey": "",
+      "Choices": [],
+      "NextNodeId": "a3f6c1b9157a4520b2d15195fcf56d30",
+      "Conditions": [],
+      "Events": [],
+      "EditorX": 20,
+      "EditorY": 190
+    },
+    {
+      "Id": "a3f6c1b9157a4520b2d15195fcf56d30",
+      "SpeakerKey": "",
+      "TextKey": "",
+      "Choices": [],
+      "NextNodeId": "f56ea7f63a054a2590d4aecdd0757416",
+      "Conditions": [],
+      "Events": [],
+      "EditorX": 20,
+      "EditorY": 290
+    },
+    {
+      "Id": "f56ea7f63a054a2590d4aecdd0757416",
+      "SpeakerKey": "",
+      "TextKey": "",
+      "Choices": [],
+      "NextNodeId": null,
+      "Conditions": [],
+      "Events": [],
+      "EditorX": 340,
+      "EditorY": 330
+    }
+  ]
+}

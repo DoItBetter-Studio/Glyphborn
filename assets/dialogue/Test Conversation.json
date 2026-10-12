@@ -1,0 +1,95 @@
+{
+  "Id": "fc76181ab4134ac9b226e386f89aeb18",
+  "Name": "Test Conversation",
+  "EntryNodeId": "bdfbd18da0d64d41aab8f01029c1cb5c",
+  "Nodes": [
+    {
+      "Id": "bdfbd18da0d64d41aab8f01029c1cb5c",
+      "SpeakerKey": "",
+      "TextKey": "",
+      "Choices": [
+        {
+          "TextKey": "",
+          "NextNodeId": "64275f8a56694d4294083b1a0195b653",
+          "Conditions": []
+        },
+        {
+          "TextKey": "",
+          "NextNodeId": "a49f0db5e6e14bad9edf8e9ddc2a32c0",
+          "Conditions": []
+        }
+      ],
+      "NextNodeId": null,
+      "Conditions": [],
+      "Events": [],
+      "EditorX": 20,
+      "EditorY": 20
+    },
+    {
+      "Id": "64275f8a56694d4294083b1a0195b653",
+      "SpeakerKey": "",
+      "TextKey": "",
+      "Choices": [],
+      "NextNodeId": "fada4a1d6bd649a3bc19382577d94121",
+      "Conditions": [],
+      "Events": [],
+      "EditorX": 250,
+      "EditorY": 40
+    },
+    {
+      "Id": "fada4a1d6bd649a3bc19382577d94121",
+      "SpeakerKey": "",
+      "TextKey": "",
+      "Choices": [],
+      "NextNodeId": "dc68bde00c194878bcc06972202b0d77",
+      "Conditions": [],
+      "Events": [],
+      "EditorX": 480,
+      "EditorY": 60
+    },
+    {
+      "Id": "a49f0db5e6e14bad9edf8e9ddc2a32c0",
+      "SpeakerKey": "",
+      "TextKey": "",
+      "Choices": [
+        {
+          "TextKey": "",
+          "NextNodeId": "fada4a1d6bd649a3bc19382577d94121",
+          "Conditions": []
+        },
+        {
+          "TextKey": "",
+          "NextNodeId": "72674c002b6f4188be3afbf06e11df07",
+          "Conditions": []
+        }
+      ],
+      "NextNodeId": null,
+      "Conditions": [],
+      "Events": [],
+      "EditorX": 250,
+      "EditorY": 150
+    },
+    {
+      "Id": "dc68bde00c194878bcc06972202b0d77",
+      "SpeakerKey": "",
+      "TextKey": "",
+      "Choices": [],
+      "NextNodeId": null,
+      "Conditions": [],
+      "Events": [],
+      "EditorX": 760,
+      "EditorY": 140
+    },
+    {
+      "Id": "72674c002b6f4188be3afbf06e11df07",
+      "SpeakerKey": "",
+      "TextKey": "",
+      "Choices": [],
+      "NextNodeId": "dc68bde00c194878bcc06972202b0d77",
+      "Conditions": [],
+      "Events": [],
+      "EditorX": 480,
+      "EditorY": 170
+    }
+  ]
+}

@@ -32,6 +32,6 @@ BakedChunk* chunk_bake(
     const Tileset* local,
     const Tileset* interior);
 
-void chunk_free(BakedChunk* chunk);
+void baked_chunk_free(BakedChunk* chunk);
 
 #endif /* WORLD_BAKER_H */

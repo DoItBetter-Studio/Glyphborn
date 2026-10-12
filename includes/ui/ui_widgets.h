@@ -15,6 +15,11 @@ float ui_scrollbar_vertical(int x, int y, int width, int height, float value);
 float ui_scrollbar_horizontal(int x, int y, int width, int height, float value);
 UIScrollValue ui_scrollbar_both(int x, int y, int width, int height, UIScrollValue value);
 
+int32_t ui_begin_vertical_scroll(int32_t x, int32_t y, int32_t width, int32_t height, int32_t content_height, float* value);
+int32_t ui_begin_horizontal_scroll(int32_t x, int32_t y, int32_t width, int32_t height, int32_t content_width, float* value);
+UIScrollOffset ui_begin_scroll(int32_t x, int32_t y, int32_t width, int32_t height, int32_t content_width, int32_t content_height, UIScrollValue* value);
+void ui_end_scroll(void);
+
 bool ui_item_slot(int x, int y, int size, const uint32_t* item_pixels, int item_width, int item_height);
 bool ui_checkbox(int x, int y, int size, bool checked);
 

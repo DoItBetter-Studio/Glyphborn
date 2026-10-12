@@ -136,6 +136,7 @@ bin/
 obj/
 Glyphborn/x64
 externals/yggdrasil
+/data/scripts/*.xbc
 *.zip
 *.img
 *.raw

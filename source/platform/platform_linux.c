@@ -23,6 +23,8 @@
 #include <fcntl.h>
 #include <sys/mman.h>
 #include <sys/stat.h>
+#include <errno.h>
+#include <string.h>
 
 /*
  * X11Context is shared between platform_linux.c and render_linux.c.
@@ -264,6 +266,23 @@ void platform_set_window_title(const char* title)
         XStoreName(display, window, title);
         XFlush(display);
     }
+}
+
+bool platform_get_executable_directory(char *directory, size_t capacity)
+{
+    if (!directory || capacity < 2)
+        return false;
+
+    ssize_t length = readlink("/proc/self/exe", directory, capacity - 1);
+    if (length < 0 || (size_t)length >= capacity - 1)
+        return false;
+    directory[length] = '\0';
+
+    char *separator = strrchr(directory, '/');
+    if (!separator)
+        return false;
+    *separator = '\0';
+    return true;
 }
 
 void platform_init_assets(int total_volumes)

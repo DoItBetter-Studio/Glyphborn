@@ -4,8 +4,8 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-#define FB_WIDTH		640
-#define FB_HEIGHT		360
+#define FB_WIDTH		960
+#define FB_HEIGHT		540
 #define MAX_VERTICES	4096
 
 /**

@@ -6,7 +6,7 @@
 #include <stdio.h>
 #include <inttypes.h>
 
-#define TARGET_FPS			60.0f
+#define TARGET_FPS			1000.0f
 #define TARGET_FRAME_TIME	(1000.0f / TARGET_FPS)
 #define MAX_VOLUMES			32
 #define VOLUME_SIZE			(4ULL * 1024ULL * 1024ULL * 1024ULL) // Fixed 4GB scale
@@ -29,6 +29,7 @@ void* platform_get_native_window(void);
 void platform_set_window_title(const char* title);
 void platform_init_assets(int total_volumes);
 void platform_shutdown_assets(int total_volumes);
+bool platform_get_executable_directory(char *directory, size_t capacity);
 
 static inline const uint8_t* platform_get_asset(uint64_t global_offset)
 {

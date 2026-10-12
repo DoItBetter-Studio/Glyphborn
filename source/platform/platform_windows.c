@@ -143,6 +143,25 @@ void platform_set_window_title(const char* title)
     }
 }
 
+bool platform_get_executable_directory(char *directory, size_t capacity)
+{
+    if (!directory || capacity < 2 || capacity > MAXDWORD)
+        return false;
+
+    DWORD length = GetModuleFileNameA(NULL, directory, (DWORD)capacity);
+    if (length == 0 || length >= capacity)
+        return false;
+
+    char *separator = strrchr(directory, '/');
+    char *backslash = strrchr(directory, '\\');
+    if (backslash && (!separator || backslash > separator))
+        separator = backslash;
+    if (!separator)
+        return false;
+    *separator = '\0';
+    return true;
+}
+
 void platform_init_assets(int32_t total_volumes)
 {
 	for (int32_t i = 0; i < total_volumes && i < MAX_VOLUMES; i++)

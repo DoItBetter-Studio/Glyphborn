@@ -13,14 +13,19 @@ repo = "DoItBetter-Studio/Mapper"
 binary = "Mapper"
 
 [tools.echo]
-version = "1.0.0"
+version = "2.0.0"
 repo = "DoItBetter-Studio/Echo"
 binary = "Echo"
 
 [tools.pigment]
-version = "2.0.0"
+version = ""
 repo = "DoItBetter-Studio/Pigment"
 binary = "Pigment"
+
+[tools.scribe]
+version = ""
+repo = "DoItBetter-Studio/Scribe"
+binary = "Scribe"
 
 [tools.forge]
 version = "1.0.0"

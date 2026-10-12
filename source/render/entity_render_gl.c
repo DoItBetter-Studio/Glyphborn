@@ -22,7 +22,12 @@
  * Shader source
  * ------------------------------------------------------------------------- */
 static const char* s_vert =
+#if defined(__YGGDRASIL__)
+    "#version 300 es\n"
+    "precision highp float;\n"
+#else
     "#version 330 core\n"
+#endif
     "layout(location = 0) in vec3 a_pos;\n"
     "layout(location = 1) in vec3 a_normal;\n"
     "layout(location = 2) in vec2 a_uv;\n"
@@ -52,7 +57,12 @@ static const char* s_vert =
     "}\n";
 
 static const char* s_frag =
+#if defined(__YGGDRASIL__)
+    "#version 300 es\n"
+    "precision highp float;\n"
+#else
     "#version 330 core\n"
+#endif
     "in  vec3 v_normal;\n"
     "in  vec2 v_uv;\n"
     "out vec4 frag_color;\n"
@@ -67,7 +77,7 @@ static const char* s_frag =
     "    float light = clamp(u_ambient + ndotl * u_intensity, 0.0, 1.0);\n"
     "    vec4  texel = texture(u_albedo, v_uv);\n"
     "    //frag_color  = vec4(texel.rgb * light, texel.a);\n"
-    "    frag_color = texture(u_albedo, v_uv);"
+    "    frag_color = texture(u_albedo, v_uv);\n"
     "}\n";
 
 /* -------------------------------------------------------------------------

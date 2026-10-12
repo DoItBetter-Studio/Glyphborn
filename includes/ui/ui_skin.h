@@ -6,13 +6,12 @@
 typedef enum
 {
     SKIN_GLYPHBORN,
-    SKIN_SEER,
     SKIN_COUNT,
 } Skin;
 
 typedef struct Element
 {
-    const uint32_t* pixels;
+    const uint8_t* pixels;
     uint32_t width;
     uint32_t height;
 } Element;
@@ -20,7 +19,7 @@ typedef struct Element
 typedef struct UISkin
 {
     const uint32_t*  active_palette;
-    const uint32_t** palettes;
+    const uint32_t* palettes[256];
     uint32_t         palette_count;
 
     Element panel;
@@ -55,7 +54,7 @@ typedef struct UISkin
 
 const UISkin* ui_get_skin(void);
 void          ui_set_skin(Skin skin);
-void          ui_set_palette(Skin skin, uint32_t palette_index);
+void          ui_set_palette(uint32_t palette_index);
 void          ui_skins_init(void);
 
 #endif // !UI_SKIN_H

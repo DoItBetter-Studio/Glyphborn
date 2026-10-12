@@ -8,7 +8,7 @@
 #include <stdint.h>
 #include <stddef.h>
 
-#define GEOMETRY_TEST_MAP_0_0_OFFSET  UINT64_C(0x00000000016430D3)
+#define GEOMETRY_TEST_MAP_0_0_OFFSET  UINT64_C(0x00000000016459E7)
 #define GEOMETRY_TEST_MAP_0_0_SIZE    UINT64_C(0x0000000000010006)
 
 extern Blob g_Geometry[];

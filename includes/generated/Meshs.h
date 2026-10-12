@@ -8,7 +8,7 @@
 #include <stdint.h>
 #include <stddef.h>
 
-#define MESHS_TEST_OFFSET  UINT64_C(0x0000000001677EB1)
+#define MESHS_TEST_OFFSET  UINT64_C(0x000000000167A7C5)
 #define MESHS_TEST_SIZE    UINT64_C(0x000000000002A058)
 
 extern Blob g_Meshs[];

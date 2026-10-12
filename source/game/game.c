@@ -30,6 +30,7 @@
 #include "generated/Locales.h"
 #include "generated/LocaleBindings.h"
 #include "dialogue/locale.h"
+#include "generated/LocaleIndex.h"
 
 #include "models/skeleton.h"
 #include "models/mesh.h"
@@ -50,13 +51,13 @@ Mat4 projection;
 
 static CameraFacing current_facing = CAM_FACE_NORTH;
 
-static GbSkeleton*  test_skel  = NULL;
-static GbMesh*      test_mesh  = NULL;
-static GbAnimation* test_anim  = NULL;
-static GbMaterial*   test_material = NULL;
-static Mat4*        test_palette = NULL;
-static float        test_frame   = 0.0f;
-static float 		test_fps   = 60.0f;   // or 30.0f
+static GbSkeleton *test_skel = NULL;
+static GbMesh *test_mesh = NULL;
+static GbAnimation *test_anim = NULL;
+static GbMaterial *test_material = NULL;
+static Mat4 *test_palette = NULL;
+static float test_frame = 0.0f;
+static float test_fps = 60.0f; // or 30.0f
 static SkinnedGPUMesh test_gpu_mesh = {0};
 
 static void draw_test_pattern_ui(void)
@@ -77,7 +78,7 @@ DirectionalLight sun;
 
 void game_init(void)
 {
-	//achievements_init();
+	// achievements_init();
 
 	Geometry_init();
 	Collision_init();
@@ -91,9 +92,9 @@ void game_init(void)
 	DialogueTable_init();
 	Locales_init();
 
-	test_skel    = gb_skeleton_load(g_Skeletons[0].data);
-	test_mesh    = gb_mesh_load(g_Meshs[0].data);
-	test_anim    = gb_animation_load(0);
+	test_skel = gb_skeleton_load(g_Skeletons[0].data);
+	test_mesh = gb_mesh_load(g_Meshs[0].data);
+	test_anim = gb_animation_load(0);
 	test_material = gb_material_load(g_Materials[0].data);
 
 	entity_gl_init();
@@ -103,8 +104,8 @@ void game_init(void)
 		if (!skinned_gpu_mesh_upload(&test_gpu_mesh, &test_mesh->surfaces[0]))
 		{
 			fprintf(stderr, "Failed to upload skinned mesh: surface 0 verts=%d faces=%d\n",
-			        test_mesh->surfaces[0].vert_count,
-			        test_mesh->surfaces[0].face_count);
+					test_mesh->surfaces[0].vert_count,
+					test_mesh->surfaces[0].face_count);
 		}
 	}
 
@@ -114,10 +115,11 @@ void game_init(void)
 	entity_gl_upload_material(test_material);
 
 	dialogue_load();
-	locale_set_active(0);
+	locale_set_active(LOCALE_EN_US);
 
 	ui_skins_init();
 	ui_set_skin(SKIN_GLYPHBORN);
+	ui_set_palette(0);
 
 	main_camera.position = (Vec3){0.0f, 10.0f, -10.0f};
 	main_camera.target = (Vec3){main_camera.position.x, 0, main_camera.position.z + 10.0f};
@@ -130,7 +132,7 @@ void game_init(void)
 	world_init(&world, main_camera.position.x, main_camera.position.z);
 	world_update(&world, main_camera.position.x, main_camera.position.z);
 
-	sun = (DirectionalLight){ .dir = vec3_normalize((Vec3){-0.4f, -1.0f, 0.2f}), .ambient = 0.35f, .intensity = 0.75f };
+	sun = (DirectionalLight){.dir = vec3_normalize((Vec3){-0.4f, -1.0f, 0.2f}), .ambient = 0.35f, .intensity = 0.75f};
 
 	audio_play_music(MUSIC_MUSIC_THE_LONGEST_JOURNEY, true);
 }
@@ -162,49 +164,53 @@ void game_update(float delta_time)
 	}
 
 	// 1. Handle snappy rotation switching (Example: SELECT button)
-    if (input_button_down(BUTTON_LEFT_BUMPER))
-    {
-        camera_cycle_facing(&current_facing, -1);
-    }
+	if (input_button_down(BUTTON_LEFT_BUMPER))
+	{
+		camera_cycle_facing(&current_facing, -1);
+	}
 	else if (input_button_down(BUTTON_RIGHT_BUMPER))
 	{
 		camera_cycle_facing(&current_facing, 1);
 	}
 
-    // 2. Track an anchor target point in the world instead of moving camera coordinates directly
-    static Vec3 camera_focus = {0.0f, 0.0f, 0.0f};
-    float move_speed = 5.0f;
-    Vec3 move_dir = {0};
+	// 2. Track an anchor target point in the world instead of moving camera coordinates directly
+	static Vec3 camera_focus = {0.0f, 0.0f, 0.0f};
+	float move_speed = 5.0f;
+	Vec3 move_dir = {0};
 
-    if (input_get_button(BUTTON_UP))    move_dir.z -= 1.0f; // Screen Forward (-Z in view space)
-    if (input_get_button(BUTTON_DOWN))  move_dir.z += 1.0f; // Screen Backward (+Z in view space)
-    if (input_get_button(BUTTON_LEFT))  move_dir.x -= 1.0f; // Screen Left (-X)
-    if (input_get_button(BUTTON_RIGHT)) move_dir.x += 1.0f; // Screen Right (+X)
+	if (input_get_button(BUTTON_UP))
+		move_dir.z -= 1.0f; // Screen Forward (-Z in view space)
+	if (input_get_button(BUTTON_DOWN))
+		move_dir.z += 1.0f; // Screen Backward (+Z in view space)
+	if (input_get_button(BUTTON_LEFT))
+		move_dir.x -= 1.0f; // Screen Left (-X)
+	if (input_get_button(BUTTON_RIGHT))
+		move_dir.x += 1.0f; // Screen Right (+X)
 
-    // Translate screen movement directly into world coordinates based on camera orientation
-    switch (current_facing)
-    {
-        case CAM_FACE_NORTH:
-            camera_focus.x += move_dir.x * move_speed * delta_time;
-            camera_focus.z += move_dir.z * move_speed * delta_time;
-            break;
-        case CAM_FACE_EAST:
-            camera_focus.z += move_dir.x * move_speed * delta_time;
-            camera_focus.x -= move_dir.z * move_speed * delta_time;
-            break;
-        case CAM_FACE_SOUTH:
-            camera_focus.x -= move_dir.x * move_speed * delta_time;
-            camera_focus.z -= move_dir.z * move_speed * delta_time;
-            break;
-        case CAM_FACE_WEST:
-            camera_focus.z -= move_dir.x * move_speed * delta_time;
-            camera_focus.x += move_dir.z * move_speed * delta_time;
-            break;
-    }
+	// Translate screen movement directly into world coordinates based on camera orientation
+	switch (current_facing)
+	{
+	case CAM_FACE_NORTH:
+		camera_focus.x += move_dir.x * move_speed * delta_time;
+		camera_focus.z += move_dir.z * move_speed * delta_time;
+		break;
+	case CAM_FACE_EAST:
+		camera_focus.z += move_dir.x * move_speed * delta_time;
+		camera_focus.x -= move_dir.z * move_speed * delta_time;
+		break;
+	case CAM_FACE_SOUTH:
+		camera_focus.x -= move_dir.x * move_speed * delta_time;
+		camera_focus.z -= move_dir.z * move_speed * delta_time;
+		break;
+	case CAM_FACE_WEST:
+		camera_focus.z -= move_dir.x * move_speed * delta_time;
+		camera_focus.x += move_dir.z * move_speed * delta_time;
+		break;
+	}
 
-    // 3. Recompute fixed positions and update the view matrix
-    camera_update(&main_camera, camera_focus, current_facing, delta_time);
-    view = camera_get_view_matrix(&main_camera);
+	// 3. Recompute fixed positions and update the view matrix
+	camera_update(&main_camera, camera_focus, current_facing, delta_time);
+	view = camera_get_view_matrix(&main_camera);
 
 	sketch_show_uvs(showUVs);
 
@@ -240,7 +246,7 @@ void game_update(float delta_time)
 
 	if (test_anim && test_skel && test_palette)
 	{
-		const GbClip* clip = &test_anim->clips[0];
+		const GbClip *clip = &test_anim->clips[0];
 
 		test_frame += delta_time * test_fps;
 
@@ -266,20 +272,16 @@ void game_update(float delta_time)
 static void draw_cross()
 {
 	Vec3 zero = {
-		0, 0, 0
-	};
+		0, 0, 0};
 
 	Vec3 right = {
-		3, 0, 0
-	};
+		3, 0, 0};
 
 	Vec3 up = {
-		0, 3, 0
-	};
+		0, 3, 0};
 
 	Vec3 forward = {
-		0, 0, 3
-	};
+		0, 0, 3};
 
 	sketch_draw_line_3d(zero, right, view, projection, 0xFFFF0000);
 	sketch_draw_line_3d(zero, up, view, projection, 0xFF00FF00);
@@ -303,7 +305,7 @@ void game_render(void)
 		mat4_identity(&mat);
 		entity_gl_begin_pass();
 		entity_gl_draw(&test_gpu_mesh, mat, view, projection,
-			test_palette, test_skel->bone_count, &sun, test_material);
+					   test_palette, test_skel->bone_count, &sun, test_material);
 	}
 
 	draw_cross();
@@ -311,61 +313,117 @@ void game_render(void)
 
 void game_render_ui(void)
 {
-    ui_begin_frame(input_get_mouse_x(), input_get_mouse_y(), input_mouse_button_down(), activate);
+	ui_begin_frame(input_get_mouse_x(), input_get_mouse_y(), input_get_mouse_button(), activate);
 
-    if (nav_dx || nav_dy)
-    {
-        g_ui.nav_mode = true;
-        g_ui.focused_id += nav_dy;
-        if (g_ui.focused_id < 1)
-            g_ui.focused_id = 1;
-    }
-
-    if (ui_button(20, 20, 128, 48, locale_get_string_terminated(UI_MENU_START_GAME), 0xFF606060)) {}
-
-	if (ui_button(20, 72, 128, 48, locale_get_string_terminated(LOCALES_EN_US), 0xFF121212))
+	if (nav_dx || nav_dy)
 	{
-		locale_set_active(0);
+		g_ui.nav_mode = true;
+		g_ui.focused_id += nav_dy;
+		if (g_ui.focused_id < 1)
+			g_ui.focused_id = 1;
 	}
 
-	if (ui_button(20, 124, 128, 48, locale_get_string_terminated(LOCALES_PT_BR), 0xFF121212))
+	ui_window(0, 0, 168, 260, "");
+
+	static float locale_scroll = 0.0f;
+	int32_t menu_x = 10;
+	int32_t menu_y = 10;
+	int32_t menu_w = 128;
+	int32_t menu_h = 240;
+	int32_t button_h = 32;
+	int32_t button_spacing = 34;
+	int32_t total_content_h = LOCALE_COUNT * button_spacing;
+
+	int32_t scroll_offset = ui_begin_vertical_scroll(menu_x, menu_y, menu_w, menu_h, total_content_h, &locale_scroll);
+
+	for (int32_t i = 0; i < LOCALE_COUNT; i++)
 	{
-		locale_set_active(1);
+		// Subtract the scroll_offset from the y position
+		int32_t btn_y = menu_y + (button_spacing * i) - scroll_offset;
+
+		// Optional optimization: skip drawing if completely out of bounds
+		if (btn_y + button_h < menu_y || btn_y > menu_y + menu_h)
+			continue;
+
+		if (ui_button(menu_x, btn_y, menu_w, button_h, locale_get_string_terminated(LOCALES_CS_CZ + i), 0xFFFFFFFF))
+		{
+			ui_set_locale(i);
+			locale_set_active(i);
+		}
 	}
 
-    if (showUI)
-    {
-        draw_test_pattern_ui();
-    }
+	ui_end_scroll();
 
-    char buffer[32];
-    snprintf(buffer, sizeof(buffer), "%f, %f, %f", main_camera.position.x, main_camera.position.y, main_camera.position.z);
+	static float palette_scroll = 0.0f;
+	int32_t palette_x = 260;
+	int32_t palette_y = 10;
+	int32_t palette_w = 128;
+	int32_t palette_h = 240;
+	int32_t button_height = 32;
+	int32_t button_space = 34;
+	const UISkin* active_skin = ui_get_skin();
+	int32_t total_height = active_skin->palette_count * button_space;
 
-    ui_draw_text_colored(200, 10, (const char *)buffer, 0xFFFFFFFF);
+	int32_t palette_offset = ui_begin_vertical_scroll(palette_x, palette_y, palette_w, palette_h, total_height, &palette_scroll);
 
-    static char* facing_dir;
+	for (uint32_t i = 0; i < active_skin->palette_count; i++)
+	{
+		// Subtract the scroll_offset from the y position
+		int32_t btn_y = palette_y + (button_space * i) - palette_offset;
 
-    switch (current_facing)
-    {
-        case CAM_FACE_NORTH: facing_dir = "north"; break;
-        case CAM_FACE_SOUTH: facing_dir = "south"; break;
-        case CAM_FACE_EAST: facing_dir = "east"; break;
-        case CAM_FACE_WEST: facing_dir = "west"; break;
-    }
+		// Optional optimization: skip drawing if completely out of bounds
+		if (btn_y + button_height < palette_y || btn_y > palette_y + palette_h)
+    		continue;
 
-    snprintf(buffer, sizeof(buffer), "facing: %s", facing_dir);
+		if (ui_button(palette_x, btn_y, palette_w, button_height, "", 0xFFFFFFFF))
+		{
+			ui_set_palette(i);
+		}
+	}
 
-    ui_draw_text_colored(500, 10, (const char *)buffer, 0xFFFFFFFF);
+	ui_end_scroll();
 
-    char* dot = ".";
-    int32_t dot_w = ui_text_width(dot);
-    int32_t dot_h = ui_text_height(dot, 8);
+	if (showUI)
+	{
+		draw_test_pattern_ui();
+	}
 
-    int32_t text_x = (FB_WIDTH - dot_w) / 2;
-    int32_t text_y = (FB_HEIGHT - dot_h) / 2;
+	char buffer[32];
+	snprintf(buffer, sizeof(buffer), "%f, %f, %f", main_camera.position.x, main_camera.position.y, main_camera.position.z);
 
-    ui_draw_text_colored(text_x, text_y, dot, 0xFFFF00FF);
-    ui_end_frame();
+	ui_draw_text_colored(200, 10, (const char *)buffer, 0xFFFFFFFF);
+
+	static char *facing_dir;
+
+	switch (current_facing)
+	{
+	case CAM_FACE_NORTH:
+		facing_dir = "north";
+		break;
+	case CAM_FACE_SOUTH:
+		facing_dir = "south";
+		break;
+	case CAM_FACE_EAST:
+		facing_dir = "east";
+		break;
+	case CAM_FACE_WEST:
+		facing_dir = "west";
+		break;
+	}
+
+	snprintf(buffer, sizeof(buffer), "facing: %s", facing_dir);
+
+	ui_draw_text_colored(500, 10, (const char *)buffer, 0xFFFFFFFF);
+
+	char *dot = ".";
+	int32_t dot_w = ui_text_width(dot);
+	int32_t dot_h = ui_text_height(dot, 8);
+
+	int32_t text_x = (FB_WIDTH - dot_w) / 2;
+	int32_t text_y = (FB_HEIGHT - dot_h) / 2;
+
+	ui_draw_text_colored(text_x, text_y, dot, 0xFFFF00FF);
+	ui_end_frame();
 }
 
 void game_shutdown(void)

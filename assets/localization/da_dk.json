@@ -1,0 +1,37 @@
+{
+  "locales": {
+    "cs_cz": "Tjekkisk",
+    "da_dk": "Dansk",
+    "de_de": "Tysk",
+    "en_au": "Engelsk (AU)",
+    "en_ca": "Engelsk (CA)",
+    "en_gb": "Engelsk (UK)",
+    "en_us": "Engelsk (US)",
+    "es_es": "Spansk (ES)",
+    "es_mx": "Spansk (MX)",
+    "fi_fi": "Finsk",
+    "fr_ca": "Fransk (CA)",
+    "fr_fr": "Fransk (FR)",
+    "is_is": "Islandsk",
+    "it_it": "Italiensk",
+    "ja_jp": "Japansk",
+    "ko_kr": "Koreansk",
+    "nl_nl": "Hollandsk",
+    "no_no": "Norsk",
+    "pl_pl": "Polsk",
+    "pt_br": "Portugisisk (BR)",
+    "pt_pt": "Portugisisk (PT)",
+    "ru_ru": "Russisk",
+    "sv_se": "Svensk",
+    "tr_tr": "Tyrkisk",
+    "uk_ua": "Ukrainsk",
+    "zh_cn": "Kinesisk (Forenklet)",
+    "zh_tw": "Kinesisk (Traditionelt)"
+  },
+  "ui": {
+    "menu": {
+      "settings": "Indstillinger",
+      "start_game": "Start spil"
+    }
+  }
+}

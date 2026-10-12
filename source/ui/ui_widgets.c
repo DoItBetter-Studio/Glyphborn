@@ -37,8 +37,15 @@ bool ui_button(int32_t x, int32_t y, int32_t width, int32_t height, const char* 
     int32_t text_y = y + (height - label_h) / 2;
 
     const UISkin* skin = ui_get_skin();
-    ui_draw_nineslice(x, y, width, height, skin->panel.pixels, skin->panel.width, skin->panel.height, 16, 16, 16, 16);
-    ui_draw_text_colored(text_x, text_y, label, text_color);
+    const Element* slot_elem = &skin->button;
+    if (g_ui.active_item == id && skin->button_active.pixels) slot_elem = &skin->button_active;
+    else if ((g_ui.hot_item == id || focused) && skin->button_hot.pixels) slot_elem = &skin->button_hot;
+
+    if (slot_elem->pixels)
+    {
+        ui_draw_nineslice(x, y, width, height, slot_elem->pixels, slot_elem->width, slot_elem->height, 16, 16, 16, 16);
+        ui_draw_text_colored(text_x, text_y, label, text_color);
+    }
 
     return clicked;
 }
@@ -152,7 +159,7 @@ float ui_scrollbar_vertical(int32_t x, int32_t y, int32_t width, int32_t height,
 
     ui_set_clip(x, y, width, height);
     if (thumb_elem->pixels)
-        ui_draw_nineslice(x, thumb_y, width, thumb_h, thumb_elem->pixels, thumb_elem->width, thumb_elem->height, 4, 4, 4, 4);
+        ui_draw_nineslice(x + 3, thumb_y + 3, width - 6, thumb_h - 6, thumb_elem->pixels, thumb_elem->width, thumb_elem->height, 4, 4, 4, 4);
     ui_reset_clip();
 
     return value;
@@ -205,7 +212,7 @@ float ui_scrollbar_horizontal(int32_t x, int32_t y, int32_t width, int32_t heigh
 
     ui_set_clip(x, y, width, height);
     if (thumb_elem->pixels)
-        ui_draw_nineslice(thumb_x, y, thumb_w, height, thumb_elem->pixels, thumb_elem->width, thumb_elem->height, 4, 4, 4, 4);
+        ui_draw_nineslice(thumb_x + 3, y + 3, thumb_w - 6, height - 6, thumb_elem->pixels, thumb_elem->width, thumb_elem->height, 4, 4, 4, 4);
     ui_reset_clip();
 
     return value;
@@ -221,6 +228,62 @@ UIScrollValue ui_scrollbar_both(int32_t x, int32_t y, int32_t width, int32_t hei
         ui_draw_nineslice(x + width - 12, y + height - 12, 12, 12, skin->scrollbar_track.pixels, skin->scrollbar_track.width, skin->scrollbar_track.height, 4, 4, 4, 4);
 
     return value;
+}
+
+int32_t ui_begin_vertical_scroll(int32_t x, int32_t y, int32_t width, int32_t height, int32_t content_height, float* value)
+{
+    int32_t max_scroll_pixels = content_height - height;
+    if (max_scroll_pixels < 0)
+        max_scroll_pixels = 0; // Prevent scrolling if everything fits
+
+    *value = ui_scrollbar_vertical(x + width + 4, y, 16, height, *value);
+
+    ui_set_clip(x, y, width, height);
+
+    return (int32_t)(*value * max_scroll_pixels);
+}
+
+int32_t ui_begin_horizontal_scroll(int32_t x, int32_t y, int32_t width, int32_t height, int32_t content_width, float* value)
+{
+    int32_t max_scroll_pixels = content_width - width;
+
+    if (max_scroll_pixels < 0)
+        max_scroll_pixels = 0;
+
+    *value = ui_scrollbar_horizontal(x, y + height + 4, width, 16, *value
+    );
+
+    ui_set_clip(x, y, width, height);
+
+    return (int32_t)(*value * max_scroll_pixels);
+}
+
+UIScrollOffset ui_begin_scroll(int32_t x, int32_t y, int32_t width, int32_t height, int32_t content_width, int32_t content_height, UIScrollValue* value)
+{
+    UIScrollOffset offset = { 0, 0 };
+
+    if (!value) return offset;
+
+    int32_t max_scroll_x = content_width - width;
+    int32_t max_scroll_y = content_height - height;
+
+    if (max_scroll_x < 0) max_scroll_x = 0;
+    if (max_scroll_y < 0) max_scroll_y = 0;
+
+    value->x = ui_scrollbar_horizontal(x, y + height + 4, width, 16, value->x);
+    value->y = ui_scrollbar_vertical(x + width + 4, y, 16, height, value->y);
+
+    offset.x = (int32_t)(value->x * max_scroll_x);
+    offset.y = (int32_t)(value->y * max_scroll_y);
+
+    ui_set_clip(x, y, width, height);
+
+    return offset;
+}
+
+void ui_end_scroll(void)
+{
+    ui_reset_clip();
 }
 
 bool ui_item_slot(int32_t x, int32_t y, int32_t size, const uint32_t* item_pixels, int32_t item_width, int32_t item_height)

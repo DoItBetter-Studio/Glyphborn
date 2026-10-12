@@ -1,0 +1,3 @@
+[submodule "externals/xenoscript"]
+	path = externals/xenoscript
+	url = https://github.com/DoItBetter-Studio/XenoScript.git

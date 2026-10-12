@@ -1,5 +1,6 @@
 #ifdef __linux__
 #include "input/input.h"
+#include "render/render.h"
 #include <X11/Xlib.h>
 #include <X11/keysym.h>
 #include <fcntl.h>
@@ -98,7 +99,7 @@ void input_update(void)
             if (win_w > 0 && win_h > 0)
             {
                 /* 1. Mirror the aspect ratio math from render_present */
-                const float TARGET_ASPECT = 640.0f / 360.0f;
+                const float TARGET_ASPECT = (float)FB_WIDTH / FB_HEIGHT;
                 float win_aspect = (float)win_w / (float)win_h;
 
                 int vp_x = 0, vp_y = 0;
@@ -121,15 +122,15 @@ void input_update(void)
                 float norm_x = (float)(win_x - vp_x) / (float)vp_w;
                 float norm_y = (float)(win_y - vp_y) / (float)vp_h;
 
-                int32_t mouse_x = (int32_t)(norm_x * 640.0f);
-                int32_t mouse_y = (int32_t)(norm_y * 360.0f);
+                int32_t mouse_x = (int32_t)(norm_x * FB_WIDTH);
+                int32_t mouse_y = (int32_t)(norm_y * FB_HEIGHT);
 
-                /* 3. Clamp so clicking in black bars doesn't go out of bounds */
+                /* 3. Clamp inside 640x360 bounds */
                 if (mouse_x < 0) mouse_x = 0;
-                if (mouse_x >= 640) mouse_x = 639;
+                if (mouse_x >= FB_WIDTH) mouse_x = FB_WIDTH - 1;
 
                 if (mouse_y < 0) mouse_y = 0;
-                if (mouse_y >= 360) mouse_y = 359;
+                if (mouse_y >= FB_HEIGHT) mouse_y = FB_HEIGHT - 1;
 
                 input_state.mouse_x = mouse_x;
                 input_state.mouse_y = mouse_y;

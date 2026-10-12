@@ -1,0 +1,37 @@
+{
+  "locales": {
+    "cs_cz": "Tékkneska",
+    "da_dk": "Danska",
+    "de_de": "Þýska",
+    "en_au": "Enska (AU)",
+    "en_ca": "Enska (CA)",
+    "en_gb": "Enska (UK)",
+    "en_us": "Enska (US)",
+    "es_es": "Spænska (ES)",
+    "es_mx": "Spænska (MX)",
+    "fi_fi": "Finnska",
+    "fr_ca": "Franska (CA)",
+    "fr_fr": "Franska (FR)",
+    "is_is": "Íslenska",
+    "it_it": "Ítalska",
+    "ja_jp": "Japanska",
+    "ko_kr": "Kóreska",
+    "nl_nl": "Hollenska",
+    "no_no": "Norska",
+    "pl_pl": "Pólska",
+    "pt_br": "Portúgalska (BR)",
+    "pt_pt": "Portúgalska (PT)",
+    "ru_ru": "Rússneska",
+    "sv_se": "Sænska",
+    "tr_tr": "Tyrkneska",
+    "uk_ua": "Úkraínska",
+    "zh_cn": "Kínverska (Einfölduð)",
+    "zh_tw": "Kínverska (Hefðbundin)"
+  },
+  "ui": {
+    "menu": {
+      "settings": "Stillingar",
+      "start_game": "Hefja leik"
+    }
+  }
+}

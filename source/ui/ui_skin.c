@@ -1,5 +1,6 @@
 #include "ui/ui_skin.h"
 #include <stddef.h>
+#include <stdio.h>
 
 // Linker-embedded skin binaries
 extern const uint8_t _binary_data_ui_skins_default_gbskin_start[] 	__asm__("_binary_data_ui_skins_default_gbskin_start");
@@ -27,15 +28,13 @@ static void skin_load(UISkin* skin, const uint8_t* data)
     skin->palette_count = palette_count;
 
     // Palette pointers — point directly into the binary
-    static const uint32_t* palette_ptrs[256];
     for (uint32_t i = 0; i < palette_count && i < 256; i++)
     {
-        palette_ptrs[i] = (const uint32_t*)p;
+        skin->palettes[i] = (const uint32_t*)p;
         p += 256 * sizeof(uint32_t);
     }
 
-    skin->palettes      = palette_ptrs;
-    skin->active_palette = palette_ptrs[0];
+    skin->active_palette = skin->palettes[0];
 
     // Elements — in fixed order matching Pigment's export
     Element* elements[] = {
@@ -66,16 +65,28 @@ static void skin_load(UISkin* skin, const uint8_t* data)
 
     for (int32_t i = 0; i < element_count; i++)
     {
-        uint32_t w = *(const uint32_t*)p; p += 4;
-        uint32_t h = *(const uint32_t*)p; p += 4;
+        uint32_t w = *(const uint32_t*)p; p += sizeof(uint32_t);
+        uint32_t h = *(const uint32_t*)p; p += sizeof(uint32_t);
+
+        printf("Element %d: %ux%u | Offset from start: %ld\n", 
+           i, w, h, (long)(p - data));
+
+        // Hard sanity ceiling to catch blown-out dimensions
+        if (w > 2048 || h > 2048) {
+            printf("CRITICAL: Corrupted dimensions on element %d!\n", i);
+            elements[i]->width = 0;
+            elements[i]->height = 0;
+            elements[i]->pixels = NULL;
+            return;
+        }
 
         elements[i]->width  = w;
         elements[i]->height = h;
 
         if (w > 0 && h > 0)
         {
-            elements[i]->pixels = (const uint32_t*)p;
-            p += w * h * sizeof(uint32_t);
+            elements[i]->pixels = (const uint8_t*)p;
+            p += w * h * sizeof(uint8_t);
         }
         else
         {
@@ -106,9 +117,10 @@ void ui_set_skin(Skin skin)
         g_current_skin = &g_skins[skin];
 }
 
-void ui_set_palette(Skin skin, uint32_t palette_index)
+void ui_set_palette(uint32_t palette_index)
 {
-    if (skin < 0 || skin >= SKIN_COUNT) return;
-    if (palette_index >= g_skins[skin].palette_count) return;
-    g_skins[skin].active_palette = g_skins[skin].palettes[palette_index];
+    if (!g_current_skin) return;
+    if (palette_index >= g_current_skin->palette_count) return;
+
+    ((UISkin*)g_current_skin)->active_palette = g_current_skin->palettes[palette_index];
 }

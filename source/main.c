@@ -6,9 +6,11 @@
 #include "game/game.h"
 #include "audio/audio.h"
 #include "achievements/achievements.h"
+#include "scripting/xeno_runtime.h"
 
 #ifdef _WIN32
 #include <windows.h>
+
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nShowCmd)
 {
 	// 1. Manually create a new console window for this process
@@ -29,26 +31,32 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	(void)hPrevInstance;
 	(void)lpCmdLine;
 	(void)nShowCmd;
-#elif __YGGDRASIL__
-#include <yggdrasil.h>
-extern void ygg_init_api(void*);
+// #elif __YGGDRASIL__
+// #include <yggdrasil.h>
+// extern void ygg_init_api(void*);
 
-int main(void* api)
-{
-	ygg_init_api(api);
+// int main(void* api)
+// {
+// 	ygg_init_api(api);
 
 #else
 int main()
 {
 #endif
 	PlatformWindowDesc window = { 0 };
-	window.width = 640;
-	window.height = 360;
+	window.width = FB_WIDTH;
+	window.height = FB_HEIGHT;
 	window.title = "Glyphborn";
 
 	platform_init(&window);
 
 	platform_init_assets(1);
+	if (!xeno_runtime_init())
+	{
+		platform_shutdown_assets(1);
+		platform_shutdown();
+		return 1;
+	}
 
 	render_init(platform_get_native_window());
 	audio_init();
@@ -64,7 +72,6 @@ int main()
 		platform_poll_events();
 
 		render_clear(framebuffer, 0xFF000000);
-		render_clear(framebuffer_game, 0xFFAAAAAA);
 		render_clear(framebuffer_ui, 0x00000000);
 
 		float delta_time = platform_frame_timing();
@@ -90,13 +97,13 @@ int main()
 
 		game_render();
 		game_render_ui();
-
 		render_blend_ui_over_game();
 		render_present();
 	}
 
 	audio_shutdown();
 	game_shutdown();
+	xeno_runtime_shutdown();
 	render_shutdown();
 	platform_shutdown_assets(1);
 	platform_shutdown();

@@ -115,7 +115,7 @@ static void world_unload_cell_internal(WorldCell* cell)
     if (cell->local_tileset)    { tileset_release_local(cell->local_tileset_id);    cell->local_tileset = NULL; }
     if (cell->interior_tileset) { tileset_release_interior(cell->interior_tileset_id); cell->interior_tileset = NULL; }
 
-    if (cell->baked) { chunk_free(cell->baked); cell->baked = NULL; }
+    if (cell->baked) { baked_chunk_free(cell->baked); cell->baked = NULL; }
 
     cell->state = CELL_EMPTY;
 }

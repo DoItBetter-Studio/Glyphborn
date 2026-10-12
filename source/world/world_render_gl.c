@@ -28,7 +28,12 @@
  * since normals are also kept in world space (translation-only model).
  * ------------------------------------------------------------------------- */
 static const char* s_vert =
+#if defined(__YGGDRASIL__)
+    "#version 300 es\n"
+    "precision highp float;\n"
+#else
     "#version 330 core\n"
+#endif
     "layout(location = 0) in vec3 a_pos;\n"
     "layout(location = 1) in vec2 a_uv;\n"
     "layout(location = 2) in vec3 a_normal;\n"
@@ -45,7 +50,12 @@ static const char* s_vert =
     "}\n";
 
 static const char* s_frag =
+#if defined(__YGGDRASIL__)
+    "#version 300 es\n"
+    "precision highp float;\n"
+#else
     "#version 330 core\n"
+#endif
     "in vec2  v_uv;\n"
     "in vec3  v_local_pos;\n"
     "out vec4 frag_color;\n"

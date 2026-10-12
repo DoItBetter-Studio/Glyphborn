@@ -93,13 +93,13 @@ DISTROS := Vanilla Steam GOG
 CC_LINUX  = /usr/bin/gcc
 CC_WIN64  = /usr/bin/x86_64-w64-mingw32-gcc
 CC_WIN32  = /usr/bin/i686-w64-mingw32-gcc
-CC_YGG	  = /usr/bin/x86_64-linux-gnu-gcc
-LD_YGG    = /usr/bin/x86_64-linux-gnu-ld
+CC_YGG     = $(HOME)/buildroot/output/host/bin/aarch64-linux-gcc
+# LD_YGG    = /usr/bin/aarch64-linux-gnu-ld
 
 STRIP_LINUX = /usr/bin/strip
 STRIP_WIN64 = /usr/bin/x86_64-w64-mingw32-strip
 STRIP_WIN32 = /usr/bin/i686-w64-mingw32-strip
-STRIP_YGG   = /usr/bin/x86_64-linux-gnu-strip
+STRIP_YGG   = $(HOME)/buildroot/output/host/bin/aarch64-linux-strip
 
 # ==========================================================
 # 📂 Windows Resources
@@ -136,42 +136,25 @@ endif
 # ==========================================================
 # 🔧 Base Compiler / Linker Flags
 # ==========================================================
-CFLAGS_BASE = -std=c17 $(WARNFLAGS) -Iincludes -Iresources -MMD -MP
+XENOSCRIPT_DIR := externals/xenoscript
+XENOSCRIPT_VM_LINUX := $(XENOSCRIPT_DIR)/bin/libxenovm.a
+XENOSCRIPT_VM_WIN64 := $(XENOSCRIPT_DIR)/bin/libxenovm-win64.a
+XENOSCRIPT_TOOLS_LINUX := $(addprefix $(XENOSCRIPT_DIR)/bin/,xenoc xar xenolsp)
+XENOSCRIPT_TOOLS_WIN64 := $(addprefix $(XENOSCRIPT_DIR)/bin/,xenoc.exe xar.exe xenolsp.exe)
+
+CFLAGS_BASE += -std=c17 $(WARNFLAGS) -Iincludes -Iresources -I$(XENOSCRIPT_DIR)/includes -I$(XENOSCRIPT_DIR)/source/stdlib -MMD -MP
 
 CFLAGS_LIN  = $(CFLAGS_BASE) -I/c/linux/include
 LDFLAGS_LIN = -L/c/linux/lib -lGL -lX11 -lXext -lXrandr -lXrender -lasound -lm
 LDFLAGS_WIN = -luser32 -lopengl32 -lgdi32 -ldsound -lkernel32 -lwinmm -lxinput -lm
 
 # Yggdrasil compiler flags - bare metal, no stdlib, links against SDK
-CFLAGS_YGG_BASE = \
-	-std=c17 \
-	-g \
-	$(WARNFLAGS) \
-	-ffreestanding \
-	-fno-stack-protector \
-	-fno-pic \
-	-fno-pie \
-	-mno-red-zone \
-	-mno-mmx \
-	-nostdlib \
-	-nostdinc \
-	-fno-builtin \
-	-mstackrealign \
-	-mpreferred-stack-boundary=4 \
-	-fno-tree-loop-vectorize \
-	-fno-tree-slp-vectorize \
-	-D__YGGDRASIL__ \
-	-DDISTRO_YGGDRASIL \
-	-Iincludes \
-	-Iresources \
-	-I$(YGG_SDK_PATH)/include \
-	-MMD -MP
+CFLAGS_YGG = \
+    $(CFLAGS_BASE) \
+    -D__YGGDRASIL__ \
+    -DDISTRO_YGGDRASIL
 
-LDFLAGS_YGG = \
-	-T $(YGG_SDK_PATH)/game.ld \
-	-nostdlib \
-	-L$(YGG_SDK_PATH) \
-	-lyggdrasil
+LDFLAGS_YGG = -lm -lpthread
 
 # ==========================================================
 # 🎮 Steamworks SDK
@@ -262,7 +245,8 @@ GENERATED_FILES     := \
     $(GENERATED_HEADERS)/DialogueTable.h \
     $(GENERATED_SOURCE)/Locales.c \
     $(GENERATED_HEADERS)/Locales.h \
-	$(GENERATED_HEADERS)/LocaleBindings.h
+	$(GENERATED_HEADERS)/LocaleBindings.h \
+    $(GENERATED_HEADERS)/LocaleIndex.h
 	
 REGISTRY_JSON := $(shell find data/registry -name '*.json')
 
@@ -270,10 +254,14 @@ REGISTRY_JSON := $(shell find data/registry -name '*.json')
 # ==========================================================
 # 📁 Source Discovery
 # ==========================================================
-SRC_ALL     	:= $(shell find source -name '*.c')
+SRC_ALL    	:= $(shell find source -name '*.c')
 SRC_LINUX   	:= $(filter-out %_windows.c %_yggdrasil.c, $(SRC_ALL))
 SRC_WINDOWS 	:= $(filter-out %_linux.c %_yggdrasil.c, $(SRC_ALL))
-SRC_YGGDRASIL   := $(filter-out %_linux.c %_windows.c, $(SRC_ALL))
+
+# REPLACE WITH ACTUAL SOURCES LATER
+# SRC_YGGDRASIL   := $(filter-out %_linux.c %_windows.c, $(SRC_ALL))
+
+SRC_YGGDRASIL := $(SRC_LINUX)
 
 OBJDIR_LINUX 	:= obj/linux
 OBJDIR_WIN32 	:= obj/win32
@@ -309,18 +297,17 @@ OBJ_RC_WIN64 := obj/win64/glyphborn.res.o
 # ==========================================================
 # 🌍 Full Target Matrix
 # ==========================================================
+YGG_TARGET := $(BUILD_BASE)/Vanilla/yggdrasil/glyphborn_yggdrasil
+
 ALL_TARGETS := $(foreach D,$(DISTROS), \
     $(BUILD_BASE)/$(D)/linux/glyphborn_linux \
     $(BUILD_BASE)/$(D)/win32/glyphborn_win32.exe \
-    $(BUILD_BASE)/$(D)/win64/glyphborn_win64.exe) \
-#     $(BUILD_BASE)/Vanilla/yggdrasil/glyphborn.elf
-
-YGG_TARGET := $(BUILD_BASE)/Vanilla/yggdrasil/glyphborn.elf
+    $(BUILD_BASE)/$(D)/win64/glyphborn_win64.exe)
 
 # ==========================================================
 # 🏗 Default Rule
 # ==========================================================
-.PHONY: all banner checksums clean distclean buildver postbuild
+.PHONY: all banner checksums clean distclean buildver postbuild yggdrasil
 
 ifeq ($(SKIP_BUILD),true)
 
@@ -341,11 +328,14 @@ all: banner
 	@echo ""
 	@echo "────────────────────────────────────────────"
 	@echo "✅ ${GREEN}All builds complete for Glyphborn $(FULL_VERSION)${RESET}"
-	@echo "   🐧  Linux / 🪟  Win32 / 🪟  Win64 / ⚙️  Yggdrasil"
+	@echo "   🐧  Linux / 🪟  Win32 / 🪟  Win64"
+	@echo "   ⚙️  Yggdrasil is temporarily available via its explicit target only."
 	@echo "📦 Output: ${BLUE}$(BUILD_BASE)${RESET}"
 	@echo "────────────────────────────────────────────"
 
 endif
+
+yggdrasil: $(YGG_TARGET)
 
 # ==========================================================
 # 🎬 Build Banner
@@ -361,15 +351,17 @@ banner:
 # ==========================================================
 # 🐧 Linux Build
 # ==========================================================
-$(BUILD_BASE)/%/linux/glyphborn_linux: $(OBJ_LINUX) $(OBJ_DATA_LINUX)
+$(BUILD_BASE)/%/linux/glyphborn_linux: $(OBJ_LINUX) $(OBJ_DATA_LINUX) $(XENOSCRIPT_VM_LINUX) $(XENOSCRIPT_TOOLS_LINUX)
 	@echo "🟩 ${GREEN}[Linux/$*] Linking...${RESET}"
 	@mkdir -p $(dir $@)
 	$(eval $(call set_distro_flags,$*,Linux))
 	$(CC_LINUX) $(CFLAGS_LIN) $(CFLAGS_DEBUG) $(CFLAGS_VERSION) $(CFLAGS_DISTRO) \
-		$(OBJ_LINUX) $(OBJ_DATA_LINUX) -o $@ $(LDFLAGS_LIN) $(LDFLAGS_DISTRO)
+		$(OBJ_LINUX) $(OBJ_DATA_LINUX) $(XENOSCRIPT_VM_LINUX) -o $@ $(LDFLAGS_LIN) $(LDFLAGS_DISTRO)
 # 	$(STRIP_LINUX) --strip-unneeded $@
 	@mkdir -p $(dir $@)/data
 	@cp -r data/volumes/* $(dir $@)/data
+	@mkdir -p $(dir $@)/tools
+	@cp $(XENOSCRIPT_TOOLS_LINUX) $(dir $@)/tools/
 	@cp $(ICON_SRC) $(dir $@)glyphborn.png
 	@printf '[Desktop Entry]\nName=Glyphborn\nExec=%sglyphborn_linux\nIcon=%sglyphborn.png\nType=Application\nCategories=Game;\nTerminal=false\nComment=Glyphborn %s\n' \
 		$(CURDIR)/$(dir $@) $(CURDIR)/$(dir $@) $(FULL_VERSION) \
@@ -397,32 +389,31 @@ $(BUILD_BASE)/%/win32/glyphborn_win32.exe: $(OBJ_WIN32)  $(OBJ_DATA_WIN32) $(OBJ
 # ==========================================================
 # 🪟 Win64 Build
 # ==========================================================
-$(BUILD_BASE)/%/win64/glyphborn_win64.exe: $(OBJ_WIN64) $(OBJ_DATA_WIN64) $(OBJ_RC_WIN64)
+$(BUILD_BASE)/%/win64/glyphborn_win64.exe: $(OBJ_WIN64) $(OBJ_DATA_WIN64) $(OBJ_RC_WIN64) $(XENOSCRIPT_VM_WIN64) $(XENOSCRIPT_TOOLS_WIN64)
 	@echo "🟦 ${BLUE}[Win64/$*] Linking...${RESET}"
 	@mkdir -p $(dir $@)
 	$(eval $(call set_distro_flags,$*,Win64))
 	$(CC_WIN64) $(CFLAGS_BASE) $(CFLAGS_DEBUG) $(CFLAGS_VERSION) $(CFLAGS_DISTRO) \
 		-D_WIN64 -Wl,-subsystem,$(SUBSYSTEM) \
-		$(OBJ_WIN64) $(OBJ_DATA_WIN64) $(OBJ_RC_WIN64) -o $@ $(LDFLAGS_WIN) $(LDFLAGS_DISTRO)
+		$(OBJ_WIN64) $(OBJ_DATA_WIN64) $(OBJ_RC_WIN64) $(XENOSCRIPT_VM_WIN64) -o $@ $(LDFLAGS_WIN) $(LDFLAGS_DISTRO)
 	$(STRIP_WIN64) --strip-unneeded $@
 	@mkdir -p $(dir $@)/data
 	@cp -r data/volumes/* $(dir $@)/data
+	@mkdir -p $(dir $@)/tools
+	@cp $(XENOSCRIPT_TOOLS_WIN64) $(dir $@)/tools/
 	@echo "   ${GREEN}✔ Built → $@${RESET}"
 
 
 # ==========================================================
-# ⚙️  Yggdrasil Build (always Vanilla)   - DISABLED! RE-ENABLE AT SOME POINT WHEN API IS BETTER!
+# ⚙️  Yggdrasil Build (Vanilla Target)
 # ==========================================================
-# $(YGG_TARGET): $(OBJ_YGG) $(OBJ_DATA_YGG)
-# 	@echo "⚙️  ${BLUE}[Yggdrasil/Vanilla] Linking...${RESET}"
-# 	@mkdir -p $(dir $@)
-# 	$(LD_YGG) -T externals/yggdrasil/game.ld -nostdlib \
-# 		$(OBJ_YGG) $(OBJ_DATA_YGG) \
-# 		-Lexternals/yggdrasil \
-# 		-lyggdrasil \
-# 		-o $@
-# # 	$(STRIP_YGG) --strip-unneeded $@
-# 	@echo "   ${GREEN}✔ Built → $@${RESET}"
+$(YGG_TARGET): $(OBJ_YGG) $(OBJ_DATA_YGG)
+	@echo "⚙️  ${BLUE}[Yggdrasil/Vanilla] Linking...${RESET}"
+	@mkdir -p $(dir $@)
+	$(CC_YGG) $(CFLAGS_YGG) $(CFLAGS_DEBUG) $(CFLAGS_VERSION) \
+		$(OBJ_YGG) $(OBJ_DATA_YGG) -o $@ $(LDFLAGS_YGG)
+	$(STRIP_YGG) --strip-unneeded $@
+	@echo "   ${GREEN}✔ Built → $@${RESET}"
 
 
 # ==========================================================
@@ -434,11 +425,27 @@ PACKABLE_DATA := $(shell find data -path data/volumes -prune -o \( \
     -o -name '*.locale' \) -print)
 ASSET_MAP_JSON  := data/volumes/asset_map.json
 
+.PHONY: xenoscript-build
+xenoscript-build:
+	$(MAKE) -C $(XENOSCRIPT_DIR) stdlib
+	$(MAKE) -C $(XENOSCRIPT_DIR) bin/xenoc bin/xar bin/xenolsp \
+		bin/xenoc.exe bin/xar.exe bin/xenolsp.exe \
+		bin/libxenovm.a bin/libxenovm-win64.a
+
+$(XENOSCRIPT_VM_LINUX): | xenoscript-build
+	@test -f $@
+
+$(XENOSCRIPT_VM_WIN64): | xenoscript-build
+	@test -f $@
+
+$(XENOSCRIPT_TOOLS_LINUX) $(XENOSCRIPT_TOOLS_WIN64): | xenoscript-build
+	@test -f $@
+
 $(ASSET_MAP_JSON): tools/build/pack_assets.py $(PACKABLE_DATA)
 	@echo "🗜  Packing asset volumes..."
 	@python3 tools/build/pack_assets.py
 
-$(GENERATED_FILES): tools/build/embed_data.py $(ASSET_MAP_JSON) $(REGISTRY_JSON)
+$(GENERATED_FILES) &: tools/build/embed_data.py $(ASSET_MAP_JSON) $(REGISTRY_JSON)
 	@echo "🧠 Generating world data C files..."
 	@python3 tools/build/embed_data.py
 
@@ -463,7 +470,7 @@ $(OBJDIR_WIN64)/%.o: source/%.c $(filter %.h, $(GENERATED_FILES))
 $(OBJDIR_YGG)/%.o: source/%.c $(ASSET_MAP_JSON) $(OBJ_DATA_YGG) $(GENERATED_FILES)
 	@mkdir -p $(dir $@)
 	@printf "⚙️  ${GRAY}Compiling (Yggdrasil): %s${RESET}\n" $<
-	@$(CC_YGG) $(CFLAGS_YGG_BASE) $(CFLAGS_DEBUG) $(CFLAGS_VERSION) -c $< -o $@
+	@$(CC_YGG) $(CFLAGS_YGG) $(CFLAGS_DEBUG) $(CFLAGS_VERSION) -c $< -o $@
 
 obj/data/linux/%.o: data/%
 	@mkdir -p $(dir $@)
@@ -483,7 +490,7 @@ obj/data/win64/%.o: data/%
 obj/data/yggdrasil/%.o: data/%
 	@mkdir -p $(dir $@)
 	@printf "📦 ${GRAY}Embedding binary (Yggdrasil): %s${RESET}\n" $<
-	@x86_64-linux-gnu-ld -r -b binary $< -o $@
+	@aarch64-linux-gnu-ld -r -b binary $< -o $@
 
 $(OBJ_RC_WIN32): resources/glyphborn.rc $(ICON_ICO)
 	@mkdir -p $(dir $@)

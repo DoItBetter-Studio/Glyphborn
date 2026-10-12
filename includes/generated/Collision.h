@@ -8,7 +8,7 @@
 #include <stdint.h>
 #include <stddef.h>
 
-#define COLLISION_TEST_MAP_0_0_OFFSET  UINT64_C(0x000000000163B0CD)
+#define COLLISION_TEST_MAP_0_0_OFFSET  UINT64_C(0x000000000163D9E1)
 #define COLLISION_TEST_MAP_0_0_SIZE    UINT64_C(0x0000000000008006)
 
 extern Blob g_Collision[];

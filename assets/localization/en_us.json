@@ -1,0 +1,37 @@
+{
+  "locales": {
+    "cs_cz": "Czech",
+    "da_dk": "Danish",
+    "de_de": "German",
+    "en_au": "English",
+    "en_ca": "English",
+    "en_gb": "English",
+    "en_us": "English",
+    "es_es": "Spanish",
+    "es_mx": "Spanish",
+    "fi_fi": "Finnish",
+    "fr_ca": "French",
+    "fr_fr": "French",
+    "is_is": "Icelandic",
+    "it_it": "Italian",
+    "ja_jp": "Japanese",
+    "ko_kr": "Korean",
+    "nl_nl": "Dutch",
+    "no_no": "Norwegian",
+    "pl_pl": "Polish",
+    "pt_br": "Portuguese",
+    "pt_pt": "Portuguese",
+    "ru_ru": "Russian",
+    "sv_se": "Swedish",
+    "tr_tr": "Turkish",
+    "uk_ua": "Ukrainian",
+    "zh_cn": "Chinese",
+    "zh_tw": "Chinese"
+  },
+  "ui": {
+    "menu": {
+      "settings": "Settings",
+      "start_game": "Start Game"
+    }
+  }
+}

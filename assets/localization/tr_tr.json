@@ -1,0 +1,37 @@
+{
+  "locales": {
+    "cs_cz": "Çekçe",
+    "da_dk": "Danca",
+    "de_de": "Almanca",
+    "en_au": "İngilizce (AU)",
+    "en_ca": "İngilizce (CA)",
+    "en_gb": "İngilizce (UK)",
+    "en_us": "İngilizce (US)",
+    "es_es": "İspanyolca (ES)",
+    "es_mx": "İspanyolca (MX)",
+    "fi_fi": "Fince",
+    "fr_ca": "Fransızca (CA)",
+    "fr_fr": "Fransızca (FR)",
+    "is_is": "İzlandaca",
+    "it_it": "İtalyanca",
+    "ja_jp": "Japonca",
+    "ko_kr": "Korece",
+    "nl_nl": "Hollandaca",
+    "no_no": "Norveççe",
+    "pl_pl": "Lehçe",
+    "pt_br": "Portekizce (BR)",
+    "pt_pt": "Portekizce (PT)",
+    "ru_ru": "Rusça",
+    "sv_se": "İsveççe",
+    "tr_tr": "Türkçe",
+    "uk_ua": "Ukraynaca",
+    "zh_cn": "Çince (Basitleştirilmiş)",
+    "zh_tw": "Çince (Geleneksel)"
+  },
+  "ui": {
+    "menu": {
+      "settings": "Ayarlar",
+      "start_game": "Oyuna Başla"
+    }
+  }
+}

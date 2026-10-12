@@ -43,7 +43,7 @@ typedef struct GPUMesh
  *
  * Computes per-face normals from the index+vertex data, builds a new
  * interleaved GPUVertex buffer, and uploads everything to the GPU.
- * The CPU-side BakedChunk data is NOT freed — chunk_free() handles that.
+ * The CPU-side BakedChunk data is NOT freed — baked_chunk_free() handles that.
  *
  * Returns 1 on success, 0 on failure.
  */

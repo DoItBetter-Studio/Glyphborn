@@ -57,4 +57,10 @@ void *platform_get_native_window(void) {
     YggFramebuffer *fb = ygg_get_framebuffer();
     return (void *)fb;
 }
+
+bool platform_get_executable_directory(char *directory, size_t capacity) {
+    (void)directory;
+    (void)capacity;
+    return false;
+}
 #endif /* __YGGDRASIL__ */

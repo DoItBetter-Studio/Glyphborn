@@ -1,0 +1,37 @@
+{
+  "locales": {
+    "cs_cz": "Tchèque",
+    "da_dk": "Danois",
+    "de_de": "Allemand",
+    "en_au": "Anglais (AU)",
+    "en_ca": "Anglais (CA)",
+    "en_gb": "Anglais (UK)",
+    "en_us": "Anglais (US)",
+    "es_es": "Espagnol (ES)",
+    "es_mx": "Espagnol (MX)",
+    "fi_fi": "Finnois",
+    "fr_ca": "Français (CA)",
+    "fr_fr": "Français (FR)",
+    "is_is": "Islandais",
+    "it_it": "Italien",
+    "ja_jp": "Japonais",
+    "ko_kr": "Coréen",
+    "nl_nl": "Néerlandais",
+    "no_no": "Norvégien",
+    "pl_pl": "Polonais",
+    "pt_br": "Portugais (BR)",
+    "pt_pt": "Portugais (PT)",
+    "ru_ru": "Russe",
+    "sv_se": "Suédois",
+    "tr_tr": "Turc",
+    "uk_ua": "Ukrainien",
+    "zh_cn": "Chinois (Simplifié)",
+    "zh_tw": "Chinois (Traditionnel)"
+  },
+  "ui": {
+    "menu": {
+      "settings": "Paramètres",
+      "start_game": "Démarrer la partie"
+    }
+  }
+}

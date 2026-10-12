@@ -8,7 +8,7 @@
 #include <stdint.h>
 #include <stddef.h>
 
-#define ANIMATIONS_TEST_OFFSET  UINT64_C(0x00000000016630DF)
+#define ANIMATIONS_TEST_OFFSET  UINT64_C(0x00000000016659F3)
 #define ANIMATIONS_TEST_SIZE    UINT64_C(0x0000000000003DB6)
 
 extern Blob g_Animations[];

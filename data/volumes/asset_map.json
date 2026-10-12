@@ -5,94 +5,244 @@
     "global_offset": 0,
     "size": 23309606
   },
-  "data/dialogue/dialogue.bin": {
+  "data/dialogue/cs_cz.locale": {
     "volume": 0,
     "offset": 23309606,
     "global_offset": 23309606,
+    "size": 474
+  },
+  "data/dialogue/da_dk.locale": {
+    "volume": 0,
+    "offset": 23310080,
+    "global_offset": 23310080,
+    "size": 359
+  },
+  "data/dialogue/de_de.locale": {
+    "volume": 0,
+    "offset": 23310439,
+    "global_offset": 23310439,
+    "size": 436
+  },
+  "data/dialogue/dialogue.bin": {
+    "volume": 0,
+    "offset": 23310875,
+    "global_offset": 23310875,
     "size": 350
   },
   "data/dialogue/en_US.locale": {
     "volume": 0,
-    "offset": 23309956,
-    "global_offset": 23309956,
+    "offset": 23311225,
+    "global_offset": 23311225,
     "size": 278
+  },
+  "data/dialogue/en_au.locale": {
+    "volume": 0,
+    "offset": 23311503,
+    "global_offset": 23311503,
+    "size": 278
+  },
+  "data/dialogue/en_ca.locale": {
+    "volume": 0,
+    "offset": 23311781,
+    "global_offset": 23311781,
+    "size": 278
+  },
+  "data/dialogue/en_gb.locale": {
+    "volume": 0,
+    "offset": 23312059,
+    "global_offset": 23312059,
+    "size": 278
+  },
+  "data/dialogue/es_es.locale": {
+    "volume": 0,
+    "offset": 23312337,
+    "global_offset": 23312337,
+    "size": 362
+  },
+  "data/dialogue/es_mx.locale": {
+    "volume": 0,
+    "offset": 23312699,
+    "global_offset": 23312699,
+    "size": 363
+  },
+  "data/dialogue/fi_fi.locale": {
+    "volume": 0,
+    "offset": 23313062,
+    "global_offset": 23313062,
+    "size": 350
+  },
+  "data/dialogue/fr_ca.locale": {
+    "volume": 0,
+    "offset": 23313412,
+    "global_offset": 23313412,
+    "size": 376
+  },
+  "data/dialogue/fr_fr.locale": {
+    "volume": 0,
+    "offset": 23313788,
+    "global_offset": 23313788,
+    "size": 386
+  },
+  "data/dialogue/is_is.locale": {
+    "volume": 0,
+    "offset": 23314174,
+    "global_offset": 23314174,
+    "size": 382
+  },
+  "data/dialogue/it_it.locale": {
+    "volume": 0,
+    "offset": 23314556,
+    "global_offset": 23314556,
+    "size": 372
+  },
+  "data/dialogue/ja_jp.locale": {
+    "volume": 0,
+    "offset": 23314928,
+    "global_offset": 23314928,
+    "size": 674
+  },
+  "data/dialogue/ko_kr.locale": {
+    "volume": 0,
+    "offset": 23315602,
+    "global_offset": 23315602,
+    "size": 525
+  },
+  "data/dialogue/nl_nl.locale": {
+    "volume": 0,
+    "offset": 23316127,
+    "global_offset": 23316127,
+    "size": 355
+  },
+  "data/dialogue/no_no.locale": {
+    "volume": 0,
+    "offset": 23316482,
+    "global_offset": 23316482,
+    "size": 363
+  },
+  "data/dialogue/pl_pl.locale": {
+    "volume": 0,
+    "offset": 23316845,
+    "global_offset": 23316845,
+    "size": 406
   },
   "data/dialogue/pt_BR.locale": {
     "volume": 0,
-    "offset": 23310234,
-    "global_offset": 23310234,
+    "offset": 23317251,
+    "global_offset": 23317251,
     "size": 307
+  },
+  "data/dialogue/pt_pt.locale": {
+    "volume": 0,
+    "offset": 23317558,
+    "global_offset": 23317558,
+    "size": 380
+  },
+  "data/dialogue/ru_ru.locale": {
+    "volume": 0,
+    "offset": 23317938,
+    "global_offset": 23317938,
+    "size": 717
+  },
+  "data/dialogue/sv_se.locale": {
+    "volume": 0,
+    "offset": 23318655,
+    "global_offset": 23318655,
+    "size": 390
+  },
+  "data/dialogue/tr_tr.locale": {
+    "volume": 0,
+    "offset": 23319045,
+    "global_offset": 23319045,
+    "size": 401
+  },
+  "data/dialogue/uk_ua.locale": {
+    "volume": 0,
+    "offset": 23319446,
+    "global_offset": 23319446,
+    "size": 713
+  },
+  "data/dialogue/zh_cn.locale": {
+    "volume": 0,
+    "offset": 23320159,
+    "global_offset": 23320159,
+    "size": 467
+  },
+  "data/dialogue/zh_tw.locale": {
+    "volume": 0,
+    "offset": 23320626,
+    "global_offset": 23320626,
+    "size": 431
   },
   "data/layouts/test_map_0_0/collision.bin": {
     "volume": 0,
-    "offset": 23310541,
-    "global_offset": 23310541,
+    "offset": 23321057,
+    "global_offset": 23321057,
     "size": 32774
   },
   "data/layouts/test_map_0_0/geometry.bin": {
     "volume": 0,
-    "offset": 23343315,
-    "global_offset": 23343315,
+    "offset": 23353831,
+    "global_offset": 23353831,
     "size": 65542
   },
   "data/layouts/test_map_0_0/rooms.bin": {
     "volume": 0,
-    "offset": 23408857,
-    "global_offset": 23408857,
+    "offset": 23419373,
+    "global_offset": 23419373,
     "size": 65542
   },
   "data/models/animation/test.gbani": {
     "volume": 0,
-    "offset": 23474399,
-    "global_offset": 23474399,
+    "offset": 23484915,
+    "global_offset": 23484915,
     "size": 15798
   },
   "data/models/material/Body.gbmat": {
     "volume": 0,
-    "offset": 23490197,
-    "global_offset": 23490197,
+    "offset": 23500713,
+    "global_offset": 23500713,
     "size": 65550
   },
   "data/models/material/Eye.gbmat": {
     "volume": 0,
-    "offset": 23555747,
-    "global_offset": 23555747,
+    "offset": 23566263,
+    "global_offset": 23566263,
     "size": 4110
   },
   "data/models/mesh/test.gbmsh": {
     "volume": 0,
-    "offset": 23559857,
-    "global_offset": 23559857,
+    "offset": 23570373,
+    "global_offset": 23570373,
     "size": 172120
   },
   "data/models/skeleton/metarig.gbsk": {
     "volume": 0,
-    "offset": 23731977,
-    "global_offset": 23731977,
+    "offset": 23742493,
+    "global_offset": 23742493,
     "size": 8276
   },
   "data/tilesets/local/test_local.bin": {
     "volume": 0,
-    "offset": 23740253,
-    "global_offset": 23740253,
+    "offset": 23750769,
+    "global_offset": 23750769,
     "size": 14
   },
   "data/tilesets/regional/test_regional.bin": {
     "volume": 0,
-    "offset": 23740267,
-    "global_offset": 23740267,
+    "offset": 23750783,
+    "global_offset": 23750783,
     "size": 56540
   },
   "data/world_headers.hdr": {
     "volume": 0,
-    "offset": 23796807,
-    "global_offset": 23796807,
+    "offset": 23807323,
+    "global_offset": 23807323,
     "size": 24
   },
   "data/world_matrix.mtx": {
     "volume": 0,
-    "offset": 23796831,
-    "global_offset": 23796831,
+    "offset": 23807347,
+    "global_offset": 23807347,
     "size": 210
   }
 }

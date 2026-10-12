@@ -1,0 +1,37 @@
+{
+  "locales": {
+    "cs_cz": "Tsjechisch",
+    "da_dk": "Deens",
+    "de_de": "Duits",
+    "en_au": "Engels (AU)",
+    "en_ca": "Engels (CA)",
+    "en_gb": "Engels (UK)",
+    "en_us": "Engels (US)",
+    "es_es": "Spaans (ES)",
+    "es_mx": "Spaans (MX)",
+    "fi_fi": "Fins",
+    "fr_ca": "Frans (CA)",
+    "fr_fr": "Frans (FR)",
+    "is_is": "IJslands",
+    "it_it": "Italiaans",
+    "ja_jp": "Japans",
+    "ko_kr": "Koreaans",
+    "nl_nl": "Nederlands",
+    "no_no": "Noors",
+    "pl_pl": "Pools",
+    "pt_br": "Portugees (BR)",
+    "pt_pt": "Portugees (PT)",
+    "ru_ru": "Russisch",
+    "sv_se": "Zweeds",
+    "tr_tr": "Turks",
+    "uk_ua": "Oekraïens",
+    "zh_cn": "Chinees (Vereenvoudigd)",
+    "zh_tw": "Chinees (Traditioneel)"
+  },
+  "ui": {
+    "menu": {
+      "settings": "Instellingen",
+      "start_game": "Spel starten"
+    }
+  }
+}
